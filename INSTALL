@@ -1,4 +1,4 @@
-@(#) $Id: INSTALL,v 1.15 2000/09/17 21:42:04 leres Exp $ (LBL)
+@(#) $Id: INSTALL,v 1.16 2004/01/22 22:05:11 leres Exp $ (LBL)
 
 If you have not built libpcap, do so first (unless you only want to
 build arpsnmp). See the README file in this directory for the ftp
@@ -8,7 +8,7 @@ You will need an ANSI C compiler to build the arpwatch package. The
 configure script will abort if your compiler is not ANSI compliant. If
 this happens, use the GNU C compiler, available via anonymous ftp:
 
-	ftp://prep.ai.mit.edu/pub/gnu/gcc-*.tar.gz
+	ftp://ftp.gnu.org/gnu/gcc/
 
 After libpcap has been built (either install it or make sure it's in
 ../libpcap), edit the BINDEST and MANDEST paths in Makefile.in and

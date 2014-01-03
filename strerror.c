@@ -70,5 +70,6 @@ strerror(num)
 		if (t <= tmp)
 			break;
 	}
+	*p = '\0';
 	return(ebuf);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1992, 1993, 1994, 1995, 1996, 1998
+ * Copyright (c) 1992, 1993, 1994, 1995, 1996, 1998, 2000
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,7 +20,7 @@
  */
 #ifndef lint
 static const char rcsid[] =
-    "@(#) $Header: dns.c,v 1.14 98/02/09 16:35:16 leres Exp $ (LBL)";
+    "@(#) $Id: dns.c,v 1.15 2000/09/30 23:40:40 leres Exp $ (LBL)";
 #endif
 
 /*
@@ -161,7 +161,7 @@ getsname(register u_int32_t a)
 	register char *s, *cp;
 
 	s = gethname(a);
-	if (!isdigit(*s)) {
+	if (!isdigit((int)*s)) {
 		cp = strchr(s, '.');
 		if (cp != NULL)
 			*cp = '\0';

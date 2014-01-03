@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998
+ * Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,10 +20,10 @@
  */
 #ifndef lint
 static const char copyright[] =
-    "Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998\n\
+    "Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000\n\
 The Regents of the University of California.  All rights reserved.\n";
 static const char rcsid[] =
-    "@(#) $Header: arpwatch.c,v 1.58 98/02/09 16:35:15 leres Exp $ (LBL)";
+    "@(#) $Id: arpwatch.c,v 1.63 2000/10/14 02:07:28 leres Exp $ (LBL)";
 #endif
 
 /*
@@ -49,6 +49,7 @@ struct rtentry;
 #include <arpa/inet.h>
 
 #include <ctype.h>
+#include <errno.h>
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif
@@ -92,13 +93,45 @@ struct rtentry;
 #define ETHERTYPE_TRAIL		0x1000
 #endif
 
+#ifndef ETHERTYPE_APOLLO
+#define ETHERTYPE_APOLLO	0x8019
+#endif
+
+#ifndef IN_CLASSD_NET
+#define IN_CLASSD_NET		0xf0000000
+#endif
+
 #ifndef max
 #define max(a,b) ((b)>(a)?(b):(a))
 #endif
 
+char *prog;
+
+int can_checkpoint;
+int swapped;
+int nobogons;
+
+static u_int32_t net;
+static u_int32_t netmask;
+
+struct nets {
+	u_int32_t net;
+	u_int32_t netmask;
+};
+
+static struct nets *nets;
+static int nets_ind;
+static int nets_size;
+
+extern int optind;
+extern int opterr;
+extern char *optarg;
+
 /* Forwards */
+int	addnet(const char *);
 RETSIGTYPE checkpoint(int);
 RETSIGTYPE die(int);
+int	isbogon(u_int32_t);
 int	main(int, char **);
 void	process_ether(u_char *, const struct pcap_pkthdr *, const u_char *);
 void	process_fddi(u_char *, const struct pcap_pkthdr *, const u_char *);
@@ -107,18 +140,6 @@ int	snmp_add(u_int32_t, u_char *, time_t, char *);
 int	sanity_ether(struct ether_header *, struct ether_arp *, int);
 int	sanity_fddi(struct fddi_header *, struct ether_arp *, int);
 __dead	void usage(void) __attribute__((volatile));
-
-char *prog;
-
-int can_checkpoint;
-int swapped;
-
-static u_int32_t net;
-static u_int32_t netmask;
-
-extern int optind;
-extern int opterr;
-extern char *optarg;
 
 int
 main(int argc, char **argv)
@@ -133,7 +154,9 @@ main(int argc, char **argv)
 	struct bpf_program code;
 	char errbuf[PCAP_ERRBUF_SIZE];
 
-	if ((cp = strrchr(argv[0], '/')) != NULL)
+	if (argv[0] == NULL)
+		prog = "arpwatch";
+	else if ((cp = strrchr(argv[0], '/')) != NULL)
 		prog = cp + 1;
 	else
 		prog = argv[0];
@@ -147,7 +170,7 @@ main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while ((op = getopt(argc, argv, "bdf:i:r:")) != EOF)
+	while ((op = getopt(argc, argv, "df:i:n:Nr:")) != EOF)
 		switch (op) {
 
 		case 'b':
@@ -170,6 +193,15 @@ main(int argc, char **argv)
 			interface = optarg;
 			break;
 
+		case 'n':
+			if (!addnet(optarg))
+				usage();
+			break;
+
+		case 'N':
+			++nobogons;
+			break;
+
 		case 'r':
 			rfilename = optarg;
 			break;
@@ -177,7 +209,7 @@ main(int argc, char **argv)
 		default:
 			usage();
 		}
-	
+
 	if (optind != argc)
 		usage();
 
@@ -250,6 +282,13 @@ main(int argc, char **argv)
 		swapped = 1;
 #endif
 	}
+
+	/*
+	 * Revert to non-privileged user after opening sockets
+	 * (not needed on most systems).
+	 */
+	setgid(getgid());
+	setuid(getuid());
 
 	/* Must be ethernet or fddi */
 	linktype = pcap_datalink(pd);
@@ -344,10 +383,8 @@ process_ether(register u_char *u, register const struct pcap_pkthdr *h,
 	BCOPY(SPA(ea), &sia, 4);
 
 	/* Watch for bogons */
-	if ((sia & netmask) != net) {
-		if (!bogonkill) {
-			dosyslog(LOG_INFO, "bogon", sia, sea, sha);
-		}
+	if (isbogon(sia)) {
+		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
 		return;
 	}
 
@@ -368,7 +405,7 @@ process_ether(register u_char *u, register const struct pcap_pkthdr *h,
 	t = h->ts.tv_sec;
 	can_checkpoint = 0;
 	if (!ent_add(sia, sea, t, NULL))
-		syslog(LOG_ERR, "ent_add(%s, %s, %d) failed",
+		syslog(LOG_ERR, "ent_add(%s, %s, %ld) failed",
 		    intoa(sia), e2str(sea), t);
 	can_checkpoint = 1;
 }
@@ -452,7 +489,7 @@ bit_reverse(u_char *p, unsigned len)
 	unsigned i;
 	u_char b;
 
-	for (i=len; i; i--,p++) {
+	for (i = len; i; i--, p++) {
 		b = (*p & 0x01 ? 0x80 : 0)
 			| (*p & 0x02 ? 0x40 : 0)
 			| (*p & 0x04 ? 0x20 : 0)
@@ -495,10 +532,8 @@ process_fddi(register u_char *u, register const struct pcap_pkthdr *h,
 	BCOPY(SPA(ea), &sia, 4);
 
 	/* Watch for bogons */
-	if ((sia & netmask) != net) {
-		if (!bogonkill) {
-			dosyslog(LOG_INFO, "bogon", sia, sea, sha);
-		}
+	if (isbogon(sia)) {
+		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
 		return;
 	}
 
@@ -519,7 +554,7 @@ process_fddi(register u_char *u, register const struct pcap_pkthdr *h,
 	t = h->ts.tv_sec;
 	can_checkpoint = 0;
 	if (!ent_add(sia, sea, t, NULL))
-		syslog(LOG_ERR, "ent_add(%s, %s, %d) failed",
+		syslog(LOG_ERR, "ent_add(%s, %s, %ld) failed",
 		    intoa(sia), e2str(sea), t);
 	can_checkpoint = 1;
 }
@@ -557,10 +592,11 @@ sanity_fddi(register struct fddi_header *fh, register struct ether_arp *ea,
 		return(0);
 	}
 
+
 	/* XXX hds X terminals sometimes send trailer arp replies */
-	if (pro != ETHERTYPE_IP 
-		&& pro != ETHERTYPE_TRAIL
-		&& pro != 0x8019) { /* 0x8019 == ETHERTYPE_APOLLO */
+	if (pro != ETHERTYPE_IP &&
+	    pro != ETHERTYPE_TRAIL &&
+	    pro != ETHERTYPE_APOLLO) {
 		syslog(LOG_ERR, "%s sent packet not ETHERTYPE_IP (0x%x)\n",
 		    e2str(shost), pro);
 		return(0);
@@ -601,6 +637,94 @@ sanity_fddi(register struct fddi_header *fh, register struct ether_arp *ea,
 	return(1);
 }
 
+int
+addnet(register const char *str)
+{
+	register char *cp;
+	register int width;
+	register u_int32_t n, m;
+	register struct nets *np;
+	char *cp2;
+	char tstr[64];
+
+	if (strlen(str) > sizeof(tstr) - 1)
+		return(0);
+
+	if (nets_size <= 0) {
+		nets_size = 8;
+		nets = malloc(nets_size * sizeof(*nets));
+	} else if (nets_size <= nets_ind) {
+		/* XXX debugging */
+		nets_size <<= 1;
+		nets = realloc(nets, nets_size * sizeof(*nets));
+	}
+	if (nets == NULL) {
+		(void)fprintf(stderr, "%s: addnet: malloc/realloc: %s\n",
+		    prog, strerror(errno));
+		exit(1);
+	}
+	np = nets + nets_ind;
+
+	width = 0;
+	strcpy(tstr, str);
+	cp = strchr(tstr, '/');
+	if (cp != NULL) {
+		*cp++ = '\0';
+		width = strtol(cp, &cp2, 10);
+		/* Trailing garbage */
+		if (*cp2 != '\0')
+			    return (0);
+		if (width > 32)
+			    return (0);
+	}
+
+	/* XXX hack */
+	n = ntohl(inet_addr(tstr));
+	while ((n & 0xff000000) == 0) {
+		n <<= 8;
+		if (n == 0)
+			return (0);
+	}
+	n = htonl(n);
+
+	if (width != 0) {
+		m = ~0;
+		m <<= 32 - width;
+	} else if (IN_CLASSA(n))
+		m = IN_CLASSA_NET;
+	else if (IN_CLASSB(n))
+		m = IN_CLASSB_NET;
+	else if (IN_CLASSC(n))
+		m = IN_CLASSC_NET;
+	else if (IN_CLASSD(n))
+		m = IN_CLASSD_NET;
+	else
+		return (0);
+	m = htonl(m);
+
+	np->net = n;
+	np->netmask = m;
+	++nets_ind;
+
+	return (1);
+}
+
+int
+isbogon(register u_int32_t sia)
+{
+	register int i;
+	register struct nets *np;
+
+	if (nobogons)
+		return (0);
+	if ((sia & netmask) == net)
+		return (0);
+	for (i = 0, np = nets; i < nets_ind; ++i, ++np)
+		if ((sia & np->netmask) == np->net)
+			return (0);
+	return (1);
+}
+
 RETSIGTYPE
 die(int signo)
 {
@@ -630,7 +754,7 @@ usage(void)
 	extern char version[];
 
 	(void)fprintf(stderr, "Version %s\n", version);
-	(void)fprintf(stderr,
-	    "usage: %s [-b] [-d] [-f datafile] [-i interface] [-r file]\n", prog);
+	(void)fprintf(stderr, "usage: %s [-dN] [-f datafile] [-i interface]"
+	    " [-n net[/width]] [-r file]\n", prog);
 	exit(1);
 }

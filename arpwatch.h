@@ -1,4 +1,4 @@
-/* @(#) $Header: arpwatch.h,v 1.28 98/02/09 16:35:15 leres Exp $ (LBL) */
+/* @(#) $Id: arpwatch.h,v 1.29 2000/09/30 23:40:49 leres Exp $ (LBL) */
 
 #define ARPFILE "arp.dat"
 
@@ -8,7 +8,7 @@
 #define CHECKPOINT (15*60)		/* Checkpoint time in seconds */
 
 #define MEMCMP(a, b, n) memcmp((char *)a, (char *)b, n)
-#define BCOPY(a, b, n) bcopy((char *)a, (char *)b, n)
+#define BCOPY(a, b, n) memmove((char *)b, (char *)a, n)
 #define MEMSET(s, c, n) memset((char *)s, c, n)
 
 char	*intoa(u_int32_t);

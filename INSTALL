@@ -1,4 +1,4 @@
-@(#) $Header: INSTALL,v 1.13 98/02/09 16:35:14 leres Exp $ (LBL)
+@(#) $Id: INSTALL,v 1.15 2000/09/17 21:42:04 leres Exp $ (LBL)
 
 If you have not built libpcap, do so first (unless you only want to
 build arpsnmp). See the README file in this directory for the ftp
@@ -87,7 +87,9 @@ lbl/gnuc.h	- gcc macros and defines
 lbl/os-*.h	- os dependent defines and prototypes
 machdep.c	- machine dependent routines
 machdep.h	- machine dependent definitions
-massagevendor	- massage vendor.html into ethercodes.dat format
+massagevendor	- massage oui.txt.html into ethercodes.dat format
+massagevendor-old - massage vendor.html into ethercodes.dat format
+missingcodes.txt - ethernet codes missing from oui.txt
 mkdep		- construct Makefile dependency list
 p.awk		- print the first ethernet address seen
 report.c	- email report generating routines

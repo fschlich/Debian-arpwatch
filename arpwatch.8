@@ -1,6 +1,6 @@
-.\" @(#) $Header: arpwatch.8,v 1.10 97/10/31 12:02:26 leres Exp $ (LBL)
+.\" @(#) $Id: arpwatch.8,v 1.13 2000/10/08 20:31:25 leres Exp $ (LBL)
 .\"
-.\" Copyright (c) 1992, 1994, 1996, 1997
+.\" Copyright (c) 1992, 1994, 1996, 1997, 2000
 .\"	The Regents of the University of California.  All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -19,7 +19,7 @@
 .\" WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
 .\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 .\"
-.TH ARPWATCH 8 "31 October 1997"
+.TH ARPWATCH 8 "8 October 2000"
 .UC 4
 .SH NAME
 arpwatch - keep track of ethernet/ip address pairings
@@ -27,9 +27,7 @@ arpwatch - keep track of ethernet/ip address pairings
 .na
 .B arpwatch
 [
-.B -b
-] [
-.B -d
+.B -dN
 ] [
 .B -f
 .I datafile
@@ -40,6 +38,9 @@ arpwatch - keep track of ethernet/ip address pairings
 .br
 .ti +8
 [
+.B -n
+.IR net [/ width
+]] [
 .B -r
 .I file
 ]
@@ -49,7 +50,7 @@ arpwatch - keep track of ethernet/ip address pairings
 keeps track for ethernet/ip address pairings. It syslogs activity
 and reports certain changes via email.
 .B Arpwatch
-uses 
+uses
 .BR pcap (3)
 to listen for arp packets on a local ethernet interface.
 .LP
@@ -79,6 +80,18 @@ The default is
 The
 .B -i
 flag is used to override the default interface.
+.LP
+The
+.B -n
+flag specifies additional local networks. This can be useful to
+avoid "bogon" warnings when there is more than one network running
+on the same wire. If the optional
+.I width
+is not specified, the default netmask for the network's class is used.
+.LP
+The
+.B -N
+flag disables reporting any bogons.
 .LP
 The
 .B -r
@@ -116,13 +129,36 @@ the second most recently seen address.
 (If either the old or new ethernet address is a DECnet address and it
 is less than 24 hours, the email version of the report is suppressed.)
 .TP
+.B "changed ethernet address"
+The host switched to a new ethernet address.
+.SH "SYSLOG MESSAGES"
+Here are some of the syslog messages;
+note that messages that are reported are also sysloged.
+.TP
+.B "ethernet broadcast"
+The mac ethernet address of the host is a broadcast address.
+.TP
+.B "ip broadcast"
+The ip address of the host is a broadcast address.
+.TP
+.B "bogon"
+The source ip address is not local to the local subnet.
+.TP
+.B "ethernet broadcast"
+The source mac or arp ethernet address was all ones or all zeros.
+.TP
+.B "ethernet mismatch"
+The source mac ethernet address didn't match the address inside
+the arp packet.
+.TP
 .B "reused old ethernet address"
 The ethernet address has changed from the most recently seen address to
 the third (or greater) least recently seen address.
 (This is similar to a flip flop.)
 .TP
-.B "changed ethernet address"
-The host switched to a new ethernet address.
+.B "suppressed DECnet flip flop"
+A "flip flop" report was suppressed because one of the two
+addresses was a DECnet address.
 .SH FILES
 .na
 .nh
@@ -153,7 +189,7 @@ University of California, Berkeley, CA.
 The current version is available via anonymous ftp:
 .LP
 .RS
-.I ftp://ftp.ee.lbl.gov/arpwatch.tar.Z
+.I ftp://ftp.ee.lbl.gov/arpwatch.tar.gz
 .RE
 .SH BUGS
 Please send bug reports to arpwatch@ee.lbl.gov.

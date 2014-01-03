@@ -1,0 +1,19 @@
+#!/bin/sh
+# @(#) $Id: massagevendor-old,v 1.4 2000/09/17 21:00:46 leres Exp $ (LBL)
+#
+# Massage
+#
+#	ftp://ftp.cavebear.com/pub/Ethernet.txt
+#	http://www.cavebear.com/CaveBear/Ethernet/vendor.html
+#
+# into ethercodes.dat format
+#
+sed -n \
+    -e '/^[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][	 ]/!d' \
+    -e 's/[	 ][	 ]*$//' \
+    -e p $* | \
+    awk -f euppertolower.awk | \
+    sed -n \
+    -e 's/^\([0-9A-Za-z][0-9A-Za-z]\)\([0-9A-Za-z][0-9A-Za-z]\)\([0-9A-Za-z][0-9A-Za-z]\)[ 	]\(.*\)$/\1:\2:\3	\4/' \
+    -e 's/^0//' -e 's/:0\([0-9A-Za-z]\)/:\1/g' -e p | \
+    sort

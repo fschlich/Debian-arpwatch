@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998
+ * Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,7 +20,7 @@
  */
 #ifndef lint
 static const char rcsid[] =
-    "@(#) $Header: file.c,v 1.22 98/02/09 16:35:17 leres Exp $ (LBL)";
+    "@(#) $Id: file.c,v 1.25 2000/10/13 22:29:42 leres Exp $ (LBL)";
 #endif
 
 /*
@@ -62,15 +62,15 @@ struct rtentry;
 #include "file.h"
 
 int
-file_loop(register FILE *f, file_process fn)
+file_loop(register FILE *f, file_process fn, register const char *name)
 {
 	register int n;
 	register char *cp, *cp2, *h;
 	u_int32_t a;
-	register u_char *e;
 	register time_t t;
 	register struct hostent *hp;
 	char line[1024];
+	u_char e[6];
 
 	n = 0;
 	while (fgets(line, sizeof(line), f)) {
@@ -82,17 +82,19 @@ file_loop(register FILE *f, file_process fn)
 		if (*cp == '#')
 			continue;
 		if ((cp2 = strchr(cp, '\t')) == NULL) {
-			syslog(LOG_ERR,
-			    "file_loop(): syntax error #1 line %d", n);
+			syslog(LOG_ERR, "file_loop: %s:%d syntax error #1",
+			    name, n);
+fprintf(stderr, "file_loop: %s:%d syntax error #1\n", name, n);
 			continue;
 		}
 
 		/* Ethernet address comes first */
 		*cp2++ = '\0';
-		if ((e = str2e(cp)) == NULL) {
+		if (!str2e(cp, e)) {
 			syslog(LOG_ERR,
-			    "file_loop(): bad ether addr \"%s\" at line %d",
-			    cp, n);
+			    "file_loop: %s:%d bad ether addr \"%s\"",
+			    name, n, cp);
+fprintf(stderr, "file_loop: %s:%d bad ether addr \"%s\"\n", name, n, cp);
 			continue;
 		}
 
@@ -100,11 +102,12 @@ file_loop(register FILE *f, file_process fn)
 		cp = cp2;
 		if ((cp2 = strchr(cp, '\t')) != NULL)
 			*cp2++ = '\0';
-		if (!isdigit(*cp) || (int32_t)(a = inet_addr(cp)) == -1) {
+		if (!isdigit((int)*cp) || (int32_t)(a = inet_addr(cp)) == -1) {
 			if ((hp = gethostbyname(cp)) == NULL) {
 				syslog(LOG_ERR,
-			    "file_loop(): bad hostname \"%s\" at line %d",
-				    cp, n);
+				    "file_loop: %s:%d bad hostname \"%s\"",
+				    name, n, cp);
+fprintf(stderr, "file_loop: %s:%d bad hostname \"%s\"\n", name, n, cp);
 				continue;
 			}
 			BCOPY(hp->h_addr, &a, 4);

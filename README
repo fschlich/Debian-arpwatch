@@ -1,10 +1,10 @@
-@(#) $Header: README,v 1.20 97/09/30 14:46:55 leres Exp $ (LBL)
+@(#) $Id: README,v 1.23 2000/10/08 20:25:42 leres Exp $ (LBL)
 
 ARPWATCH 2.1
 Lawrence Berkeley National Laboratory
 Network Research Group
 arpwatch@ee.lbl.gov
-ftp://ftp.ee.lbl.gov/arpwatch.tar.Z
+ftp://ftp.ee.lbl.gov/arpwatch.tar.gz
 
 This directory contains source code for arpwatch and arpsnmp, tools
 that monitors ethernet or fddi activity and maintain a database of
@@ -15,7 +15,7 @@ Arpwatch uses libpcap, a system-independent interface for user-level
 packet capture.  Before building arpwatch, you must first retrieve and
 build libpcap, also from LBL, in:
 
-	ftp://ftp.ee.lbl.gov/libpcap.tar.Z.
+	ftp://ftp.ee.lbl.gov/libpcap.tar.gz
 
 Once libpcap is built (either install it or make sure arpwatch and
 libpcap share the same parent directory), you can build arpwatch using
@@ -26,20 +26,21 @@ external agent to collect the arp data. This distribution contains a
 script, arpfetch, that uses snmpwalk from the CMU SNMP package. This
 package is available from:
 
-	ftp://ftp.net.cmu.edu/pub/snmp-dist/cmu-snmp*.tar.Z
+	ftp://ftp.net.cmu.edu/pub/snmp-dist/cmu-snmp*.tar.gz
 
 It should be trivial to adaptive the output of any snmp query program
 for use with arpsnmp.
 
-The ethernet vendor codes come from:
+The ethernet vendor codes come from the IEEE's website:
 
-    ftp://ftp.cavebear.com/pub/Ethernet.txt
-    http://www.cavebear.com/CaveBear/Ethernet/vendor.html
+    http://standards.ieee.org/regauth/oui/oui.txt
 
-Another source of ethernet vendor code data is:
-
-    http://standards.ieee.org/db/oui/
-
-However that version is copyrighted.
+This is the IEEE's public Organizationally Unique Identifier (OUI)
+listing. If you run across an OUI that isn't in ethercodes.dat,
+first get a new copy from the IEEE website. Under FreeBSD you can
+use fetch(1). Convert this file to ethercodes.dat format using the
+massagevendor script. If OUI isn't in the resulting file check with
+the IEEE.  (But note that this is unlikely since the IEEE assign
+OUIs...)
 
 Please send bugs and comments to arpwatch@ee.lbl.gov.

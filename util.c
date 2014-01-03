@@ -58,6 +58,7 @@ char *ethercodes = ETHERCODES;
 u_char zero[6] = { 0, 0, 0, 0, 0, 0 };
 u_char allones[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
+int bogonkill = 0;			/* suppress bogon messages? */
 int debug = 0;
 int initializing = 1;			/* true if initializing */
 

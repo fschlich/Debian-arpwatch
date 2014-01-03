@@ -1,0 +1,29 @@
+arpwatch (2.1a4-3) frozen; urgency=low
+
+  * [Colin Phipps] Fixed /tmp race condition. (Closes: #56823)
+  * [Erik Warmelink] Fixed arp2ethers multiple MAC behavior. (Closes: #60859)
+
+ -- KELEMEN Peter <fuji@debian.org>  Tue, 21 Mar 2000 12:08:56 +0100
+
+arpwatch (2.1a4-2) unstable; urgency=low
+
+  * Implemented `-b' flag to suppress bogon messages. (Closes: #36199)
+  * Changed Architecture: from `i386' to `any'. (Closes: #36259)
+  * Disabled automatic update of Ethernet vendor codes. (Closes: #36260)
+  * Moved database directory from /var/run/ to /var/lib/. (Closes: #36293)
+  * Fixed and updated arpwatch.8 manpage. (Closes: #36312)
+  * Fixed `restart' option in init.d script.
+  * Updated Ethernet vendor codes.
+
+ -- KELEMEN Peter <fuji@debian.org>  Fri, 23 Apr 1999 20:55:04 +0200
+
+arpwatch (2.1a4-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- KELEMEN Peter <fuji@debian.org>  Mon, 12 Apr 1999 18:30:09 +0200
+
+Local variables:
+mode: debian-changelog
+add-log-mailing-address: "fuji@debian.org"
+End:

@@ -147,9 +147,13 @@ main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while ((op = getopt(argc, argv, "df:i:r:")) != EOF)
+	while ((op = getopt(argc, argv, "bdf:i:r:")) != EOF)
 		switch (op) {
 
+		case 'b':
+			++bogonkill;
+			break;
+			
 		case 'd':
 			++debug;
 #ifndef DEBUG
@@ -341,7 +345,9 @@ process_ether(register u_char *u, register const struct pcap_pkthdr *h,
 
 	/* Watch for bogons */
 	if ((sia & netmask) != net) {
-		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
+		if (!bogonkill) {
+			dosyslog(LOG_INFO, "bogon", sia, sea, sha);
+		}
 		return;
 	}
 
@@ -490,7 +496,9 @@ process_fddi(register u_char *u, register const struct pcap_pkthdr *h,
 
 	/* Watch for bogons */
 	if ((sia & netmask) != net) {
-		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
+		if (!bogonkill) {
+			dosyslog(LOG_INFO, "bogon", sia, sea, sha);
+		}
 		return;
 	}
 
@@ -623,6 +631,6 @@ usage(void)
 
 	(void)fprintf(stderr, "Version %s\n", version);
 	(void)fprintf(stderr,
-	    "usage: %s [-d] [-f datafile] [-i interface] [-r file]\n", prog);
+	    "usage: %s [-b] [-d] [-f datafile] [-i interface] [-r file]\n", prog);
 	exit(1);
 }

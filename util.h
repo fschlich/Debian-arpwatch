@@ -15,5 +15,6 @@ extern char *ethercodes;
 extern u_char zero[6];
 extern u_char allones[6];
 
+extern int bogonkill;
 extern int debug;
 extern int initializing;

@@ -1,5 +1,9 @@
 @(#) $Header: CHANGES,v 1.31 98/07/28 22:16:43 leres Exp $ (LBL)
 
+v2.1 Fri Apr 23 20:40:57 CEST 1999
+
+- Add `-b' flag to suppress bogon messages. (fuji@debian.org)
+
 v2.1 Tue Jul 28 22:15:18 PDT 1998
 
 - Add FDDI support. Based on code contributed by Flemming Johansen

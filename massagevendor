@@ -12,7 +12,34 @@ sed -n \
     -e '/^[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][	 ]/!d' \
     -e 's/[	 ][	 ]*$//' \
     -e p $* | \
-    awk -f euppertolower.awk | \
+# 1999-04-12	KELEMEN Peter <fuji@debian.org>
+#	Included euppertolower.awk directly.
+#    awk -f euppertolower.awk | \
+    awk '
+BEGIN {
+	x["A"] = "a"
+	x["B"] = "b"
+	x["C"] = "c"
+	x["D"] = "d"
+	x["E"] = "e"
+	x["F"] = "f"
+
+}
+
+{
+	s = ""
+	for (i = 1; i <= 6; ++i) {
+		t = substr($0, i, 1)
+		if (x[t] != "")
+			s = s x[t]
+		else
+			s = s t
+	}
+	s = s substr($0, 7)
+	print s
+	next
+}
+    ' | \
     sed -n \
     -e 's/^\([0-9A-Za-z][0-9A-Za-z]\)\([0-9A-Za-z][0-9A-Za-z]\)\([0-9A-Za-z][0-9A-Za-z]\)[ 	]\(.*\)$/\1:\2:\3	\4/' \
     -e 's/^0//' -e 's/:0\([0-9A-Za-z]\)/:\1/g' -e p | \

@@ -31,7 +31,10 @@ BINDEST = @sbindir@
 # Pathname of directory to install the man page
 MANDEST = @mandir@
 # Pathname of directory to install database file
-ARPDIR = $(prefix)/arpwatch
+
+# 1999-04-23	KELEMEN Peter <fuji@debian.org>
+ARPDIR = /var/lib/arpwatch
+ETHERCODES = /usr/share/arpwatch/ethercodes.dat
 
 # VPATH
 srcdir = @srcdir@
@@ -44,7 +47,8 @@ VPATH = @srcdir@
 CC = @CC@
 CCOPT = @V_CCOPT@
 INCLS = -I. @V_INCLS@
-DEFS = -DDEBUG @DEFS@ -DARPDIR=\"$(ARPDIR)\" -DPATH_SENDMAIL=\"$(SENDMAIL)\"
+DEFS = -DDEBUG @DEFS@ -DARPDIR=\"$(ARPDIR)\" -DPATH_SENDMAIL=\"$(SENDMAIL)\" \
+	-DETHERCODES=\"$(ETHERCODES)\"
 
 # Standard CFLAGS
 CFLAGS = $(CCOPT) $(DEFS) $(INCLS)

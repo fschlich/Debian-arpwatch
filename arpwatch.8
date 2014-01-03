@@ -19,13 +19,7 @@
 .\" WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
 .\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 .\"
-.TH ARPSNMP 8 "31 October 1997"
-.UC 4
-.SH NAME
-arpsnmp - keep track of ethernet/ip address pairings
-.SH SYNOPSIS
-.B arpsnmp
-[
+.TH ARPWATCH 8 "31 October 1997"
 .UC 4
 .SH NAME
 arpwatch - keep track of ethernet/ip address pairings
@@ -33,6 +27,8 @@ arpwatch - keep track of ethernet/ip address pairings
 .na
 .B arpwatch
 [
+.B -b
+] [
 .B -d
 ] [
 .B -f
@@ -56,6 +52,17 @@ and reports certain changes via email.
 uses 
 .BR pcap (3)
 to listen for arp packets on a local ethernet interface.
+.LP
+The
+.B -b
+flag is used to suppress bogon messages logged to syslog.  An ethernet
+bogon is detected when
+.B source_ip
+.B &
+.B netmask
+.B !=
+.B network_address
+occurs.
 .LP
 The
 .B -d
@@ -120,7 +127,8 @@ The host switched to a new ethernet address.
 .na
 .nh
 .nf
-/usr/operator/arpwatch - default directory
+/usr/share/arpwatch - ethernet vendor code database directory
+/var/lib/arpwatch - ethernet/ip address database directory
 arp.dat - ethernet/ip address database
 ethercodes.dat - vendor ethernet block list
 .ad

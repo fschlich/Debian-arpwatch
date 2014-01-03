@@ -1,7 +1,10 @@
 /* @(#) $Header: arpwatch.h,v 1.28 98/02/09 16:35:15 leres Exp $ (LBL) */
 
 #define ARPFILE "arp.dat"
-#define ETHERCODES "ethercodes.dat"
+
+/* 1999-04-12	KELEMEN Peter <fuji@debian.org> */
+/*	See Makefile.in for ETHERCODES definition. */
+/* #define ETHERCODES "ethercodes.dat" */
 #define CHECKPOINT (15*60)		/* Checkpoint time in seconds */
 
 #define MEMCMP(a, b, n) memcmp((char *)a, (char *)b, n)

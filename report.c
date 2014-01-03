@@ -241,7 +241,7 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 	register char *cp, *hn;
 	register int pid;
 	register FILE *f;
-	char tempfile[64], cpu[64], os[64];
+	char cpu[64], os[64];
 	char *fmt = "%20s: %s\n";
 	char *watcher = WATCHER;
 	char *watchee = WATCHEE;
@@ -285,14 +285,11 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 
 		/* Child */
 		closelog();
-		(void)strcpy(tempfile, "/tmp/arpwatch.XXXXXX");
-		(void)mktemp(tempfile);
-		if ((f = fopen(tempfile, "w+")) == NULL) {
-			syslog(LOG_ERR, "child open(%s): %m", tempfile);
+		f = tmpfile(); /* Use tmpfile, which does precisely what's needed */
+		if (f == NULL) {
+			syslog(LOG_ERR, "child open(temp file): %m");
 			exit(1);
 		}
-		if (unlink(tempfile) < 0)
-			syslog(LOG_ERR, "unlink(%s): %m", tempfile);
 	}
 
 	(void)fprintf(f, "From: %s\n", watchee);

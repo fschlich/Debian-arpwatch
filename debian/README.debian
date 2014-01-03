@@ -1,0 +1,25 @@
+arpwatch for DEBIAN
+----------------------
+
+Comments regarding the Package
+
+arpfetch:
+	The script uses snmpwalk from the CMU SNMP package.
+
+ethercodes.dat:
+	(Ethernet.txt) Generated when package was build.
+
+The ethernet vendor codes come from:
+
+    ftp://ftp.cavebear.com/pub/Ethernet.txt
+    http://www.cavebear.com/CaveBear/Ethernet/vendor.html
+
+Another source of ethernet vendor code data is:
+
+    http://standards.ieee.org/db/oui/
+
+However that version is copyrighted.
+
+Please send bugs and comments to arpwatch@ee.lbl.gov.
+
+KELEMEN Peter <fuji@debian.org>, Mon, 12 Apr 1999 18:30:09 +0200

@@ -1,4 +1,11 @@
 #!/bin/sh
+### BEGIN INIT INFO
+# Provides:          arpwatch
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+### END INIT INFO
 # /etc/init.d/arpwatch: v9 2004/08/14 KELEMEN Peter <fuji@debian.org>
 # Based on /etc/init.d/skeleton (1.8  03-Mar-1998  miquels@cistron.nl)
 # 2001/10/26	fuji@debian.org		Support multiple instances.

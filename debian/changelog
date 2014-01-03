@@ -1,3 +1,14 @@
+arpwatch (2.1a15-1.2) unstable; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * Fix initgroups() adding the gid 0 group to the list. Instead of dropping
+    privileges it was in fact adding it. This is CVE-2012-2653. closes: #674715
+  * debian/rules:
+    - enable hardening flags.
+  * Makefile.in: add LDFLAGS support.
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 27 May 2012 09:20:52 +0200
+
 arpwatch (2.1a15-1.1) unstable; urgency=high
 
   * Non-maintainer upload.

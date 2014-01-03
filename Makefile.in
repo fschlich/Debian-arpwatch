@@ -51,6 +51,7 @@ DEFS = -DDEBUG @DEFS@ -DARPDIR=\"$(ARPDIR)\" -DPATH_SENDMAIL=\"$(SENDMAIL)\" \
 
 # Standard CFLAGS
 CFLAGS = $(CCOPT) $(DEFS) $(INCLS)
+LDFLAGS = @LDFLAGS@
 
 # Standard LIBS
 LIBS = @LIBS@
@@ -97,11 +98,11 @@ all: $(ALL)
 
 arpwatch: $(WOBJ) @V_PCAPDEP@
 	@rm -f $@
-	$(CC) $(CFLAGS) -o $@ $(WOBJ) $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(WOBJ) $(LIBS)
 
 arpsnmp: $(SOBJ)
 	@rm -f $@
-	$(CC) $(CFLAGS) -o $@ $(SOBJ) $(SLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SOBJ) $(SLIBS)
 
 version.o: version.c
 version.c: $(srcdir)/VERSION
@@ -109,7 +110,7 @@ version.c: $(srcdir)/VERSION
 	sed -e 's/.*/char version[] = "&";/' $(srcdir)/VERSION > $(srcdir)/$@
 
 zap: zap.o intoa.o
-	$(CC) $(CFLAGS) -o $@ zap.o intoa.o -lutil
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ zap.o intoa.o -lutil
 
 install: force
 	$(INSTALL) -m 555 -o bin -g bin arpwatch $(DESTDIR)$(BINDEST)

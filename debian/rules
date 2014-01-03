@@ -21,6 +21,10 @@ CROSS= --build $(DEB_BUILD_GNU_TYPE)
 endif
 
 
+CFLAGS=$(shell dpkg-buildflags --get CPPFLAGS)
+CFLAGS+=$(shell dpkg-buildflags --get CFLAGS)
+LDFLAGS=$(shell dpkg-buildflags --get LDFLAGS)
+LDFLAGS+=-Wl,-z,defs
 
 config.status: configure
 	dh_testdir
@@ -31,7 +35,7 @@ endif
 ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
-	./configure $(CROSS) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
+	./configure $(CROSS) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
 
 
 build: build-stamp

@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+case "$1" in 
+  purge|remove) 
+	if [ -x "/etc/init.d/arpwatch" ]; then
+		if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+			invoke-rc.d arpwatch stop || exit $?
+		else
+			/etc/init.d/arpwatch stop || exit $?
+		fi
+	fi
+	;;
+esac

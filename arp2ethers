@@ -17,10 +17,32 @@
 #
 # 2000-03-21	Erik Warmelink <erik@selwerd.nl>
 #	Use next instead of continue in included p.awk.
+#
+# 2004-06-26	Javier Fernandez-Sanguino <jfs@debian.org>
+#	Use a default file or the one provided in the command line
 
-sort +2rn arp.dat | \
+FILE=/var/lib/arpwatch/arp.dat
+[ -n "$1" ] && FILE=$1
+[ -r "$FILE" ] || {
+	echo "Cannot read file $FILE"
+	exit 1
+}
+
+sort +2rn $FILE | \
     awk 'NF == 4 { print }' | \
-    awk -f p.awk | \
+# 1999-04-12	KELEMEN Peter <fuji@debian.org>
+#    awk -f p.awk | \
+    awk '
+# Only print the first ethernet address seen
+
+{
+	e = $1
+	if (seen[e])
+		next
+	seen[e] = 1
+	print $0
+}
+    ' | \
     egrep -v '\.[0-9][0-9]*$' | \
     sed -e 's/	.*	/	/' | \
 # 1999-04-12	KELEMEN Peter <fuji@debian.org>

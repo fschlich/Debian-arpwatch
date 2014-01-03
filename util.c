@@ -50,6 +50,7 @@ static const char rcsid[] =
 #include "ec.h"
 #include "file.h"
 #include "util.h"
+#include "addresses.h"
 
 char *arpdir = ARPDIR;
 char *arpfile = ARPFILE;
@@ -59,14 +60,27 @@ char *ethercodes = ETHERCODES;
 u_char zero[6] = { 0, 0, 0, 0, 0, 0 };
 u_char allones[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-int bogonkill = 0;			/* suppress bogon messages? */
 int debug = 0;
 int initializing = 1;			/* true if initializing */
+/**/
+/**/
+int nopromisc = 0;			/* don't activate promisc mode */
+/**/
+/**/
+int allsubnets = 0;			/* watch all attached subnets */
+/**/
+/**/
+char *mailaddress = WATCHER;
+/**/
+/**/
+int quiet = 0;				/* send mail by default */
+/**/
+/**/
 
 /* syslog() helper routine */
 void
 dosyslog(register int p, register char *s, register u_int32_t a,
-    register u_char *ea, register u_char *ha)
+    register u_char *ea, register u_char *ha, char *interface)
 {
 	char xbuf[64];
 
@@ -83,23 +97,21 @@ dosyslog(register int p, register char *s, register u_int32_t a,
 	}
 
 	if (debug)
-		fprintf(stderr, "%s: %s %s %s\n", prog, s, intoa(a), xbuf);
+		fprintf(stderr, "%s: %s %s %s %s\n", prog, s, intoa(a),
+			xbuf, interface);
 	else
-		syslog(p, "%s %s %s", s, intoa(a), xbuf);
+		syslog(p, "%s %s %s %s", s, intoa(a), xbuf, interface);
 }
 
 static FILE *dumpf;
 
 void
 dumpone(register u_int32_t a, register u_char *e, register time_t t,
-    register char *h)
+    register char *h, char *interface)
 {
-	(void)fprintf(dumpf, "%s\t%s", e2str(e), intoa(a));
-	if (t != 0 || h != NULL)
-		(void)fprintf(dumpf, "\t%u", (u_int32_t)t);
-	if (h != NULL && *h != '\0')
-		(void)fprintf(dumpf, "\t%s", h);
-	(void)putc('\n', dumpf);
+	(void)fprintf(dumpf, "%s\t%s\t%u\t%s\t%s\n", e2str(e), intoa(a),
+		      (u_int32_t)t, ((h != NULL)?h:""),
+		      ((interface != NULL)?interface:""));
 }
 
 int

@@ -1,9 +1,6 @@
 /* @(#) $Id: arpwatch.h,v 1.29 2000/09/30 23:40:49 leres Exp $ (LBL) */
 
 #define ARPFILE "arp.dat"
-
-/* 1999-04-12	KELEMEN Peter <fuji@debian.org> */
-/*	See Makefile.in for ETHERCODES definition. */
 /* #define ETHERCODES "ethercodes.dat" */
 #define CHECKPOINT (15*60)		/* Checkpoint time in seconds */
 

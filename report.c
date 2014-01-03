@@ -67,6 +67,7 @@ struct rtentry;
 #include "report.h"
 #include "setsignal.h"
 #include "util.h"
+#include "localhost.h"
 
 #define PLURAL(n) ((n) == 1 || (n) == -1 ? "" : "s")
 
@@ -233,16 +234,18 @@ reaper(int signo)
 
 void
 report(register char *title, register u_int32_t a, register u_char *e1,
-    register u_char *e2, register time_t *t1p, register time_t *t2p)
+    register u_char *e2, register time_t *t1p, register time_t *t2p,
+    char *interface)
 {
+        extern char *path_sendmail;
 	register char *cp, *hn;
 	register int fd, pid;
 	register FILE *f;
-	char cpu[64], os[64];
+	char tempfile[64], cpu[64], os[64];
 	char *fmt = "%20s: %s\n";
-	char *watcher = WATCHER;
+	char *watcher = mailaddress;
 	char *watchee = WATCHEE;
-	char *sendmail = PATH_SENDMAIL;
+	char *sendmail = path_sendmail;
 	char *unknown = "<unknown>";
 	char buf[132];
 	static int init = 0;
@@ -253,7 +256,7 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 
 	if (debug) {
 		if (debug > 1) {
-			dosyslog(LOG_NOTICE, title, a, e1, e2);
+			dosyslog(LOG_NOTICE, title, a, e1, e2, interface);
 			return;
 		}
 		f = stdout;
@@ -270,7 +273,11 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 		}
 
 		/* Syslog this event too */
-		dosyslog(LOG_NOTICE, title, a, e1, e2);
+		dosyslog(LOG_NOTICE, title, a, e1, e2, interface);
+
+		/* return if watcher is an empty string */
+		if ( quiet ) 
+		  return;
 
 		/* Update child depth */
 		++cdepth;
@@ -300,18 +307,18 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 			syslog(LOG_ERR, "unlink(%s): %m", tempfile);
 	}
 
-	(void)fprintf(f, "From: %s\n", watchee);
+	(void)fprintf(f, "From: arpwatch (Arpwatch %s)\n", localhost());
 	(void)fprintf(f, "To: %s\n", watcher);
+	if (interface == NULL) interface = ""; /* shouldn't happen */
 	hn = gethname(a);
-	if (!isdigit(*hn))
-		(void)fprintf(f, "Subject: %s (%s)\n", title, hn);
-	else {
-		(void)fprintf(f, "Subject: %s\n", title);
+	(void)fprintf(f, "Subject: %s (%s) %s\n", title, hn,
+		      interface);
+	if (isdigit(*hn))
 		hn = unknown;
-	}
 	(void)putc('\n', f);
 	(void)fprintf(f, fmt, "hostname", hn);
 	(void)fprintf(f, fmt, "ip address", intoa(a));
+	(void)fprintf(f, fmt, "interface", interface);
 	(void)fprintf(f, fmt, "ethernet address", e2str(e1));
 	if ((cp = ec_find(e1)) == NULL)
 		cp = unknown;

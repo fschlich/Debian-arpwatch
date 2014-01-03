@@ -64,7 +64,17 @@ if [ -d $DBDIR ]; then
 	touch $DBDIR/$DBFILE
 fi
 
-#DEBHELPER#
+# Automatically added by dh_installinit
+if [ -x "/etc/init.d/arpwatch" ]; then
+	update-rc.d arpwatch defaults 40 >/dev/null
+	if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+		invoke-rc.d arpwatch restart || exit $?
+	else
+		/etc/init.d/arpwatch restart || exit $?
+	fi
+fi
+# End automatically added section
+
 
 exit 0
 

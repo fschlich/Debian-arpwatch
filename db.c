@@ -64,6 +64,7 @@ struct einfo {
 	u_char e[6];		/* ether address */
 	char h[34];		/* simple hostname */
 	time_t t;		/* timestamp */
+	char i[16];		/* interface */
 };
 
 /* Address info */
@@ -80,13 +81,14 @@ static struct ainfo ainfo_table[HASHSIZE];
 
 static void alist_alloc(struct ainfo *);
 int cmpeinfo(const void *, const void *);
-static struct einfo *elist_alloc(u_int32_t, u_char *, time_t, char *);
+static struct einfo *elist_alloc(u_int32_t, u_char *, time_t, char *, char *);
 static struct ainfo *ainfo_find(u_int32_t);
 static void check_hname(struct ainfo *);
 struct ainfo *newainfo(void);
 
 int
-ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
+ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h,
+	char *interface)
 {
 	register struct ainfo *ap;
 	register struct einfo *ep;
@@ -94,6 +96,11 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 	register u_int len;
 	u_char *e2;
 	time_t t2;
+
+	/* Ignore 0.0.0.0 */
+	if (a == 0) {
+		return(1);
+	}
 
 	/* Lookup ip address */
 	ap = ainfo_find(a);
@@ -103,7 +110,8 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 		ep = ap->elist[0];
 		if (MEMCMP(e, ep->e, 6) == 0) {
 			if (t - ep->t > NEWACTIVITY_DELTA) {
-				report("new activity", a, e, NULL, &t, &ep->t);
+				report("new activity", a, e, NULL, &t, &ep->t,
+				       interface);
 				check_hname(ap);
 			}
 			ep->t = t;
@@ -114,8 +122,8 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 	/* Check for a virgin ainfo record */
 	if (ap->ecount == 0) {
 		ap->ecount = 1;
-		ap->elist[0] = elist_alloc(a, e, t, h);
-		report("new station", a, e, NULL, &t, NULL);
+		ap->elist[0] = elist_alloc(a, e, t, h, interface);
+		report("new station", a, e, NULL, &t, NULL, interface);
 		return (1);
 	}
 
@@ -133,9 +141,11 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 			if (t - t2 < FLIPFLIP_DELTA &&
 			    (isdecnet(e) || isdecnet(e2)))
 				dosyslog(LOG_INFO,
-				    "suppressed DECnet flip flop", a, e, e2);
+				    "suppressed DECnet flip flop", a, e, e2,
+				    interface);
 			else
-				report("flip flop", a, e, e2, &t, &t2);
+				report("flip flop", a, e, e2, &t, &t2,
+				       interface);
 			ap->elist[1] = ap->elist[0];
 			ap->elist[0] = ep;
 			ep->t = t;
@@ -151,7 +161,7 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 			e2 = ap->elist[0]->e;
 			t2 = ap->elist[0]->t;
 			dosyslog(LOG_NOTICE, "reused old ethernet address",
-			    a, e, e2);
+			    a, e, e2, interface);
 			/* Shift entries down */
 			len = i * sizeof(ap->elist[0]);
 			BCOPY(&ap->elist[0], &ap->elist[1], len);
@@ -165,12 +175,12 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 	/* New ether address */
 	e2 = ap->elist[0]->e;
 	t2 = ap->elist[0]->t;
-	report("changed ethernet address", a, e, e2, &t, &t2);
+	report("changed ethernet address", a, e, e2, &t, &t2, interface);
 	/* Make room at head of list */
 	alist_alloc(ap);
 	len = ap->ecount * sizeof(ap->elist[0]);
 	BCOPY(&ap->elist[0], &ap->elist[1], len);
-	ap->elist[0] = elist_alloc(a, e, t, h);
+	ap->elist[0] = elist_alloc(a, e, t, h, interface);
 	++ap->ecount;
 	return (1);
 }
@@ -227,7 +237,7 @@ ent_loop(ent_process fn)
 		for (ap = &ainfo_table[i]; ap != NULL; ap = ap->next)
 			for (j = 0; j < ap->ecount; ++j) {
 				ep = ap->elist[j];
-				(*fn)(ap->a, ep->e, ep->t, ep->h);
+				(*fn)(ap->a, ep->e, ep->t, ep->h, ep->i);
 				++n;
 			}
 	return (n);
@@ -259,7 +269,7 @@ alist_alloc(register struct ainfo *ap)
 /* Allocate and initialize a elist struct */
 static struct einfo *
 elist_alloc(register u_int32_t a, register u_char *e, register time_t t,
-    register char *h)
+    register char *h, char *interface)
 {
 	register struct einfo *ep;
 	register u_int size;
@@ -286,6 +296,8 @@ elist_alloc(register u_int32_t a, register u_char *e, register time_t t,
 	if (h != NULL && !isdigit((int)*h))
 		strcpy(ep->h, h);
 	ep->t = t;
+	if (interface != NULL)
+		strncpy(ep->i, interface, 16);
 	return (ep);
 }
 

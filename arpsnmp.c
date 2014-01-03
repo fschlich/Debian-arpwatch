@@ -63,10 +63,11 @@ static const char rcsid[] =
 /* Forwards */
 int	main(int, char **);
 int	readsnmp(char *);
-int	snmp_add(u_int32_t, u_char *, time_t, char *);
+int	snmp_add(u_int32_t, u_char *, time_t, char *, char *);
 __dead	void usage(void) __attribute__((volatile));
 
 char *prog;
+char *path_sendmail = PATH_SENDMAIL;
 
 extern int optind;
 extern int opterr;
@@ -78,6 +79,12 @@ main(int argc, char **argv)
 	register char *cp;
 	register int op, i;
 	char errbuf[256];
+	char options[] =
+		"d"
+		"m:"
+		"f:"
+		"s:"
+	;
 
 	if ((cp = strrchr(argv[0], '/')) != NULL)
 		prog = cp + 1;
@@ -90,7 +97,7 @@ main(int argc, char **argv)
 	}
 
 	opterr = 0;
-	while ((op = getopt(argc, argv, "df:")) != EOF)
+	while ((op = getopt(argc, argv, options)) != EOF)
 		switch (op) {
 
 		case 'd':
@@ -101,8 +108,16 @@ main(int argc, char **argv)
 #endif
 			break;
 
+		case 'm':
+			mailaddress = optarg;
+			break;
+
 		case 'f':
 			arpfile = optarg;
+			break;
+
+		case 's':
+			path_sendmail = optarg;
 			break;
 
 		default:
@@ -139,22 +154,24 @@ main(int argc, char **argv)
 static time_t now;
 
 int
-snmp_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
+snmp_add(register u_int32_t a, register u_char *e, time_t t, register char *h,
+    char *interface)
 {
 	/* Watch for ethernet broadcast */
 	if (MEMCMP(e, zero, 6) == 0 || MEMCMP(e, allones, 6) == 0) {
-		dosyslog(LOG_INFO, "ethernet broadcast", a, e, NULL);
+		dosyslog(LOG_INFO, "ethernet broadcast", a, e, NULL,
+			 interface);
 		return (1);
 	}
 
 	/* Watch for some ip broadcast addresses */
 	if (a == 0 || a == 1) {
-		dosyslog(LOG_INFO, "ip broadcast", a, e, NULL);
+		dosyslog(LOG_INFO, "ip broadcast", a, e, NULL, interface);
 		return (1);
 	}
 
 	/* Use current time (although it would be nice to subtract idle time) */
-	return (ent_add(a, e, now, h));
+	return (ent_add(a, e, now, h, interface));
 }
 
 /* Process an snmp file */
@@ -182,9 +199,16 @@ __dead void
 usage(void)
 {
 	extern char version[];
+	char usage[] =
+		"[-d] "
+		"[-m addr ] "
+		"[-f datafile] "
+		"[-s sendmail_path] "
+		"file [...]\n"
+	;
 
 	(void)fprintf(stderr, "Version %s\n", version);
 	(void)fprintf(stderr,
-	    "usage: %s [-d] [-f datafile] file [...]\n", prog);
+	    "usage: %s %s", prog, usage);
 	exit(1);
 }

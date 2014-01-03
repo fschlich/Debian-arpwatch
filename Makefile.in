@@ -31,8 +31,6 @@ BINDEST = @sbindir@
 # Pathname of directory to install the man page
 MANDEST = @mandir@
 # Pathname of directory to install database file
-
-# 1999-04-23	KELEMEN Peter <fuji@debian.org>
 ARPDIR = /var/lib/arpwatch
 ETHERCODES = /usr/share/arpwatch/ethercodes.dat
 
@@ -69,7 +67,7 @@ SENDMAIL = @V_SENDMAIL@
 	@rm -f $@
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 
-CSRC =	db.c dns.c ec.c file.c intoa.c machdep.c util.c report.c setsignal.c
+CSRC =	db.c dns.c ec.c file.c intoa.c machdep.c util.c report.c localhost.c setsignal.c
 WSRC =	arpwatch.c
 SSRC =	arpsnmp.c
 GENSRC = version.c
@@ -81,7 +79,7 @@ SRC =	$(WSRC) $(SSRC) $(CSRC) $(GENSRC)
 OBJ =	$(WSRC:.c=.o) $(SSRC:.c=.o) $(CSRC:.c=.o) $(GENSRC:.c=.o) @LIBOBJS@
 WOBJ =	$(WSRC:.c=.o) $(CSRC:.c=.o) $(GENSRC:.c=.o) @LIBOBJS@
 SOBJ =	$(SSRC:.c=.o) $(CSRC:.c=.o) $(GENSRC:.c=.o) @LIBOBJS@
-HDR =	arpwatch.h db.h dns.h ec.h file.h machdep.h report.h setsignal.h
+HDR =	arpwatch.h db.h dns.h ec.h file.h machdep.h report.h localhost.h setsignal.h
 
 TAGHDR = \
 	/usr/include/net/if.h \
@@ -108,7 +106,7 @@ arpsnmp: $(SOBJ)
 version.o: version.c
 version.c: $(srcdir)/VERSION
 	@rm -f $@
-	sed -e 's/.*/char version[] = "&";/' $(srcdir)/VERSION > $@
+	sed -e 's/.*/char version[] = "&";/' $(srcdir)/VERSION > $(srcdir)/$@
 
 zap: zap.o intoa.o
 	$(CC) $(CFLAGS) -o $@ zap.o intoa.o -lutil

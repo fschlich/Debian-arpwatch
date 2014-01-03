@@ -1,3 +1,27 @@
+arpwatch (2.1a15-1) unstable; urgency=low
+
+  * Non-maintainer upload to fix some outstanding bugs
+  * latest upstream release (Closes: #427867)
+  * converted packaging from dbs to debhelper
+  * applied all existing patches from old 2.1a13 package
+  * made bihourly.sh an example, and copied bihourly cron script from
+    arpwatch-2.1a13
+  * added my pretty-print-arpwatch.pl script as an example
+  * deleted duplicate errs= line from bihourly (Closes: #321504)
+  * fixed sprintf in ec.c to zero-pad MAC addresses (Closes: #315215)
+  * Applied patch from Sebastian Reichelt <SebastianR@gmx.de> to
+    initialise interface variable (Closes: #289426)
+  * updated watch file to v3 (Closes: #529097)
+  * applied patch from Sebastian Reichelt to display IP in subject if
+    hostname unknown (Closes: #288994)
+  * updated ethercodes.dat from latest IEEE listing (~5000 new entries)
+  * made /usr/share/arpwatch/ethercodes.dat a conffile so upgrades wont
+    silently overwrite it if the user updates it.
+  * installed arpwatch's *.awk scripts into /usr/lib/arpwatch and edited
+    massagevendor to set AWKPATH before running awk.
+
+ -- Craig Sanders <cas@taz.net.au>  Tue, 01 Sep 2009 20:00:54 +1000
+
 arpwatch (2.1a13-2.1) unstable; urgency=low
 
   * Non-maintainer upload to solve release goal.

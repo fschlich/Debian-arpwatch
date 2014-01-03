@@ -62,7 +62,8 @@ struct rtentry;
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
-
+#include <pwd.h>
+#include <grp.h>
 #include <pcap.h>
 
 #include "gnuc.h"
@@ -106,6 +107,7 @@ struct rtentry;
 #endif
 
 char *prog;
+char *path_sendmail = PATH_SENDMAIL;
 
 int can_checkpoint;
 int swapped;
@@ -122,6 +124,9 @@ struct nets {
 static struct nets *nets;
 static int nets_ind;
 static int nets_size;
+
+static struct in_addr ignore_net;
+static struct in_addr ignore_netmask;
 
 extern int optind;
 extern int opterr;
@@ -141,6 +146,26 @@ int	sanity_ether(struct ether_header *, struct ether_arp *, int);
 int	sanity_fddi(struct fddi_header *, struct ether_arp *, int);
 __dead	void usage(void) __attribute__((volatile));
 
+static char *interface;
+
+void dropprivileges(const char* user)
+{
+       struct passwd* pw;
+       pw = getpwnam( user );
+       if ( pw ) {
+               if ( initgroups(pw->pw_name, 0) != 0 || setgid(pw->pw_gid) != 0 ||
+                       setuid(pw->pw_uid) != 0 ) {
+                       syslog(LOG_ERR, "Couldn't change to '%.32s' uid=%d gid=%d", user,pw->pw_uid, pw->pw_gid);
+                       exit(1);
+              }
+      }
+      else {
+            syslog(LOG_ERR, "Couldn't find user '%.32s' in /etc/passwd", user);
+            exit(1);
+      }
+      syslog(LOG_INFO, "Running as uid=%d gid=%d", getuid(), getgid());
+}
+
 int
 main(int argc, char **argv)
 {
@@ -150,9 +175,54 @@ main(int argc, char **argv)
 	register int fd;
 #endif
 	register pcap_t *pd;
-	register char *interface, *rfilename;
+	register char *rfilename;
 	struct bpf_program code;
 	char errbuf[PCAP_ERRBUF_SIZE];
+	char* username = NULL;
+	int restart = 0;
+	char options[] =
+		"d"
+		/**/
+		/**/
+		"f:"
+		/**/
+		/**/
+		"i:"
+		/**/
+		/**/
+		"n:"
+		/**/
+		/**/
+		"N"
+		/**/
+		/**/
+		"r:"
+		/**/
+		/**/
+		"s:"
+		/**/
+		/**/
+		"p"
+		/**/
+		/**/
+		"a"
+		/**/
+		/**/
+		"m:"
+		/**/
+		/**/
+		"u:"
+		"R:"
+		/**/
+		/**/
+		"Q"
+		/**/
+		/**/
+		"z:"
+		/**/
+		/**/
+	;
+	char *tmpptr;
 
 	if (argv[0] == NULL)
 		prog = "arpwatch";
@@ -170,13 +240,16 @@ main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while ((op = getopt(argc, argv, "df:i:n:Nr:")) != EOF)
+
+	inet_aton("0.0.0.0", &ignore_netmask);
+	inet_aton("255.255.255.255", &ignore_netmask);
+	while ((op = getopt(argc, argv, options)) != EOF)
 		switch (op) {
 
-		case 'b':
-			++bogonkill;
+		case 'a':
+			++allsubnets;
 			break;
-			
+
 		case 'd':
 			++debug;
 #ifndef DEBUG
@@ -205,7 +278,50 @@ main(int argc, char **argv)
 		case 'r':
 			rfilename = optarg;
 			break;
+		/**/
+		/**/
+		case 's':
+			path_sendmail = optarg;
+			break;
+		/**/
+		/**/
+		case 'p':
+			++nopromisc;
+			break;
+		/**/
+		/**/
+		case 'm':
+			mailaddress = optarg;
+			break;
+		/**/
+		/**/
+		case 'u':
+			if ( optarg ) {
+				username = strdup(optarg);
+			} else {
+				fprintf(stderr, "%s: Need username after -u\n", prog);
+				usage();
+			}
+			break;
+		case 'R':
+			restart = atoi(optarg);
+			break;
+		/**/
+		/**/
+		case 'Q':
+		        ++quiet;
+			break;
 
+		/**/
+		/**/
+		case 'z':
+			tmpptr = strtok(optarg, "/");
+			inet_aton(tmpptr, &ignore_net);
+			tmpptr = strtok(NULL, "/");
+			inet_aton(tmpptr, &ignore_netmask);
+			break;
+		/**/
+		/**/
 		default:
 			usage();
 		}
@@ -216,6 +332,8 @@ main(int argc, char **argv)
 	if (rfilename != NULL) {
 		net = 0;
 		netmask = 0;
+		interface = "(from file)";
+		restart = 0;
 	} else {
 		/* Determine interface if not specified */
 		if (interface == NULL &&
@@ -227,9 +345,10 @@ main(int argc, char **argv)
 
 		/* Determine network and netmask */
 		if (pcap_lookupnet(interface, &net, &netmask, errbuf) < 0) {
-			(void)fprintf(stderr, "%s: bad interface %s: %s\n",
-			    prog, interface, errbuf);
-			exit(1);
+			syslog(LOG_NOTICE, "bad interface %s: %s - assuming unconfigured interface",
+				interface, errbuf);
+			net = 0;
+			netmask = 0;
 		}
 
 		/* Drop into the background if not debugging */
@@ -262,6 +381,7 @@ main(int argc, char **argv)
 		syslog(LOG_ERR, "(using current working directory)");
 	}
 
+label_restart:
 	if (rfilename != NULL) {
 		pd = pcap_open_offline(rfilename, errbuf);
 		if (pd == NULL) {
@@ -273,22 +393,32 @@ main(int argc, char **argv)
 		snaplen = max(sizeof(struct ether_header),
 		    sizeof(struct fddi_header)) + sizeof(struct ether_arp);
 		timeout = 1000;
-		pd = pcap_open_live(interface, snaplen, 1, timeout, errbuf);
+		pd = pcap_open_live(interface, snaplen, !nopromisc, timeout, errbuf);
 		if (pd == NULL) {
 			syslog(LOG_ERR, "pcap open %s: %s", interface, errbuf);
-			exit(1);
+			if (restart) {
+				syslog(LOG_ERR, "restart in %d secs", restart);
+			} else {
+				exit(1);
+			}
+			sleep(restart);
+			goto label_restart;
 		}
 #ifdef WORDS_BIGENDIAN
 		swapped = 1;
 #endif
 	}
 
+        if ( username && !restart ) {
+               dropprivileges( username );
+        } else {
 	/*
 	 * Revert to non-privileged user after opening sockets
 	 * (not needed on most systems).
 	 */
-	setgid(getgid());
-	setuid(getuid());
+		setgid(getgid());
+		setuid(getuid());
+	}
 
 	/* Must be ethernet or fddi */
 	linktype = pcap_datalink(pd);
@@ -384,29 +514,39 @@ process_ether(register u_char *u, register const struct pcap_pkthdr *h,
 
 	/* Watch for bogons */
 	if (isbogon(sia)) {
-		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
-		return;
+		dosyslog(LOG_INFO, "bogon", sia, sea, sha, interface);
+		if (!allsubnets) return;
 	}
 
 	/* Watch for ethernet broadcast */
 	if (MEMCMP(sea, zero, 6) == 0 || MEMCMP(sea, allones, 6) == 0 ||
 	    MEMCMP(sha, zero, 6) == 0 || MEMCMP(sha, allones, 6) == 0) {
-		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha);
+		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha,
+			 interface);
 		return;
 	}
 
 	/* Double check ethernet addresses */
 	if (MEMCMP(sea, sha, 6) != 0) {
-		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha);
+		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha,
+			 interface);
 		return;
 	}
 
+	/* Ignores the specified netmask/metwork */
+	if ((sia & ignore_netmask.s_addr) == ignore_net.s_addr) {
+		if (debug) {
+			dosyslog(LOG_INFO, "ignored", sia, sea, sha, interface);
+		}
+		return;
+	}
 	/* Got a live one */
+
 	t = h->ts.tv_sec;
 	can_checkpoint = 0;
-	if (!ent_add(sia, sea, t, NULL))
-		syslog(LOG_ERR, "ent_add(%s, %s, %ld) failed",
-		    intoa(sia), e2str(sea), t);
+	if (!ent_add(sia, sea, t, NULL, interface))
+		syslog(LOG_ERR, "ent_add(%s, %s, %ld, %s) failed",
+		    intoa(sia), e2str(sea), t, interface);
 	can_checkpoint = 1;
 }
 
@@ -533,29 +673,31 @@ process_fddi(register u_char *u, register const struct pcap_pkthdr *h,
 
 	/* Watch for bogons */
 	if (isbogon(sia)) {
-		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
-		return;
+		dosyslog(LOG_INFO, "bogon", sia, sea, sha, interface);
+		if (!allsubnets) return;
 	}
 
 	/* Watch for ethernet broadcast */
 	if (MEMCMP(sea, zero, 6) == 0 || MEMCMP(sea, allones, 6) == 0 ||
 	    MEMCMP(sha, zero, 6) == 0 || MEMCMP(sha, allones, 6) == 0) {
-		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha);
+		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha,
+			 interface);
 		return;
 	}
 
 	/* Double check ethernet addresses */
 	if (MEMCMP(sea, sha, 6) != 0) {
-		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha);
+		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha,
+			 interface);
 		return;
 	}
 
 	/* Got a live one */
 	t = h->ts.tv_sec;
 	can_checkpoint = 0;
-	if (!ent_add(sia, sea, t, NULL))
-		syslog(LOG_ERR, "ent_add(%s, %s, %ld) failed",
-		    intoa(sia), e2str(sea), t);
+	if (!ent_add(sia, sea, t, NULL, interface))
+		syslog(LOG_ERR, "ent_add(%s, %s, %ld, %s) failed",
+		    intoa(sia), e2str(sea), t, interface);
 	can_checkpoint = 1;
 }
 
@@ -752,9 +894,48 @@ __dead void
 usage(void)
 {
 	extern char version[];
+	char usage[] =
+		"[-dN] "
+		/**/
+		/**/
+		"[-f datafile] "
+		/**/
+		/**/
+		"[-i interface] "
+		/**/
+		/**/
+		"[-n net[/width]] "
+		/**/
+		/**/
+		"[-r file] "
+		/**/
+		/**/
+		"[-s sendmail_path] "
+		/**/
+		/**/
+		"[-p] "
+		/**/
+		/**/
+		"[-a] "
+		/**/
+		/**/
+		"[-m addr] "
+		/**/
+		/**/
+		"[-u username] "
+		"[-R seconds ] "
+		/**/
+		/**/
+		"[-Q] "
+		/**/
+		/**/
+		"[-z ignorenet/ignoremask] "
+		/**/
+		/**/
+		"\n"
+	;
 
 	(void)fprintf(stderr, "Version %s\n", version);
-	(void)fprintf(stderr, "usage: %s [-dN] [-f datafile] [-i interface]"
-	    " [-n net[/width]] [-r file]\n", prog);
+	(void)fprintf(stderr, "usage: %s %s", prog, usage);
 	exit(1);
 }

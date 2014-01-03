@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997
+ * Copyright (c) 1996, 1997, 1999, 2000
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,7 +20,7 @@
  */
 #ifndef lint
 static const char rcsid[] =
-    "@(#) $Header: util.c,v 1.6 97/09/30 14:04:01 leres Exp $ (LBL)";
+    "@(#) $Id: util.c,v 1.9 2000/10/13 22:48:55 leres Exp $ (LBL)";
 #endif
 
 /*
@@ -30,6 +30,7 @@ static const char rcsid[] =
 #include <sys/types.h>
 #include <sys/file.h>
 
+#include <fcntl.h>
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif
@@ -142,7 +143,7 @@ readdata(void)
 		syslog(LOG_ERR, "fopen(%s): %m", arpfile);
 		return(0);
 	}
-	if (!file_loop(f, ent_add)) {
+	if (!file_loop(f, ent_add, arpfile)) {
 		(void)fclose(f);
 		return(0);
 	}
@@ -150,7 +151,7 @@ readdata(void)
 
 	/* It's not fatal if we can't open the ethercodes file */
 	if ((f = fopen(ethercodes, "r")) != NULL) {
-		(void)ec_loop(f, ec_add);
+		(void)ec_loop(f, ec_add, ethercodes);
 		(void)fclose(f);
 	}
 

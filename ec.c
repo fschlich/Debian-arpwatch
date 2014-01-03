@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998
+ * Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,7 +20,7 @@
  */
 #ifndef lint
 static const char rcsid[] =
-    "@(#) $Header: ec.c,v 1.25 98/02/09 16:35:16 leres Exp $ (LBL)";
+    "@(#) $Id: ec.c,v 1.28 2000/10/13 22:49:15 leres Exp $ (LBL)";
 #endif
 
 /*
@@ -69,22 +69,22 @@ static struct ecent *list;
 static u_int ec_last = 0;
 static u_int ec_len = 0;
 
-static u_int32_t ec_a2o(char *);
+/* Forwards */
+static int ec_a2o(char *, u_int32_t *);
 
 /* Convert an 3 octets from an ethernet address to a u_int32_t */
-static u_int32_t
-ec_a2o(register char *cp)
+static int
+ec_a2o(register char *cp, register u_int32_t *op)
 {
-	register u_char *e;
-	u_int32_t o;
 	char xbuf[128];
+	u_char e[6];
 
 	(void)sprintf(xbuf, "%.32s:0:0:0", cp);
-	if ((e = str2e(xbuf)) == NULL)
+	if (!str2e(xbuf, e))
 		return (0);
-	o = 0;
-	BCOPY(e, &o, 3);
-	return (o);
+	*op = 0;
+	BCOPY(e, op, 3);
+	return (1);
 }
 
 /* Add a ethernet code to the database */
@@ -129,12 +129,12 @@ ec_find(register u_char *e)
 
 /* Loop through the ethernet code database */
 int
-ec_loop(register FILE *f, ec_process fn)
+ec_loop(register FILE *f, ec_process fn, register const char *nm)
 {
 	register int n;
 	register char *cp, *cp2, *text;
-	register u_int32_t o;
 	register int sawblank;
+	u_int32_t o;
 	char line[1024];
 
 	n = 0;
@@ -147,18 +147,15 @@ ec_loop(register FILE *f, ec_process fn)
 		if (*cp == '#')
 			continue;
 		if ((cp2 = strchr(cp, '\t')) == 0) {
-			syslog(LOG_ERR,
-			    "ec_loop(): syntax error #1 line %d", n);
+			syslog(LOG_ERR, "ec_loop(): %s:%d missing tab", nm, n);
 			continue;
 		}
 
 		/* 3 octets come first */
 		*cp2++ = '\0';
 		text = cp2;
-		o = ec_a2o(cp);
-		if (o == 0) {
-			syslog(LOG_ERR,
-			    "ec_loop(): syntax error #2 line %d", n);
+		if (!ec_a2o(cp, &o)) {
+			syslog(LOG_ERR, "ec_loop(): %s:%d bad octets", nm, n);
 			continue;
 		}
 
@@ -171,7 +168,7 @@ ec_loop(register FILE *f, ec_process fn)
 				sawblank = 0;
 			}
 			*cp2++ = *cp++;
-			while (isspace(*cp)) {
+			while (isspace((int)*cp)) {
 				++cp;
 				sawblank = 1;
 			}
@@ -197,19 +194,22 @@ isdecnet(register u_char *e)
 }
 
 /* Convert an ascii ethernet string to ethernet address */
-u_char *
-str2e(register char *str)
+int
+str2e(register char *str, register u_char *e)
 {
 	register int i;
-	int n[6];
-	static u_char e[6];
+	u_int n[6];
 
 	MEMSET(n, 0, sizeof(n));
-	(void) sscanf(str, "%x:%x:%x:%x:%x:%x",
-	    &n[0], &n[1], &n[2], &n[3], &n[4], &n[5]);
-	for (i = 0; i < 6; ++i)
+	if (sscanf(str, "%x:%x:%x:%x:%x:%x",
+	    &n[0], &n[1], &n[2], &n[3], &n[4], &n[5]) != 6)
+		return (0);
+	for (i = 0; i < 6; ++i) {
+		if (n[i] > 0xff)
+			return (0);
 		e[i] = n[i];
-	return (e);
+	}
+	return (1);
 }
 
 /* Convert an ethernet address to an ascii ethernet string */

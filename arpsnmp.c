@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997
+ * Copyright (c) 1996, 1997, 1998
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,10 +20,10 @@
  */
 #ifndef lint
 static const char copyright[] =
-    "Copyright (c) 1996, 1997\n\
+    "Copyright (c) 1996, 1997, 1998\n\
 The Regents of the University of California.  All rights reserved.\n";
 static const char rcsid[] =
-    "@(#) $Header: arpsnmp.c,v 1.7 97/09/30 14:04:29 leres Exp $ (LBL)";
+    "@(#) $Header: arpsnmp.c,v 1.8 99/01/17 17:47:38 leres Exp $ (LBL)";
 #endif
 
 /*
@@ -169,7 +169,7 @@ readsnmp(register char *file)
 		return(0);
 	}
 	now = time(NULL);
-	if (!file_loop(f, snmp_add)) {
+	if (!file_loop(f, snmp_add, file)) {
 		(void)fclose(f);
 		return(0);
 	}

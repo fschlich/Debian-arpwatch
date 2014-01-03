@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998
+ * Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,7 +20,7 @@
  */
 #ifndef lint
 static const char rcsid[] =
-    "@(#) $Header: db.c,v 1.30 98/02/09 16:35:16 leres Exp $ (LBL)";
+    "@(#) $Id: db.c,v 1.34 2000/09/30 23:39:57 leres Exp $ (LBL)";
 #endif
 
 /*
@@ -54,7 +54,7 @@ static const char rcsid[] =
 #include "report.h"
 #include "util.h"
 
-#define HASHSIZE 4096
+#define HASHSIZE (2 << 15)
 
 #define NEWACTIVITY_DELTA (6*30*24*60*60)	/* 6 months in seconds */
 #define FLIPFLIP_DELTA (24*60*60)		/* 24 hours in seconds */
@@ -150,8 +150,8 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 			/* An old entry comes to life */
 			e2 = ap->elist[0]->e;
 			t2 = ap->elist[0]->t;
-			report("reused old ethernet address",
-			    a, e, e2, &t, &t2);
+			dosyslog(LOG_NOTICE, "reused old ethernet address",
+			    a, e, e2);
 			/* Shift entries down */
 			len = i * sizeof(ap->elist[0]);
 			BCOPY(&ap->elist[0], &ap->elist[1], len);
@@ -281,9 +281,9 @@ elist_alloc(register u_int32_t a, register u_char *e, register time_t t,
 	ep = elist++;
 	--eleft;
 	BCOPY(e, ep->e, 6);
-	if (h == NULL)
+	if (h == NULL && !initializing)
 		h = getsname(a);
-	if (!isdigit(*h))
+	if (h != NULL && !isdigit((int)*h))
 		strcpy(ep->h, h);
 	ep->t = t;
 	return (ep);
@@ -296,9 +296,12 @@ check_hname(register struct ainfo *ap)
 	register struct einfo *ep;
 	register char *h;
 
+	/* Don't waste time if we're loading the initial arp.dat */
+	if (initializing)
+		return;
 	ep = ap->elist[0];
 	h = getsname(ap->a);
-	if (!isdigit(*h) && strcmp(h, ep->h) != 0) {
+	if (!isdigit((int)*h) && strcmp(h, ep->h) != 0) {
 		syslog(LOG_INFO, "hostname changed %s %s %s -> %s",
 		    intoa(ap->a), e2str(ep->e), ep->h, h);
 		strcpy(ep->h, h);

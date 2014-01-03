@@ -1,5 +1,5 @@
-#  Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997
-# 	The Regents of the University of California.  All rights reserved.
+#  Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000
+#	The Regents of the University of California.  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that: (1) source code distributions
@@ -17,7 +17,7 @@
 #  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
 #  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-# @(#) $Header: Makefile.in,v 1.67 98/07/28 22:16:45 leres Exp $ (LBL)
+# @(#) $Id: Makefile.in,v 1.68 2000/06/15 00:39:54 leres Exp $ (LBL)
 
 #
 # Various configurable paths (remember to edit Makefile.in, not Makefile)
@@ -42,6 +42,7 @@ VPATH = @srcdir@
 #
 
 CC = @CC@
+PROG = arpwatch
 CCOPT = @V_CCOPT@
 INCLS = -I. @V_INCLS@
 DEFS = -DDEBUG @DEFS@ -DARPDIR=\"$(ARPDIR)\" -DPATH_SENDMAIL=\"$(SENDMAIL)\"
@@ -137,18 +138,18 @@ ethers.new: arp.dat
 	./arp2ethers > ethers.new
 
 tar:	force
-	@cwd=`pwd` ; dir=`basename $$cwd` ; name=arpwatch-`cat VERSION` ; \
-	    list="" ; tar="tar cFFfh" ; \
+	@cwd=`pwd` ; name=$(PROG)-`cat VERSION` ; \
+	    list="" ; tar="tar chf" ; temp="$$name.tar.gz" ; \
 	    for i in `cat FILES` ; do list="$$list $$name/$$i" ; done; \
 	    echo \
-	    "rm -f ../$$name; ln -s $$dir ../$$name" ; \
-	     rm -f ../$$name; ln -s $$dir ../$$name ; \
+	    "rm -f $$name; ln -s . $$name" ; \
+	     rm -f $$name; ln -s . $$name ; \
 	    echo \
-	    "(cd .. ; $$tar - [lots of files]) | compress > /tmp/$$name.tar.Z" ; \
-	     (cd .. ; $$tar - $$list) | compress > /tmp/$$name.tar.Z ; \
+	    "$$tar - [lots of files] | gzip > $$temp" ; \
+	     $$tar - $$list | gzip > $$temp ; \
 	    echo \
-	    "rm -f ../$$name" ; \
-	     rm -f ../$$name
+	    "rm -f $$name" ; \
+	     rm -f $$name
 
 force:	/tmp
 depend:	$(GENSRC) force

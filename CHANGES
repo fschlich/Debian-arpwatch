@@ -1,18 +1,39 @@
-@(#) $Header: CHANGES,v 1.31 98/07/28 22:16:43 leres Exp $ (LBL)
+@(#) $Id: CHANGES,v 1.39 2001/05/16 18:35:14 leres Exp $ (LBL)
 
-v2.1 Tue Jul 28 22:15:18 PDT 1998
+v2.1 Wed May 16 11:35:10 PDT 2001
 
 - Add FDDI support. Based on code contributed by Flemming Johansen
   (fsj@csd.cri.dk)
 
 - New -f flag overrides the default database filename.
 
-- New -r flag allows save files to be read.
+- New -r flag allows tcpdump save files to be read.
 
-- Use bcopy() instead of memcpy() since it doesn't handle overlapping
-  buffers. Reported by Attila Bruncsak (attila.bruncsak@itu.int)
+- memcpy() doesn't handle overlapping buffers so use bcopy() instead.
+  Reported by Attila Bruncsak (attila.bruncsak@itu.int)
 
 - Have configure determine the sendmail path.
+
+- Don't bother updating hostnames when reading arp.dat since this can
+  be expensive in the number of dns requests generated.
+
+- Improve robostness of the aprfetch script.
+
+- Update massagevendor to convert the IEEE public Organizationally
+  Unique Identifier (OUI) file format.
+
+- Don't use -e with awk, not all versions support it. Suggested by
+  Stephen Thompson (thompson@pobox.upenn.edu)
+
+- Convert usage of mktemp() to mkstemp().
+
+- Add -n flag (alternate networks) and -N flag (don't report bogons).
+
+- Improve ethernet address parser error checking.
+
+- More concessions to linux.
+
+- Special case dn_skipname() check for bind 8.
 
 v2.0.2 Sat Jun  7 03:15:03 PDT 1997
 

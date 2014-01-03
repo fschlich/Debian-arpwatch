@@ -1,4 +1,4 @@
-/* @(#) $Header$ (LBL) */
+/* @(#) $Header: fddi.h,v 1.1 99/01/17 17:51:02 leres Exp $ (LBL) */
 /* Support for IP-over-FDDI */
       
 /*

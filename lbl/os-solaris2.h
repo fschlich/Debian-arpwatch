@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993, 1994, 1995, 1996, 1997
+ * Copyright (c) 1993, 1994, 1995, 1996, 1997, 2000
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -18,7 +18,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: os-solaris2.h,v 1.18 97/10/01 01:10:22 leres Exp $ (LBL)
+ * @(#) $Id: os-solaris2.h,v 1.18 1997/10/01 01:10:22 leres Exp leres $ (LBL)
  */
 
 /* Prototypes missing in SunOS 5 */
@@ -48,7 +48,3 @@ char    *strerror(int);
 int	snprintf(char *, size_t, const char *, ...);
 int	strcasecmp(const char *, const char *);
 void	unsetenv(const char *);
-#ifdef __STDC__
-struct	timeval;
-#endif
-int	utimes(const char *, struct timeval *);

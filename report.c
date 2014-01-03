@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997
+ * Copyright (c) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,7 +20,7 @@
  */
 #ifndef lint
 static const char rcsid[] =
-    "@(#) $Header: report.c,v 1.43 98/07/28 22:16:46 leres Exp $ (LBL)";
+    "@(#) $Id: report.c,v 1.46 2000/09/30 23:41:04 leres Exp $ (LBL)";
 #endif
 
 /*
@@ -224,9 +224,6 @@ reaper(int signo)
 		if (pid == 0)
 			break;
 		--cdepth;
-/* XXX this is stupid, if debug is > 0, we won't have children */
-		if (debug > 1)
-			syslog(LOG_DEBUG, "reaper: child %d", pid);
 		if (WEXITSTATUS(status))
 			syslog(LOG_DEBUG, "reaper: pid %d, exit status %d",
 			    pid, WEXITSTATUS(status));
@@ -239,7 +236,7 @@ report(register char *title, register u_int32_t a, register u_char *e1,
     register u_char *e2, register time_t *t1p, register time_t *t2p)
 {
 	register char *cp, *hn;
-	register int pid;
+	register int fd, pid;
 	register FILE *f;
 	char tempfile[64], cpu[64], os[64];
 	char *fmt = "%20s: %s\n";
@@ -267,6 +264,10 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 			(void)setsignal(SIGCHLD, reaper);
 			++init;
 		}
+		while (cdepth >= 3) {
+			syslog(LOG_ERR, "report: pausing (cdepth %d)", cdepth);
+			pause();
+		}
 
 		/* Syslog this event too */
 		dosyslog(LOG_NOTICE, title, a, e1, e2);
@@ -279,18 +280,22 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 		if (pid) {
 			/* Parent */
 			if (pid < 0)
-				syslog(LOG_ERR, "report fork() 1: %m");
+				syslog(LOG_ERR, "report: fork() 1: %m");
 			return;
 		}
 
 		/* Child */
 		closelog();
 		(void)strcpy(tempfile, "/tmp/arpwatch.XXXXXX");
-		(void)mktemp(tempfile);
-		if ((f = fopen(tempfile, "w+")) == NULL) {
-			syslog(LOG_ERR, "child open(%s): %m", tempfile);
+		if ((fd = mkstemp(tempfile)) < 0) {
+			syslog(LOG_ERR, "mkstemp(%s) %m", tempfile);
 			exit(1);
 		}
+		if ((f = fdopen(fd, "w+")) == NULL) {
+			syslog(LOG_ERR, "child fdopen(%s): %m", tempfile);
+			exit(1);
+		}
+		/* Cheap delete-on-close */
 		if (unlink(tempfile) < 0)
 			syslog(LOG_ERR, "unlink(%s): %m", tempfile);
 	}
@@ -339,12 +344,8 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 		exit(1);
 	}
 	/* XXX Need to freopen()? */
-	/* Deliver interactively or just queue based on number outstanding */
-	if (cdepth <= 2)
-		cp = "-odi";
-	else
-		cp = "-odq";
-	execl(sendmail, "sendmail", cp, watcher, NULL);
+	/* Always Deliver interactively (pause when child depth gets large) */
+	execl(sendmail, "sendmail", "-odi", watcher, NULL);
 	syslog(LOG_ERR, "execl: %s: %m", sendmail);
 	exit(1);
 }

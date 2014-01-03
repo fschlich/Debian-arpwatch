@@ -1,5 +1,5 @@
 #!/bin/csh -f
-# @(#) $Header: arp2ethers,v 1.2 94/03/29 02:44:44 leres Exp $ (LBL)
+# @(#) $Id: arp2ethers,v 1.3 2000/09/30 23:22:11 leres Exp $ (LBL)
 #
 # Convert arp.dat to ethers format
 #
@@ -14,7 +14,7 @@
 #
 
 sort +2rn arp.dat | \
-    awk -e 'NF == 4 { print }' | \
+    awk 'NF == 4 { print }' | \
     awk -f p.awk | \
     egrep -v '\.[0-9][0-9]*$' | \
     sed -e 's/	.*	/	/' | \

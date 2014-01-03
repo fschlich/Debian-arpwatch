@@ -24,6 +24,7 @@ db.c
 db.h
 dns.c
 dns.h
+duplicates.awk
 e.awk
 ec.c
 ec.h
@@ -46,6 +47,8 @@ linux-include/netinet/if_ether.h
 machdep.c
 machdep.h
 massagevendor
+massagevendor-old
+missingcodes.txt
 mkdep
 p.awk
 report.c

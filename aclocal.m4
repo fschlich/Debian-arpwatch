@@ -1,6 +1,6 @@
-dnl @(#) $Header: aclocal.m4,v 1.63 98/06/12 03:44:50 leres Exp $ (LBL)
+dnl @(#) $Header: aclocal.m4,v 1.73 99/08/14 16:50:02 leres Exp $ (LBL)
 dnl
-dnl Copyright (c) 1995, 1996, 1997, 1998
+dnl Copyright (c) 1995, 1996, 1997, 1998, 1999
 dnl	The Regents of the University of California.  All rights reserved.
 dnl
 dnl Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,6 @@ dnl	$1 (copt set)
 dnl	$2 (incls set)
 dnl	CC
 dnl	LDFLAGS
-dnl	ac_cv_lbl_gcc_vers
 dnl	LBL_CFLAGS
 dnl
 AC_DEFUN(AC_LBL_C_INIT,
@@ -73,24 +72,7 @@ AC_DEFUN(AC_LBL_C_INIT,
 	    export CC
     fi
     AC_PROG_CC
-    if test "$GCC" = yes ; then
-	    if test "$SHLICC2" = yes ; then
-		    ac_cv_lbl_gcc_vers=2
-		    $1="-O2"
-	    else
-		    AC_MSG_CHECKING(gcc version)
-		    AC_CACHE_VAL(ac_cv_lbl_gcc_vers,
-			ac_cv_lbl_gcc_vers=`$CC -v 2>&1 | \
-			    sed -e '/^gcc version /!d' \
-				-e 's/^gcc version //' \
-				-e 's/ .*//' -e 's/^[[[^0-9]]]*//' \
-				-e 's/\..*//'`)
-		    AC_MSG_RESULT($ac_cv_lbl_gcc_vers)
-		    if test $ac_cv_lbl_gcc_vers -gt 1 ; then
-			    $1="-O2"
-		    fi
-	    fi
-    else
+    if test "$GCC" != yes ; then
 	    AC_MSG_CHECKING(that $CC handles ansi prototypes)
 	    AC_CACHE_VAL(ac_cv_lbl_cc_ansi_prototypes,
 		AC_TRY_COMPILE(
@@ -117,7 +99,7 @@ AC_DEFUN(AC_LBL_C_INIT,
 				    AC_MSG_ERROR(see the INSTALL doc for more info)
 			    fi
 			    CFLAGS="$savedcflags"
-			    V_CCOPT="-Aa $V_CCOPT"
+			    $1="-Aa $$1"
 			    AC_DEFINE(_HPUX_SOURCE)
 			    ;;
 
@@ -132,11 +114,11 @@ AC_DEFUN(AC_LBL_C_INIT,
 	    case "$target_os" in
 
 	    irix*)
-		    V_CCOPT="$V_CCOPT -xansi -signed -g3"
+		    $1="$$1 -xansi -signed -g3"
 		    ;;
 
 	    osf*)
-		    V_CCOPT="$V_CCOPT -std1 -g3"
+		    $1="$$1 -std1 -g3"
 		    ;;
 
 	    ultrix*)
@@ -172,6 +154,7 @@ dnl
 dnl	$1 (pcapdep set)
 dnl	$2 (incls appended)
 dnl	LIBS
+dnl	LDFLAGS
 dnl	LBL_LIBS
 dnl
 AC_DEFUN(AC_LBL_LIBPCAP,
@@ -206,18 +189,29 @@ AC_DEFUN(AC_LBL_LIBPCAP,
 		    dnl continue and select the last one that exists
 	    fi
     done
-    if test $libpcap = FAIL ; then
+    if test "x$libpcap" = xFAIL ; then
 	    AC_MSG_RESULT(not found)
-	    AC_CHECK_LIB(pcap, main, libpcap="-lpcap")
-	    if test $libpcap = FAIL ; then
-		    AC_MSG_ERROR(see the INSTALL doc for more info)
+	    unset ac_cv_lbl_lib_pcap_pcap_open_live_
+	    AC_LBL_CHECK_LIB(pcap, pcap_open_live, libpcap="-lpcap")
+	    if test "x$libpcap" = xFAIL ; then
+		    unset ac_cv_lbl_lib_pcap_pcap_open_live_
+		    CFLAGS="$CFLAGS -I/usr/local/include"
+		    LIBS="$LIBS -L/usr/local/lib"
+		    AC_LBL_CHECK_LIB(pcap, pcap_open_live, libpcap="-lpcap")
+		    if test "x$libpcap" = xFAIL ; then
+			    AC_MSG_ERROR(see the INSTALL doc for more info)
+		    fi
+		    $2="$$2 -I/usr/local/include"
 	    fi
+	    LIBS="$LIBS -lpcap"
     else
 	    $1=$libpcap
 	    $2="-I$d $$2"
 	    AC_MSG_RESULT($libpcap)
     fi
-    LIBS="$libpcap $LIBS"
+    if test "x$libpcap" != "x-lpcap" ; then
+	    LIBS="$libpcap $LIBS"
+    fi
     case "$target_os" in
 
     aix*)
@@ -259,7 +253,9 @@ AC_DEFUN(AC_LBL_TYPE_SIGNAL,
     *)
 	    dnl prefer sigset() to sigaction()
 	    AC_CHECK_FUNCS(sigset)
-	    if test $ac_cv_func_sigset = no ; then
+	    if test $ac_cv_func_sigset = yes ; then
+		    AC_DEFINE(signal,sigset)
+	    else
 		    AC_CHECK_FUNCS(sigaction)
 	    fi
 	    ;;
@@ -415,6 +411,41 @@ AC_DEFUN(AC_LBL_SOCKADDR_SA_LEN,
     fi])
 
 dnl
+dnl Checks to see if the IFF_LOOPBACK exists as a define or enum
+dnl
+dnl   (stupidly some versions of linux use an enum...)
+dnl
+dnl usage:
+dnl
+dnl	AC_LBL_IFF_LOOPBACK
+dnl
+dnl results:
+dnl
+dnl	HAVE_IFF_LOOPBACK (defined)
+dnl
+AC_DEFUN(AC_LBL_IFF_LOOPBACK,
+    [AC_MSG_CHECKING(for IFF_LOOPBACK define/enum)
+    AC_CACHE_VAL(ac_cv_lbl_have_iff_loopback,
+	AC_TRY_COMPILE([
+#	include <sys/param.h>
+#	include <sys/file.h>
+#	include <sys/ioctl.h>
+#	include <sys/socket.h>
+#	ifdef HAVE_SYS_SOCKIO_H
+#	include <sys/sockio.h>
+#	endif
+#	include <sys/time.h>
+#	include <net/if.h>
+#	include <netinet/in.h>],
+	[int i = IFF_LOOPBACK],
+	ac_cv_lbl_have_iff_loopback=yes,
+	ac_cv_lbl_have_iff_loopback=no))
+    AC_MSG_RESULT($ac_cv_lbl_have_iff_loopback)
+    if test $ac_cv_lbl_have_iff_loopback = yes ; then
+	    AC_DEFINE(HAVE_IFF_LOOPBACK)
+    fi])
+
+dnl
 dnl Checks to see if -R is used
 dnl
 dnl usage:
@@ -538,6 +569,54 @@ EOF
     fi])
 
 dnl
+dnl add all warning option to CFLAGS
+dnl
+dnl usage:
+dnl
+dnl	AC_LBL_CHECK_WALL(copt)
+dnl
+dnl results:
+dnl
+dnl	$1 (copt appended)
+dnl	ac_cv_lbl_gcc_vers
+dnl
+AC_DEFUN(AC_LBL_CHECK_WALL,
+    [ if test "$GCC" = yes ; then
+	    if test "$SHLICC2" = yes ; then
+		    ac_cv_lbl_gcc_vers=2
+		    $1="`echo $$1 | sed -e 's/-O/-O2/'`"
+	    else
+		    AC_MSG_CHECKING(gcc version)
+		    AC_CACHE_VAL(ac_cv_lbl_gcc_vers,
+			ac_cv_lbl_gcc_vers=`$CC --version 2>&1 | \
+			    sed -e 's/\..*//'`)
+		    AC_MSG_RESULT($ac_cv_lbl_gcc_vers)
+		    if test $ac_cv_lbl_gcc_vers -gt 1 ; then
+			    $1="`echo $$1 | sed -e 's/-O/-O2/'`"
+		    fi
+	    fi
+	    if test "${LBL_CFLAGS+set}" != set; then
+		    if test "$ac_cv_prog_cc_g" = yes ; then
+			    $1="-g $$1"
+		    fi
+		    $1="$$1 -Wall"
+		    if test $ac_cv_lbl_gcc_vers -gt 1 ; then
+			    $1="$$1 -Wmissing-prototypes -Wstrict-prototypes"
+		    fi
+	    fi
+    else
+	    case "$target_os" in
+
+	    irix6*)
+		    $1="$$1 -fullwarn -n32"
+		    ;;
+
+	    *)
+		    ;;
+	    esac
+    fi])
+
+dnl
 dnl If using gcc and the file .devel exists:
 dnl	Compile with -g (if supported) and -Wall
 dnl	If using gcc 2, do extra prototype checking
@@ -559,27 +638,7 @@ AC_DEFUN(AC_LBL_DEVEL,
 	    $1="$$1 ${LBL_CFLAGS}"
     fi
     if test -f .devel ; then
-	    if test "$GCC" = yes ; then
-		    if test "${LBL_CFLAGS+set}" != set; then
-			    if test "$ac_cv_prog_cc_g" = yes ; then
-				    $1="-g $$1"
-			    fi
-			    $1="$$1 -Wall"
-			    if test $ac_cv_lbl_gcc_vers -gt 1 ; then
-				    $1="$$1 -Wmissing-prototypes -Wstrict-prototypes"
-			    fi
-		    fi
-	    else
-		    case "$target_os" in
-
-		    irix6*)
-			    V_CCOPT="$V_CCOPT -n32"
-			    ;;
-
-		    *)
-			    ;;
-		    esac
-	    fi
+	    AC_LBL_CHECK_WALL($1)
 	    os=`echo $target_os | sed -e 's/\([[0-9]][[0-9]]*\)[[^0-9]].*$/\1/'`
 	    name="lbl/os-$os.h"
 	    if test -f $name ; then

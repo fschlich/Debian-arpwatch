@@ -3,7 +3,7 @@
 {
 	e = $1
 	if (seen[e])
-		continue
+		next
 	seen[e] = 1
-	print $0
+	print
 }

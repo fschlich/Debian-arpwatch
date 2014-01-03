@@ -1,38 +1,42 @@
 Index: arpwatch/arpsnmp.8
-diff -u arpwatch/arpsnmp.8:1.1.1.1 arpwatch/arpsnmp.8:1.1.1.1.4.1
---- arpwatch/arpsnmp.8:1.1.1.1	Tue Apr 17 13:31:36 2001
-+++ arpwatch/arpsnmp.8	Tue Apr 17 13:49:16 2001
-@@ -30,7 +30,12 @@
- ] [
- .B -f
- .I datafile
-+] [
+diff -u arpwatch/arpsnmp.8:1.1.1.1.2.1 arpwatch/arpsnmp.8:1.1.1.1.4.4
+--- arpwatch/arpsnmp.8:1.1.1.1.2.1	Thu Aug 12 22:16:18 2004
++++ arpwatch/arpsnmp.8	Thu Aug 12 22:23:48 2004
+@@ -40,6 +40,14 @@
+ .\" **
+ .br
+ .ti +8
++[
 +.B -s
 +.I sendmail_path
- ]
++]
++.\" **
++.\" **
 +.br
 +.ti +8
  .I file
  [
  .I ...
-@@ -54,6 +59,13 @@
- flag is used to set the ethernet/ip address database filename.
- The default is
- .IR arp.dat .
-+.LP
-+The
+@@ -70,6 +78,15 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
 +.B -s
 +flag is used to specify the path to the sendmail program.
 +Any program that takes the option -odi and then text from stdin
 +can be substituted. This is useful for redirecting reports
-+to log files instead of mail. (Debian specific)
- .LP
++to log files instead of mail.
++.\" **
++.\" **
++.LP
  Note that an empty
  .I arp.dat
+ file must be created before the first time you run
 Index: arpwatch/arpsnmp.c
-diff -u arpwatch/arpsnmp.c:1.1.1.1.2.1 arpwatch/arpsnmp.c:1.1.1.1.2.1.2.1
---- arpwatch/arpsnmp.c:1.1.1.1.2.1	Tue Apr 17 13:47:57 2001
-+++ arpwatch/arpsnmp.c	Tue Apr 17 13:49:16 2001
+diff -u arpwatch/arpsnmp.c:1.1.1.1.2.2 arpwatch/arpsnmp.c:1.1.1.1.2.1.2.2
+--- arpwatch/arpsnmp.c:1.1.1.1.2.2	Tue Aug 10 11:14:13 2004
++++ arpwatch/arpsnmp.c	Tue Aug 10 11:16:17 2004
 @@ -67,6 +67,7 @@
  __dead	void usage(void) __attribute__((volatile));
  
@@ -60,7 +64,7 @@ diff -u arpwatch/arpsnmp.c:1.1.1.1.2.1 arpwatch/arpsnmp.c:1.1.1.1.2.1.2.1
  		default:
  			usage();
  		}
-@@ -188,6 +194,7 @@
+@@ -189,6 +195,7 @@
  	char usage[] =
  		"[-d] "
  		"[-f datafile] "
@@ -69,40 +73,44 @@ diff -u arpwatch/arpsnmp.c:1.1.1.1.2.1 arpwatch/arpsnmp.c:1.1.1.1.2.1.2.1
  	;
  
 Index: arpwatch/arpwatch.8
-diff -u arpwatch/arpwatch.8:1.1.1.1 arpwatch/arpwatch.8:1.1.1.1.4.1
---- arpwatch/arpwatch.8:1.1.1.1	Tue Apr 17 13:31:36 2001
-+++ arpwatch/arpwatch.8	Tue Apr 17 13:49:16 2001
-@@ -44,6 +44,12 @@
- .B -r
- .I file
+diff -u arpwatch/arpwatch.8:1.1.1.1.2.2 arpwatch/arpwatch.8:1.1.1.1.4.5
+--- arpwatch/arpwatch.8:1.1.1.1.2.2	Thu Aug 12 22:31:09 2004
++++ arpwatch/arpwatch.8	Thu Aug 12 22:35:07 2004
+@@ -63,6 +63,14 @@
  ]
+ .\" **
+ .\" **
 +.br
 +.ti +8
 +[
 +.B -s
 +.I sendmail_path
 +]
++.\" **
++.\" **
  .ad
  .SH DESCRIPTION
  .B Arpwatch
-@@ -93,6 +99,13 @@
- of reading from the network. In this case,
- .B arpwatch
- does not fork.
-+.LP
-+The
+@@ -127,6 +135,15 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
 +.B -s
 +flag is used to specify the path to the sendmail program.
 +Any program that takes the option -odi and then text from stdin
 +can be substituted. This is useful for redirecting reports
-+to log files instead of mail. (Debian specific)
- .LP
++to log files instead of mail.
++.\" **
++.\" **
++.LP
  Note that an empty
  .I arp.dat
+ file must be created before the first time you run
 Index: arpwatch/arpwatch.c
-diff -u arpwatch/arpwatch.c:1.1.1.1.2.1 arpwatch/arpwatch.c:1.1.1.1.2.1.2.1
---- arpwatch/arpwatch.c:1.1.1.1.2.1	Tue Apr 17 13:47:57 2001
-+++ arpwatch/arpwatch.c	Tue Apr 17 13:49:16 2001
+diff -u arpwatch/arpwatch.c:1.1.1.1.2.5 arpwatch/arpwatch.c:1.1.1.1.2.1.2.3
+--- arpwatch/arpwatch.c:1.1.1.1.2.5	Sat Aug 14 02:33:07 2004
++++ arpwatch/arpwatch.c	Fri Aug 13 00:12:22 2004
 @@ -106,6 +106,7 @@
  #endif
  
@@ -111,32 +119,35 @@ diff -u arpwatch/arpwatch.c:1.1.1.1.2.1 arpwatch/arpwatch.c:1.1.1.1.2.1.2.1
  
  int can_checkpoint;
  int swapped;
-@@ -160,6 +161,7 @@
- 		"n:"
- 		"N"
+@@ -172,6 +173,9 @@
  		"r:"
+ 		/**/
+ 		/**/
 +		"s:"
++		/**/
++		/**/
  	;
  
  	if (argv[0] == NULL)
-@@ -210,6 +212,10 @@
- 			rfilename = optarg;
+@@ -223,6 +227,11 @@
  			break;
- 
+ 		/**/
+ 		/**/
 +		case 's':
 +			path_sendmail = optarg;
 +			break;
-+
++		/**/
++		/**/
  		default:
  			usage();
  		}
-@@ -761,7 +767,8 @@
- 		"[-f datafile] "
- 		"[-i interface] "
- 		"[-n net[/width]] "
--		"[-r file] "
-+		"[-r file]\n\t"
+@@ -785,6 +794,9 @@
+ 		"[-r file] "
+ 		/**/
+ 		/**/
 +		"[-s sendmail_path] "
++		/**/
++		/**/
  		"\n"
  	;
  

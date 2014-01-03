@@ -1,3 +1,91 @@
+arpwatch (2.1a13-2) unstable; urgency=high
+
+  * [Daniel Hermann] Post-install fixes. (Closes: #271134)
+
+ -- KELEMEN Péter <fuji@debian.org>  Wed, 15 Sep 2004 15:53:44 +0200
+
+arpwatch (2.1a13-1) unstable; urgency=medium
+
+  * The "Tying Up Loose Ends" release.
+  * Acknowledging NMU by Javier Fernández-Sanguino Peña, thanks.
+  * Acknowledging NMU by Torsten Landschoff, thanks.
+  * New upstream release.
+  * Fixed insecure tempfile handling. (Closes: #256381)
+  * [Dean Gaudet] -u option to drop privileges. (Closes: #217488)
+  * [Per Andreas Buer] -Q option not to send mail.
+  * [Julien Brouchier] -z option to ignore network. (Closes: #95369)
+  * [Blars Blarson] Print interface info. (Closes: #140504)
+  * [J. Fernández-Sanguino Peña] arp2ethers file handling. (Closes: #260818)
+  * [Christoph Biedl] -R option to restart after ifdown. (Closes: #170338)
+  * [Christoph Biedl] Support ignoring 0.0.0.0 IPs. (Closes: #142192, #160369)
+  * [Christoph Biedl] Support unconfigured interfaces. (Closes: #76365, #240399)
+  * [Christoph Biedl] From: field contains running host. (Closes: #265158)
+  * [Justin Doiel] Support building out-of-tree.
+  * Updated Ethernet vendor database, ~2000 new entries.
+    (Closes: #140731, #146643, #227375)
+  * debian/arpwatch.conf:
+    - Get rid of @example.com domain. (Closes: #197138)
+  * debian/init.d:
+    - Run daemon only if executable. (Closes: #211645)
+    - Drop privileges by default. (Closes: #263184)
+  * debian/arpwatch-default:
+    - Common options extracted from init.d script.
+  * debian/arpwatch.preinst, debian/arpwatch.postinst:
+    - Revamped backup/restore mechanism. (Closes: #145259, #149099, #259543)
+  * debian/arpwatch.postrm:
+    - [J. Fernández-Sanguino Peña] Remove arpwatch database directory on purge.
+  * debian/control:
+    - Standards-Version: 3.6.1
+    - Depends: debianutils, adduser (Closes: #265287)
+    - Build-Depends: debhelper (>= 4.0.0)
+    - Description: Ethernet/FDDI station activity monitor
+  * debian/changelog:
+    - UTF-8 encoding.
+
+ -- KELEMEN Péter <fuji@debian.org>  Thu, 14 Aug 2004 00:28:34 +0200
+
+arpwatch (2.1a11-6.3) unstable; urgency=medium
+
+  * Fixed postinst error introduced in previous NMU (Closes: #259543)
+  * Postrm removes files under /var/lib/arpwatch/ on purge
+
+ -- Javier Fernandez-Sanguino Pen~a <jfs@computer.org>  Sat, 17 Jul 2004 15:47:24 +0200
+
+arpwatch (2.1a11-6.2) unstable; urgency=low
+
+  * Fixed race condition in the bihourly and arpfetch cron scripts.
+    (Closes: #256381)
+    [patch 023_arpfetch]
+  * Added the -u flag to run arpwatch with lower privileges as suggested
+    by Den Gaudet and with a patch based on RedHat's. Also, the 
+    'arpwatch' user is created on postinst and used by the init
+    script (Closes: #217488)
+    [patch 024_username]
+  * Changed test statement in the init script from -f to -x (Closes: #211645)
+  * Added Multicast, VRRP (note), VMWare (retrieved from FreeBSD's ethercodes)
+    and Compaq MAC addresses (Closes: #227375)
+  * Changed the sample lines of the configuration file to just 'root'
+    instead of 'root+ethX@example.com' (Closes: #197138)
+  * Create an empty arp.dat file at /var/lib/arpwatch/ if it does not 
+    exist when running 'start_default()' in the init script. This will
+    make arpwatch work even if you have not customised arpwatch.conf or
+    the preinst fails to create that file.
+    (Closes: #145259)
+    [patch 025_arpdat]
+  * Small improvements in arp2ethers so that it uses the default location
+    of the arp.dat file, also noticed this in the manpage.
+    [patch 026_arp2ethers2]
+
+ -- Javier Fernandez-Sanguino Pen~a <jfs@computer.org>  Sat, 26 Jun 2004 18:34:49 +0200
+
+arpwatch (2.1a11-6.1) unstable; urgency=low
+
+  * Non maintainer upload
+  * Rebuilt with new libpcap to remove dependency on libpcap0, which I
+    got removed from unstable by accident. Sorry about this...
+
+ -- Torsten Landschoff <torsten@debian.org>  Sat, 10 Aug 2002 11:36:45 +0200
+
 arpwatch (2.1a11-6) unstable; urgency=low
 
   * [Vincent Letocart] Fixed missing `arp.dat' upon fresh install.

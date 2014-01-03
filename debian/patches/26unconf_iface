@@ -1,0 +1,18 @@
+Index: arpwatch/arpwatch.c
+diff -u arpwatch/arpwatch.c:1.1.1.1 arpwatch/arpwatch.c:1.1.1.1.20.1
+--- arpwatch/arpwatch.c:1.1.1.1	Tue Apr 17 13:31:36 2001
++++ arpwatch/arpwatch.c	Thu Aug 12 23:51:51 2004
+@@ -223,9 +223,10 @@
+ 
+ 		/* Determine network and netmask */
+ 		if (pcap_lookupnet(interface, &net, &netmask, errbuf) < 0) {
+-			(void)fprintf(stderr, "%s: bad interface %s: %s\n",
+-			    prog, interface, errbuf);
+-			exit(1);
++			syslog(LOG_NOTICE, "bad interface %s: %s - assuming unconfigured interface",
++				interface, errbuf);
++			net = 0;
++			netmask = 0;
+ 		}
+ 
+ 		/* Drop into the background if not debugging */

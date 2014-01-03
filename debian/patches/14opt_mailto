@@ -1,0 +1,192 @@
+Index: arpwatch/arpsnmp.8
+diff -u arpwatch/arpsnmp.8:1.1.1.1.2.1 arpwatch/arpsnmp.8:1.1.1.1.12.4
+--- arpwatch/arpsnmp.8:1.1.1.1.2.1	Thu Aug 12 22:16:18 2004
++++ arpwatch/arpsnmp.8	Thu Aug 12 22:50:39 2004
+@@ -40,6 +40,14 @@
+ .\" **
+ .br
+ .ti +8
++[
++.B -m
++.I addr
++]
++.\" **
++.\" **
++.br
++.ti +8
+ .I file
+ [
+ .I ...
+@@ -70,6 +78,15 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
++.B -m
++option is used to specify the e-mail address to which reports will be
++sent.  By default, reports are sent to
++.I root
++on the local machine.
++.\" **
++.\" **
++.LP
+ Note that an empty
+ .I arp.dat
+ file must be created before the first time you run
+Index: arpwatch/arpsnmp.c
+diff -u arpwatch/arpsnmp.c:1.1.1.1.2.2 arpwatch/arpsnmp.c:1.1.1.1.2.1.8.2
+--- arpwatch/arpsnmp.c:1.1.1.1.2.2	Tue Aug 10 11:14:13 2004
++++ arpwatch/arpsnmp.c	Tue Aug 10 11:17:43 2004
+@@ -80,6 +80,7 @@
+ 	char errbuf[256];
+ 	char options[] =
+ 		"d"
++		"m:"
+ 		"f:"
+ 	;
+ 
+@@ -105,6 +106,10 @@
+ #endif
+ 			break;
+ 
++		case 'm':
++			mailaddress = optarg;
++			break;
++
+ 		case 'f':
+ 			arpfile = optarg;
+ 			break;
+@@ -188,6 +193,7 @@
+ 	extern char version[];
+ 	char usage[] =
+ 		"[-d] "
++		"[-m addr ] "
+ 		"[-f datafile] "
+ 		"file [...]\n"
+ 	;
+Index: arpwatch/arpwatch.8
+diff -u arpwatch/arpwatch.8:1.1.1.1.2.2 arpwatch/arpwatch.8:1.1.1.1.12.4
+--- arpwatch/arpwatch.8:1.1.1.1.2.2	Thu Aug 12 22:31:09 2004
++++ arpwatch/arpwatch.8	Thu Aug 12 22:50:39 2004
+@@ -47,6 +47,8 @@
+ .B -i
+ .I interface
+ ]
++.\" **
++.\" **
+ .br
+ .ti +8
+ [
+@@ -63,6 +65,14 @@
+ ]
+ .\" **
+ .\" **
++.br
++.ti +8
++[
++.B -m
++.I addr
++]
++.\" **
++.\" **
+ .ad
+ .SH DESCRIPTION
+ .B Arpwatch
+@@ -127,6 +137,15 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
++.B -m
++option is used to specify the e-mail address to which reports will be
++sent.  By default, reports are sent to
++.I root
++on the local machine.
++.\" **
++.\" **
++.LP
+ Note that an empty
+ .I arp.dat
+ file must be created before the first time you run
+Index: arpwatch/arpwatch.c
+diff -u arpwatch/arpwatch.c:1.1.1.1.2.5 arpwatch/arpwatch.c:1.1.1.1.2.1.8.3
+--- arpwatch/arpwatch.c:1.1.1.1.2.5	Sat Aug 14 02:33:07 2004
++++ arpwatch/arpwatch.c	Fri Aug 13 00:22:17 2004
+@@ -172,6 +172,9 @@
+ 		"r:"
+ 		/**/
+ 		/**/
++		"m:"
++		/**/
++		/**/
+ 	;
+ 
+ 	if (argv[0] == NULL)
+@@ -223,6 +226,11 @@
+ 			break;
+ 		/**/
+ 		/**/
++		case 'm':
++			mailaddress = optarg;
++			break;
++		/**/
++		/**/
+ 		default:
+ 			usage();
+ 		}
+@@ -785,6 +793,9 @@
+ 		"[-r file] "
+ 		/**/
+ 		/**/
++		"[-m addr] "
++		/**/
++		/**/
+ 		"\n"
+ 	;
+ 
+Index: arpwatch/report.c
+diff -u arpwatch/report.c:1.1.1.1 arpwatch/report.c:1.1.1.1.12.1
+--- arpwatch/report.c:1.1.1.1	Tue Apr 17 13:31:37 2001
++++ arpwatch/report.c	Tue Apr 17 13:54:38 2001
+@@ -240,7 +240,7 @@
+ 	register FILE *f;
+ 	char tempfile[64], cpu[64], os[64];
+ 	char *fmt = "%20s: %s\n";
+-	char *watcher = WATCHER;
++	char *watcher = mailaddress;
+ 	char *watchee = WATCHEE;
+ 	char *sendmail = PATH_SENDMAIL;
+ 	char *unknown = "<unknown>";
+Index: arpwatch/util.c
+diff -u arpwatch/util.c:1.1.1.1.2.2 arpwatch/util.c:1.1.1.1.12.3
+--- arpwatch/util.c:1.1.1.1.2.2	Fri Aug 13 00:06:49 2004
++++ arpwatch/util.c	Fri Aug 13 00:22:17 2004
+@@ -50,6 +50,7 @@
+ #include "ec.h"
+ #include "file.h"
+ #include "util.h"
++#include "addresses.h"
+ 
+ char *arpdir = ARPDIR;
+ char *arpfile = ARPFILE;
+@@ -63,6 +64,9 @@
+ int initializing = 1;			/* true if initializing */
+ /**/
+ /**/
++char *mailaddress = WATCHER;
++/**/
++/**/
+ 
+ /* syslog() helper routine */
+ void
+Index: arpwatch/util.h
+diff -u arpwatch/util.h:1.1.1.1.2.1 arpwatch/util.h:1.1.1.1.12.2
+--- arpwatch/util.h:1.1.1.1.2.1	Fri Aug 13 00:06:49 2004
++++ arpwatch/util.h	Fri Aug 13 00:22:17 2004
+@@ -19,3 +19,6 @@
+ extern int initializing;
+ /**/
+ /**/
++extern char *mailaddress;
++/**/
++/**/

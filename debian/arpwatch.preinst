@@ -1,5 +1,5 @@
 #!/bin/sh
-# arpwatch.preinst: v0.02 2001/11/24 KELEMEN Peter <fuji@debian.org>
+# arpwatch.preinst: v4 2004/08/14 KELEMEN Peter <fuji@debian.org>
 
 set -e
 
@@ -9,16 +9,14 @@ NAME=arpwatch
 DBDIR=/var/lib/$NAME
 DBFILE=arp.dat
 BACKUPDIR=/var/backups
-BACKUPNAME=$NAME.dbbackup
 
-[ -d $DBDIR ] || exit 0
-[ -f $DBDIR/$DBFILE ] || touch $DBDIR/$DBFILE
-[ -d $BACKUPDIR ] || { 
-	echo "$NAME: $BACKUPDIR does not exist, ARP database(s) not saved.";
-	exit 0
-}
-
-echo "$NAME: Saving collected ARP database(s)."
-cp -rp $DBDIR $BACKUPDIR/$BACKUPNAME
+# Back up collected ARP databases.
+if [ -d $DBDIR -a -d $BACKUPDIR ]; then
+	if [ -d $BACKUPDIR/$NAME ]; then
+		rm -r $BACKUPDIR/$NAME
+	fi
+	cp -rp $DBDIR $BACKUPDIR/$NAME
+	
+fi
 
 # End of file.

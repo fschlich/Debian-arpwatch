@@ -20,7 +20,7 @@ ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 	endif
 endif
 # DBS
-TAR_DIR := arpwatch-2.1a11
+TAR_DIR := arpwatch-2.1a13
 include debian/scripts/dbs-build.mk
 # dpkg-arch
 ifeq (,$(DEB_BUILD_GNU_TYPE))
@@ -102,7 +102,6 @@ install: build $(dh_mak_deps)
 	$(IEN) $(BUILD_TREE)/massagevendor $(DESTDIR)/usr/sbin
 	$(IEN) $(LOCALDIR)/dmassagevendor $(DESTDIR)/usr/sbin
 
-	##mkdir -p $(DESTDIR)/usr/share/man/man8
 	$(ID) $(BUILD_TREE)/arpwatch.8 $(DESTDIR)/usr/share/man/man8
 	$(ID) $(BUILD_TREE)/arpsnmp.8 $(DESTDIR)/usr/share/man/man8
 	$(ID) $(BUILD_TREE)/arp2ethers.8 $(DESTDIR)/usr/share/man/man8
@@ -112,7 +111,6 @@ install: build $(dh_mak_deps)
 	$(ID) $(LOCALDIR)/dmassagevendor.8 $(DESTDIR)/usr/share/man/man8
 	$(ID) $(LOCALDIR)/arpwatch.conf $(DESTDIR)/etc/arpwatch.conf
 
-	##mkdir -p $(DESTDIR)/usr/share/lintian/overrides
 	cp $(LOCALDIR)/override $(DESTDIR)/usr/share/lintian/overrides/$(package)
 
 	# Namespace cleanup here.

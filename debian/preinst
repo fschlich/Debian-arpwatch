@@ -3,7 +3,7 @@
 
 set -e
 
-
+#DEBHELPER#
 
 NAME=arpwatch
 DBDIR=/var/lib/$NAME
@@ -19,4 +19,3 @@ if [ -d $DBDIR -a -d $BACKUPDIR ]; then
 	
 fi
 
-# End of file.

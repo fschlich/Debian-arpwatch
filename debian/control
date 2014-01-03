@@ -3,12 +3,12 @@ Section: admin
 Priority: optional
 Maintainer: KELEMEN Péter <fuji@debian.org>
 Build-Depends: libpcap0.8-dev, debhelper (>= 7), autotools-dev
-Standards-Version: 3.8.1
+Standards-Version: 3.8.3
 Homepage: http://ee.lbl.gov/
 
 Package: arpwatch
 Architecture: any
-Depends: adduser, debianutils, ${shlibs:Depends}, ${misc:Depends}
+Depends: adduser, ${shlibs:Depends}, ${misc:Depends}
 Description: Ethernet/FDDI station activity monitor
  Arpwatch maintains a database of Ethernet MAC addresses seen on the
  network, with their associated IP pairs.  Alerts the system administrator

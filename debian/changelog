@@ -1,3 +1,19 @@
+arpwatch (2.1a15-1.1) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * High-urgency upload for RC bugfix.
+  * Revert change in previous NMU that makes
+    /usr/share/arpwatch/ethercodes.dat a conffile; users who need to modify
+    this can use dpkg-divert instead.  Closes: #552792, #550233.
+  * Fix lintian errors introduced in previous upload:
+    - maintainer script debhelper tokens
+    - remove vestigial debian/cron.d.ex
+  * Drop dependency on debianutils, which is essential
+  * Fix author(s) boilerplate in debian/copyright
+  * Bump standards version to 3.8.3 (no changes needed)
+
+ -- Steve Langasek <vorlon@debian.org>  Sun, 24 Jan 2010 08:57:38 +0000
+
 arpwatch (2.1a15-1) unstable; urgency=low
 
   * Non-maintainer upload to fix some outstanding bugs

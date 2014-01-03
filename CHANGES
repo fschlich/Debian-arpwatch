@@ -1,6 +1,6 @@
-@(#) $Id: CHANGES,v 1.41 2004/01/22 22:25:43 leres Exp $ (LBL)
+@(#) $Id: CHANGES,v 1.42 2006/06/21 20:34:52 leres Exp $ (LBL)
 
-v2.1 Thu Jan 22 14:05:27 PST 2004
+v2.1 Wed Jun 21 13:34:42 PDT 2006
 
 - Add FDDI support. Based on code contributed by Flemming Johansen
   (fsj@csd.cri.dk)

@@ -1,4 +1,4 @@
-/* @(#) $Header: gnuc.h,v 1.3 95/10/09 02:47:01 leres Exp $ (LBL) */
+/* @(#) $Id: gnuc.h,v 1.4 2006/04/30 03:58:45 leres Exp $ (LBL) */
 
 /* Define __P() macro, if necessary */
 #ifndef __P
@@ -21,12 +21,18 @@
  *
  * For example:
  *
- *	__dead void foo(void) __attribute__((volatile));
+ *	__dead void foo(void) __attribute__((noreturn));
  *
  */
 #ifdef __GNUC__
 #ifndef __dead
+#if __GNUC__ >= 4
+#define __dead
+#define noreturn __noreturn__
+#else
 #define __dead volatile
+#define noreturn volatile
+#endif
 #endif
 #if __GNUC__ < 2  || (__GNUC__ == 2 && __GNUC_MINOR__ < 5)
 #ifndef __attribute__

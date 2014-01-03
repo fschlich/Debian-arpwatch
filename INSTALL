@@ -1,4 +1,4 @@
-@(#) $Id: INSTALL,v 1.16 2004/01/22 22:05:11 leres Exp $ (LBL)
+@(#) $Id: INSTALL,v 1.18 2006/07/28 18:21:09 leres Exp $ (LBL)
 
 If you have not built libpcap, do so first (unless you only want to
 build arpsnmp). See the README file in this directory for the ftp
@@ -33,7 +33,7 @@ If you want to run arpsnmp, there are two scripts in this distribution
 that are of interest. The first is arpfetch and it knows how to
 retrieve the arp tables from a cisco using snmpwalk. This script takes
 two arguments, the hostname and the snmp community name. The other
-script is called bihourly and is suitable as a cron job. To configure
+script is called bihourly.sh and is suitable as a cron job. To configure
 it, you need to create a file called "list" that contains the names of
 the hosts to query and "cname" which contains the read/only snmp
 community name.
@@ -63,7 +63,7 @@ arpwatch.8	- man page
 arpwatch.c	- main program
 arpwatch.h	- config info
 bcopy.c		- missing routine
-bihourly	- arpsnmp wrapper script
+bihourly.sh	- arpsnmp wrapper script
 config.guess	- autoconf support
 config.sub	- autoconf support
 configure	- configure script (run this first)
@@ -89,7 +89,6 @@ machdep.c	- machine dependent routines
 machdep.h	- machine dependent definitions
 massagevendor	- massage oui.txt.html into ethercodes.dat format
 massagevendor-old - massage vendor.html into ethercodes.dat format
-missingcodes.txt - ethernet codes missing from oui.txt
 mkdep		- construct Makefile dependency list
 p.awk		- print the first ethernet address seen
 report.c	- email report generating routines

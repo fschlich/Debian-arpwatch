@@ -14,7 +14,7 @@ arpwatch.8
 arpwatch.c
 arpwatch.h
 bcopy.c
-bihourly
+bihourly.sh
 config.guess
 config.sub
 configure
@@ -48,7 +48,6 @@ machdep.c
 machdep.h
 massagevendor
 massagevendor-old
-missingcodes.txt
 mkdep
 p.awk
 report.c

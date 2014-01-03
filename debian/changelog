@@ -1,3 +1,11 @@
+arpwatch (2.1a15-1.1+squeeze1) stable-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * Fix initgroups() adding the gid 0 group to the list. Instead of dropping
+    privileges it was in fact adding it. This is CVE-2012-2653. closes: #674715
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sat, 26 May 2012 23:53:19 +0200
+
 arpwatch (2.1a15-1.1) unstable; urgency=high
 
   * Non-maintainer upload.

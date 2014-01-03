@@ -1,0 +1,41 @@
+#!/bin/sh
+# @(#) $Header: arpfetch,v 1.3 96/11/07 17:39:10 leres Exp $ (LBL)
+#
+# arpfetch - collect arp data from a cisco using snmpwalk
+#
+if test $# -ne 2; then
+	echo "usage: $0 host cname"
+	exit 1
+fi
+#
+host=$1
+cname=$2
+temp=/tmp/arpfetch.temp.$$
+errs=/tmp/arpfetch.errs.$$
+what="ip.ipNetToMediaTable.ipNetToMediaEntry.ipNetToMediaPhysAddress"
+#
+# Get the data
+#
+snmpwalk -v 1 $host $cname $what > $temp 2>&1
+#
+# Try to make up for the fact that snmpwalk doesn't write errors to stderr
+#
+grep -v $what $temp > $errs
+if test -s $errs; then
+	cat $errs 1>&2
+	rm -f $temp $errs
+	exit 1
+fi
+#
+# Convert the results
+#
+sed -e 's/^ip\.ipNetToMediaTable\.ipNetToMediaEntry\.ipNetToMediaPhysAddress\.[0-9][0-9]*\.//' \
+    -e 's/ =  *Hex: /=/' \
+    -e 's/  *$//' \
+    -e 's/ /:/g' \
+    -e 's/\(.*\)=\(.*\)/\2	\1/' \
+    -e 's/:0/:/g' \
+    -e 's/^0//' $temp | \
+    tr A-Z a-z 
+#
+rm -f $temp $errs

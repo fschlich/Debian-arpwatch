@@ -1,0 +1,126 @@
+@(#) $Header: CHANGES,v 1.31 98/07/28 22:16:43 leres Exp $ (LBL)
+
+v2.1 Tue Jul 28 22:15:18 PDT 1998
+
+- Add FDDI support. Based on code contributed by Flemming Johansen
+  (fsj@csd.cri.dk)
+
+- New -f flag overrides the default database filename.
+
+- New -r flag allows save files to be read.
+
+- Use bcopy() instead of memcpy() since it doesn't handle overlapping
+  buffers. Reported by Attila Bruncsak (attila.bruncsak@itu.int)
+
+- Have configure determine the sendmail path.
+
+v2.0.2 Sat Jun  7 03:15:03 PDT 1997
+
+- Look for "_res" in -lresolv since Solaris doesn't have it in libc.
+  Problem first reported by Blair Zajac (blair@gps.caltech.edu)
+
+v2.0.1 Wed Jan  1 20:43:12 PST 1997
+
+- Rework signal setup to accommodate Linux.
+
+- Autoconf -lstr for DLPI under HPUX.
+
+v2.0 Sat Oct  5 22:14:05 PDT 1996
+
+- Add arpsnmp.
+
+- Updated ethercodes.dat from http://www.cavebear.com/CaveBear/Ethernet/
+
+- Ethernet vendor codes table now dynamic.
+
+- Linux support added.
+
+v1.11 Sat Sep 14 14:24:26 PDT 1996
+
+- Rewrite gmt2local() to avoid problematic os dependencies.
+
+- Fixed the autoconf "wait status" detection for OSF. Resulted from a
+  bug report from Guy Loucks (ukloug@engsyd.bhp.com.au)
+
+- Autoconf ARPDIR as suggested by Davin Milun (milun@cs.buffalo.edu)
+
+- Use autoconf to make ether_header and ether_arp struct accesses work
+  on more systems.
+
+v1.10 Mon Jul 29 19:03:24 PDT 1996
+
+- Disable hinfo lookups when dn_skipname() isn't available.
+
+v1.9 Sun Fri Jul  5 23:12:20 PDT 1996
+
+- Added getopt() externs for systems that don't define them. Thanks to
+  Jun Shoji (jshoji@jsnext.linc.or.jp)
+
+- Fixed swapped arguments to MEMCPY(). Thanks to Jun Shoji.
+
+- On systems that have it, use sigset() instead of signal() since
+  signal() has different semantics on these systems. Resulted from a
+  bug report by Michael Neef (neef@neuroinformatik.ruhr-uni-bochum.de)
+
+- Modified to handle timezones more generically.
+
+v1.8 Fri Jun  7 19:45:09 PDT 1996
+
+- Convert to autoconf.
+
+v1.7 Mon Jun 12 03:25:50 PDT 1995
+
+- Fixed bug that was causing endless nameserver lookups.
+
+- Fixed the makefile to use -I. to pick up the files in lbl directory.
+
+v1.6 Tue Apr  4 13:35:10 PDT 1995
+
+- Fix a typo in configure regarding libresolv logic. Thanks to Mark
+  Andrews (mandrews@alias.com).
+
+- Added os prototype support.
+
+v1.5 Sun Apr  2 19:40:16 PDT 1995
+
+- Forgot to include addresses.h.in. Thanks to Tamas Pinter
+  (pinter@donio.bgytf.hu).
+
+v1.4 Wed Mar 15 20:26:31 PST 1995
+
+- Updated ethercodes.dat from ftp://ftp.lcs.mit.edu/pub/map/EtherNet-codes
+
+- Changed to use -lresolv under SunOS 4 since the stock libc doesn't
+  have dns routines).
+
+- Change configure to create addresses.h from addresses.h.in when it
+  doesn't already exist.
+
+v1.3 Tue Oct  4 12:55:53 PDT 1994
+
+- Port to Solaris. New configuration script.
+
+- dns.c: Define BUFSIZ if it's not defined by stdio.h.
+
+- Lowered the snaplen to what we really need.
+
+v1.2 Tue Oct 12 00:34:47 PDT 1993
+
+- arpwatch.c: Modified to use libpcap.
+
+- db.c: Rewrote data structures to handle an arbitrary number of
+ethernet addresses per ip address.
+
+- report.c: Simplified child process management. Queue mail messages if
+  we get too many at once.
+
+v1.1 Sat Aug 14 20:42:46 PDT 1993
+
+- arpwatch.c: Fixed byte ordering problems. Thanks to Yoshitaka
+  Tokugawa (toku@dit.co.jp).
+
+- inet.c: Modified to work with 4.4 BSD.
+
+v1.0 Tue Jun 16  3:05:31 PDT 1992
+
+- Initial release.

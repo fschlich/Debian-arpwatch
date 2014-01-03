@@ -1,0 +1,23 @@
+#!/bin/csh -f
+# @(#) $Header: arp2ethers,v 1.2 94/03/29 02:44:44 leres Exp $ (LBL)
+#
+# Convert arp.dat to ethers format
+#
+#	- sort on timestamp, newest first
+#	- discard entries without simple hostnames
+#	- discard all but first occurance of each ethernet address
+#	- discard entires with raw ip addresses for simple names
+#	- remove ip address and timestamp fields
+#	- append "-ip" to hosts with decnet address too
+#	- append "-old", "-old1", etc. as necessary
+#	- sort
+#
+
+sort +2rn arp.dat | \
+    awk -e 'NF == 4 { print }' | \
+    awk -f p.awk | \
+    egrep -v '\.[0-9][0-9]*$' | \
+    sed -e 's/	.*	/	/' | \
+    awk -f d.awk | \
+    awk -f e.awk | \
+    sort

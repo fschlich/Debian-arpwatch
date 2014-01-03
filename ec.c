@@ -1,0 +1,224 @@
+/*
+ * Copyright (c) 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998
+ *	The Regents of the University of California.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that: (1) source code distributions
+ * retain the above copyright notice and this paragraph in its entirety, (2)
+ * distributions including binary code include the above copyright notice and
+ * this paragraph in its entirety in the documentation or other materials
+ * provided with the distribution, and (3) all advertising materials mentioning
+ * features or use of this software display the following acknowledgement:
+ * ``This product includes software developed by the University of California,
+ * Lawrence Berkeley Laboratory and its contributors.'' Neither the name of
+ * the University nor the names of its contributors may be used to endorse
+ * or promote products derived from this software without specific prior
+ * written permission.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+#ifndef lint
+static const char rcsid[] =
+    "@(#) $Header: ec.c,v 1.25 98/02/09 16:35:16 leres Exp $ (LBL)";
+#endif
+
+/*
+ * ec - manufactures ethernet code routines
+ */
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+
+#if __STDC__
+struct mbuf;
+struct rtentry;
+#endif
+#include <net/if.h>
+
+#include <netinet/in.h>
+
+#include <arpa/inet.h>
+
+#include <ctype.h>
+#ifdef HAVE_MEMORY_H
+#include <memory.h>
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <syslog.h>
+
+#include "gnuc.h"
+#ifdef HAVE_OS_PROTO_H
+#include "os-proto.h"
+#endif
+
+#include "arpwatch.h"
+#include "ec.h"
+#include "util.h"
+
+/* Basic data structure */
+struct ecent {
+	u_int32_t o;		/* first 3 octets */
+	char *text;		/* associated text */
+};
+
+static struct ecent *list;
+static u_int ec_last = 0;
+static u_int ec_len = 0;
+
+static u_int32_t ec_a2o(char *);
+
+/* Convert an 3 octets from an ethernet address to a u_int32_t */
+static u_int32_t
+ec_a2o(register char *cp)
+{
+	register u_char *e;
+	u_int32_t o;
+	char xbuf[128];
+
+	(void)sprintf(xbuf, "%.32s:0:0:0", cp);
+	if ((e = str2e(xbuf)) == NULL)
+		return (0);
+	o = 0;
+	BCOPY(e, &o, 3);
+	return (o);
+}
+
+/* Add a ethernet code to the database */
+int
+ec_add(register u_int32_t o, register char *text)
+{
+
+	if (ec_last >= ec_len) {
+		if (list == NULL) {
+			ec_len = 512;
+			list = malloc(ec_len * sizeof(*list));
+		} else {
+			ec_len *= 2;
+			list = realloc(list, ec_len * sizeof(*list));
+		}
+		if (list == NULL) {
+			syslog(LOG_ERR, "ec_add(): malloc: %m");
+			exit(1);
+		}
+	}
+	list[ec_last].o = o;
+	list[ec_last].text = savestr(text);
+	++ec_last;
+	return (1);
+}
+
+/* Find the manufacture for a given ethernet address */
+char *
+ec_find(register u_char *e)
+{
+	u_int32_t o;
+	register int i;
+
+	o = 0;
+	BCOPY(e, &o, 3);
+	for (i = 0; i < ec_last; ++i)
+		if (list[i].o == o)
+			return (list[i].text);
+
+	return (NULL);
+}
+
+/* Loop through the ethernet code database */
+int
+ec_loop(register FILE *f, ec_process fn)
+{
+	register int n;
+	register char *cp, *cp2, *text;
+	register u_int32_t o;
+	register int sawblank;
+	char line[1024];
+
+	n = 0;
+	while (fgets(line, sizeof(line), f)) {
+		++n;
+		cp = line;
+		cp2 = cp + strlen(cp) - 1;
+		if (cp2 >= cp && *cp2 == '\n')
+			*cp2++ = '\0';
+		if (*cp == '#')
+			continue;
+		if ((cp2 = strchr(cp, '\t')) == 0) {
+			syslog(LOG_ERR,
+			    "ec_loop(): syntax error #1 line %d", n);
+			continue;
+		}
+
+		/* 3 octets come first */
+		*cp2++ = '\0';
+		text = cp2;
+		o = ec_a2o(cp);
+		if (o == 0) {
+			syslog(LOG_ERR,
+			    "ec_loop(): syntax error #2 line %d", n);
+			continue;
+		}
+
+		/* Compress blanks */
+		cp = cp2 = text;
+		sawblank = 0;
+		while (*cp != '\0') {
+			if (sawblank) {
+				*cp2++ = ' ';
+				sawblank = 0;
+			}
+			*cp2++ = *cp++;
+			while (isspace(*cp)) {
+				++cp;
+				sawblank = 1;
+			}
+		}
+		*cp2 = '\0';
+
+		if (!(*fn)(o, text))
+			return (0);
+	}
+
+	return (1);
+}
+
+/* DECnet local logical address prefix */
+static u_char decnet[3] = { 0xaa, 0x0, 0x4 };
+
+/* Returns true if an ethernet address is decnet, else false */
+int
+isdecnet(register u_char *e)
+{
+
+	return (MEMCMP(e, decnet, sizeof(decnet)) == 0);
+}
+
+/* Convert an ascii ethernet string to ethernet address */
+u_char *
+str2e(register char *str)
+{
+	register int i;
+	int n[6];
+	static u_char e[6];
+
+	MEMSET(n, 0, sizeof(n));
+	(void) sscanf(str, "%x:%x:%x:%x:%x:%x",
+	    &n[0], &n[1], &n[2], &n[3], &n[4], &n[5]);
+	for (i = 0; i < 6; ++i)
+		e[i] = n[i];
+	return (e);
+}
+
+/* Convert an ethernet address to an ascii ethernet string */
+char *
+e2str(register u_char *e)
+{
+	static char str[32];
+
+	(void)sprintf(str, "%x:%x:%x:%x:%x:%x",
+	    e[0], e[1], e[2], e[3], e[4], e[5]);
+	return (str);
+}

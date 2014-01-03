@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1997, 1999, 2000
+ * Copyright (c) 1996, 1997, 1999, 2000, 2004
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -20,7 +20,7 @@
  */
 #ifndef lint
 static const char rcsid[] =
-    "@(#) $Id: util.c,v 1.9 2000/10/13 22:48:55 leres Exp $ (LBL)";
+    "@(#) $Id: util.c,v 1.10 2004/01/22 22:25:27 leres Exp $ (LBL)";
 #endif
 
 /*
@@ -121,6 +121,10 @@ dump(void)
 	}
 
 	(void)ent_loop(dumpone);
+	if (ferror(dumpf)) {
+		syslog(LOG_ERR, "ferror %s: %m", newarpfile);
+		return(0);
+	}
 
 	(void)fclose(dumpf);
 	if (rename(arpfile, oldarpfile) < 0) {

@@ -1,4 +1,4 @@
-@(#) $Id: README,v 1.23 2000/10/08 20:25:42 leres Exp $ (LBL)
+@(#) $Id: README,v 1.24 2002/01/05 20:00:32 leres Exp $ (LBL)
 
 ARPWATCH 2.1
 Lawrence Berkeley National Laboratory
@@ -28,19 +28,23 @@ package is available from:
 
 	ftp://ftp.net.cmu.edu/pub/snmp-dist/cmu-snmp*.tar.gz
 
-It should be trivial to adaptive the output of any snmp query program
+It should be trivial to adapt the output of any snmp query program
 for use with arpsnmp.
 
-The ethernet vendor codes come from the IEEE's website:
+The ethernet vendor codes in ethercodes.dat is only current at the
+time the last arpwatch release was assembled. The data it contains
+come from the IEEE's website:
 
     http://standards.ieee.org/regauth/oui/oui.txt
 
 This is the IEEE's public Organizationally Unique Identifier (OUI)
-listing. If you run across an OUI that isn't in ethercodes.dat,
-first get a new copy from the IEEE website. Under FreeBSD you can
-use fetch(1). Convert this file to ethercodes.dat format using the
-massagevendor script. If OUI isn't in the resulting file check with
-the IEEE.  (But note that this is unlikely since the IEEE assign
-OUIs...)
+listing. If you run across an OUI that isn't in ethercodes.dat (or
+find any other deficiency) get a new copy from the IEEE website.
+
+Under FreeBSD you can do this using use fetch(1). Next convert the
+file to ethercodes.dat format using the massagevendor script.
+
+If you still have a problem with ethercodes.dat, contact the IEEE
+website (after all, they're the ones who assign OUIs...)
 
 Please send bugs and comments to arpwatch@ee.lbl.gov.

@@ -1,6 +1,6 @@
-@(#) $Id: CHANGES,v 1.39 2001/05/16 18:35:14 leres Exp $ (LBL)
+@(#) $Id: CHANGES,v 1.41 2004/01/22 22:25:43 leres Exp $ (LBL)
 
-v2.1 Wed May 16 11:35:10 PDT 2001
+v2.1 Thu Jan 22 14:05:27 PST 2004
 
 - Add FDDI support. Based on code contributed by Flemming Johansen
   (fsj@csd.cri.dk)
@@ -34,6 +34,8 @@ v2.1 Wed May 16 11:35:10 PDT 2001
 - More concessions to linux.
 
 - Special case dn_skipname() check for bind 8.
+
+- Convert arp2ethers from csh to sh.
 
 v2.0.2 Sat Jun  7 03:15:03 PDT 1997
 

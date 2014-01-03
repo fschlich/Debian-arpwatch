@@ -1,6 +1,6 @@
-dnl @(#) $Id: aclocal.m4,v 1.80 2003/04/07 19:13:48 leres Exp $ (LBL)
+dnl @(#) $Id: aclocal.m4,v 1.81 2006/03/27 23:55:40 leres Exp $ (LBL)
 dnl
-dnl Copyright (c) 1995, 1996, 1997, 1998, 1999, 2002, 2003
+dnl Copyright (c) 1995, 1996, 1997, 1998, 1999, 2002, 2003, 2006
 dnl	The Regents of the University of California.  All rights reserved.
 dnl
 dnl Redistribution and use in source and binary forms, with or without
@@ -640,10 +640,11 @@ AC_DEFUN(AC_LBL_CHECK_WALL,
 		    AC_MSG_CHECKING(gcc version)
 		    AC_CACHE_VAL(ac_cv_lbl_gcc_vers,
 			# Gag, the gcc folks keep changing the output...
-			ac_cv_lbl_gcc_vers=`$CC --version 2>&1 | \
-			    sed -e '1!d' -e 's/.* //' -e 's/\..*//'`)
+			# try to grab N.N.N
+			ac_cv_lbl_gcc_vers=`$CC --version 2>&1 |
+			    sed -e '1!d' -e 's/[[[^0-9]]]*\([[[0-9]]][[[0-9]]]*\)\.[[[0-9\]]][[[0-9]]]*\.[[[0-9]]][[[0-9]]]*.*/\1/'`)
 		    AC_MSG_RESULT($ac_cv_lbl_gcc_vers)
-		    if test $ac_cv_lbl_gcc_vers -gt 1 ; then
+		    if test "$ac_cv_lbl_gcc_vers" -gt 1 ; then
 			    $1="`echo $$1 | sed -e 's/-O/-O2/'`"
 		    fi
 	    fi
@@ -652,7 +653,7 @@ AC_DEFUN(AC_LBL_CHECK_WALL,
 			    $1="-g $$1"
 		    fi
 		    $1="$$1 -Wall"
-		    if test $ac_cv_lbl_gcc_vers -gt 1 ; then
+		    if test "$ac_cv_lbl_gcc_vers" -gt 1 ; then
 			    $1="$$1 -Wmissing-prototypes -Wstrict-prototypes"
 		    fi
 	    fi

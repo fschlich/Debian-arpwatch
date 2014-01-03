@@ -1,0 +1,83 @@
+#!/usr/bin/perl
+
+$control = 'debian/control';
+if ( -d 'debian/packages.d' ) {
+    $dir = 'debian/packages.d';
+} else {
+    $dir = 'debian';
+}
+$needclean = 0;
+$needlist = 0;
+$needdeps = 0;
+
+if (defined($ENV{'DH_COMPAT'})) {
+    $dh = $ENV{'DH_COMPAT'};
+} else {
+    $dh = 0;
+}
+
+if (@ARGV) {
+    $temp = shift;
+    if ($temp eq "clean") { $needclean = 1; }
+    elsif ($temp eq "makedeps") { $needlist = 1; }
+    elsif ($temp eq "gendeps") { $needdeps = 1; }
+}
+
+@packages = ();
+$first_package = "";
+
+open (CONTROL, "< $control");
+
+while (<CONTROL>) {
+    if (m/^Package:/) {
+	$package = (split)[1];
+	if ($first_package eq "" and $dh < 2) {
+		$first_package = $package;
+	}
+	if ( -f "${dir}/${package}.in" ) {
+	    push @packages, $package;
+	}
+    }
+}
+
+close CONTROL;
+
+while (@packages) {
+    $package = shift(@packages);
+    $inhead = 1;
+    $opened = 0;
+    if ($needdeps) {
+	print "${dir}/${package}.in ";
+	next;
+    }
+    open (IN, "< ${dir}/${package}.in");
+    while (<IN>) {
+	if (m/^\%(.*)\%$/) {
+	    if ($needclean) {
+		if ($package ne $first_package) {
+		    system("rm -f debian/${package}.${1}");
+		} else {
+		    system("rm -f debian/${1}");
+		}
+	    } elsif ($needlist) {
+		if ($package ne $first_package) {
+		    print "debian/${package}.${1} ";
+		} else {
+		    print "debian/${1} ";
+		}
+	    } else {
+		$inhead = 0;
+		if ($opened) { close OUT; } else { $opened = 1; }
+		if ($package ne $first_package) {
+		    open OUT, "> debian/${package}.${1}";
+		} else {
+		    open OUT, "> debian/${1}";
+		}
+	    }
+	} elsif (!$inhead) {
+	    print OUT $_;
+	}
+    }
+    close OUT;
+    close IN;
+}

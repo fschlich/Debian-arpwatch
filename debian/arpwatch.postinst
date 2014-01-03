@@ -1,0 +1,36 @@
+#!/bin/sh
+# arpwatch.postinst: v0.03 2002/03/07 KELEMEN Peter <fuji@debian.org>
+
+set -e
+
+NAME=arpwatch
+DBDIR=/var/lib/$NAME
+DBFILE=arp.dat
+BACKUPDIR=/var/backups
+BACKUPNAME=$NAME.dbbackup
+
+restore_arp_dat () {
+	echo "$NAME: Restoring ARP database from obsolete version backup."
+	cp -p $BACKUPDIR/$DBFILE $DBDIR && rm -f $BACKUPDIR/$DBFILE
+}
+
+restore_arpwatch_dir () {
+	echo "$NAME: Restoring ARP database(s)."
+	cp -rp $BACKUPDIR/$BACKUPNAME/* $DBDIR && rm -rf $BACKUPDIR/$BACKUPNAME
+}
+
+[ -d $DBDIR ] || exit 0
+[ -d $BACKUPDIR ] || {
+	echo "$NAME: No backup, no restore -- creating empty arp.dat file.";
+	touch $DBDIR/$DBFILE
+	chown root:root $DBDIR/$DBFILE
+	chmod 0644 $DBDIR/$DBFILE
+	exit 0
+}
+
+[ -f $BACKUPDIR/$DBFILE ] && restore_arp_dat
+[ -d $BACKUPDIR/$BACKUPNAME ] && restore_arpwatch_dir
+
+#DEBHELPER#
+
+# End of file.

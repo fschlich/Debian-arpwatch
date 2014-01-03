@@ -2,12 +2,13 @@ Source: arpwatch
 Section: admin
 Priority: optional
 Maintainer: KELEMEN Peter <fuji@debian.org>
-Standards-Version: 3.1.0.0
+Standards-Version: 3.5.2
+Build-Depends: libpcap-dev, debhelper
 
 Package: arpwatch
 Architecture: any
 Depends: ${shlibs:Depends}
-Recommends: sendmail | mail-transport-agent
+Recommends: mail-transport-agent
 Suggests: snmp
 Description: Ethernet/FDDI station activity monitor.
  Arpwatch maintains a database of Ethernet MAC addresses seen on the

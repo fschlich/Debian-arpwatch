@@ -1,4 +1,7 @@
+etc
 usr/bin
 usr/sbin
 usr/share/arpwatch
+usr/share/man/man8
+usr/share/lintian/overrides
 var/lib/arpwatch

@@ -1,3 +1,107 @@
+arpwatch (2.1a11-6) unstable; urgency=low
+
+  * [Vincent Letocart] Fixed missing `arp.dat' upon fresh install.
+  * Fixed dmassagevendor(8) parser to include private Ethernet address ranges.
+  * Updated Ethernet vendor database, 200+ new entries.
+
+ -- KELEMEN Peter <fuji@debian.org>  Thu,  7 Mar 2002 18:48:24 +0100
+
+arpwatch (2.1a11-5) unstable; urgency=MEDIUM
+
+  * The "Trivial Bug Overlooked" upload.
+  * Fixed init.d restart target. (Closes: #122201)
+
+ -- KELEMEN Peter <fuji@debian.org>  Mon, 17 Dec 2001 13:59:32 +0100
+
+arpwatch (2.1a11-4) unstable; urgency=MEDIUM
+
+  * Fixed inability to start multiple instances. (Closes: #123191)
+  * Updated Ethernet vendor database, 100+ new entries.
+
+ -- KELEMEN Peter <fuji@debian.org>  Mon, 17 Dec 2001 13:40:55 +0100
+
+arpwatch (2.1a11-3) unstable; urgency=MEDIUM
+
+  * Fixed hardcoded libc6 dependency. (Closes: #120305)
+  * Fixed init.d functions POSIX-conformance. (Closes: #117796)
+  * Fixed arpwatch.conf options parsing.
+  * No more recommends sendmail explicitly.
+  * Updated debian/arpwatch.preinst to save multiple databases.
+  * Updated debian/arpwatch.postinst to restore multiple databases.
+
+ -- KELEMEN Peter <fuji@debian.org>  Sat, 24 Nov 2001 14:07:56 +0100
+
+arpwatch (2.1a11-2) unstable; urgency=low
+
+  * Previous upload rejected due to signing errors.
+
+ -- KELEMEN Peter <fuji@debian.org>  Mon, 29 Oct 2001 14:55:57 +0100
+
+arpwatch (2.1a11-1) unstable; urgency=low
+
+  * New Upstream Release.
+  * Supports watching multiple interfaces. (Closes: #74888)
+  * Updated Ethernet vendor database, 600+ new entries.
+  * Fixed init.d script comments. (Closes: #114893)
+
+ -- KELEMEN Peter <fuji@debian.org>  Wed, 26 Oct 2001 14:56:25 +0200
+
+arpwatch (2.1a10-3) unstable; urgency=low
+
+  * Fixed minor manual page incosistencies. (Closes: #93851)
+  * [Hugo Graumann] Contributed all missing manpages. (Closes: #76367)
+  * Introducing dmassagevendor(8) as alternative of massagevendor(8).
+
+ -- KELEMEN Peter <fuji@debian.org>  Tue, 17 Apr 2001 14:33:19 +0200
+
+arpwatch (2.1a10-2) unstable; urgency=low
+
+  * [Hugo Graumann] arp2ethers.8 manual page.
+
+ -- KELEMEN Peter <fuji@debian.org>  Wed, 11 Apr 2001 19:44:18 +0200
+
+arpwatch (2.1a10-1) unstable; urgency=low
+
+  * New Upstream Release. (Closes: #82755)
+  * Fixed debhelper build dependency. (Closes: #70134)
+  * Fixed libpcap-dev build dependency. (Closes: #76792)
+  * Fixed typo in README.Debian. (Closes: #76368)
+  * Fixed too early startup. (Closes: #70473)
+  * Fixed init.d script $ARGS usage. (Closes: #70568, #76012)
+  * [Zygo Blaxell] -p option to disable promisc mode. (Closes: #44838)
+  * [Jerome Petazzoni] -m option to specify mail address. (Closes: #76794)
+  * [Jerome Petazzoni] -a option to watch all subnets.
+  * Updated Ethernet vendor database.
+  * Updated massagevendor(8) and man page.
+  * Reverted Colin Phipps' tmprace patch since upstream provided a fix.
+  * Reverted my bogonkill patch since upstream provided such functionality.
+  * Security: arpwatch now drops root privileges after startup.
+  * Build: local override to suppress lintian warning of /var/lib/arpwatch mode.
+
+ -- KELEMEN Peter <fuji@debian.org>  Mon,  9 Apr 2001 17:48:11 +0200
+
+arpwatch (2.1a4-6) unstable; urgency=low
+
+  * Maintenance upload since 2.1a4-4 and 2.1a4-5 were rejected due to
+    parallel frozen/unstable uploads.
+
+ -- KELEMEN Peter <fuji@debian.org>  Fri, 28 Apr 2000 14:52:06 +0200
+
+arpwatch (2.1a4-5) frozen unstable; urgency=low
+
+  * Updated /etc/init.d/arpwatch script. (Closes: #57284)
+
+ -- KELEMEN Peter <fuji@debian.org>  Wed, 19 Apr 2000 10:34:47 +0200
+
+arpwatch (2.1a4-4) frozen unstable; urgency=low
+
+  * Updated 3000+ Ethernet vendor codes. (Closes: #45905)
+  * [Peter T. Breuer] Configurable sendmail(8) path. (Closes: #53036)
+  * Attempt to save ARP database on upgrade. (Closes: #61556)
+  * New massagevendor(8) script.
+
+ -- KELEMEN Peter <fuji@debian.org>  Fri, 14 Apr 2000 17:18:14 +0200
+
 arpwatch (2.1a4-3) frozen; urgency=low
 
   * [Colin Phipps] Fixed /tmp race condition. (Closes: #56823)
@@ -22,8 +126,3 @@ arpwatch (2.1a4-1) unstable; urgency=low
   * Initial Release.
 
  -- KELEMEN Peter <fuji@debian.org>  Mon, 12 Apr 1999 18:30:09 +0200
-
-Local variables:
-mode: debian-changelog
-add-log-mailing-address: "fuji@debian.org"
-End:

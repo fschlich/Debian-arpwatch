@@ -7,7 +7,8 @@ arpfetch:
 	The script uses snmpwalk from the CMU SNMP package.
 
 ethercodes.dat:
-	(Ethernet.txt) Generated when package was build.
+	Generated when package was built.
+	(Ethernet.txt, oui.txt)
 
 The ethernet vendor codes come from:
 
@@ -19,6 +20,9 @@ Another source of ethernet vendor code data is:
     http://standards.ieee.org/db/oui/
 
 However that version is copyrighted.
+
+See /etc/arpwatch.conf for Debian-specific solution to watch multiple
+interfaces at once.
 
 Please send bugs and comments to arpwatch@ee.lbl.gov.
 

@@ -1,89 +1,157 @@
 #!/usr/bin/make -f
-# Made with the aid of dh_make, by Craig Small
-# Sample debian/rules that uses debhelper. GNU copyright 1997 by Joey Hess.
-# Some lines taken from debmake, by Cristoph Lameter.
+# Sample debian/rules that uses debhelper.
+# GNU copyright 1997 to 1999 by Joey Hess.
+# Modified for arpwatch based on Adam Heath's and Ben Collins' work in 2001 by
+# KELEMEN Peter <fuji@debian.org>
+
+# Some local stuff.
+package = arpwatch
+DESTDIR = $(CURDIR)/debian/$(package)
+LOCALDIR = $(CURDIR)/debian/local
+CC = gcc
+CFLAGS := -O2 -Wall
+IEN := install -m755
+IE := $(IEN) -s
+ID := install -m644
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -g
+	ifneq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+		IE := $(IEN)
+	endif
+endif
+# DBS
+TAR_DIR := arpwatch-2.1a11
+include debian/scripts/dbs-build.mk
+# dpkg-arch
+ifeq (,$(DEB_BUILD_GNU_TYPE))
+	include debian/scripts/dpkg-arch.mk
+endif
+# features
+configure_args :=
+configure_args += --prefix=/usr --mandir=\$${prefix}/share/man\
+	--infodir=\$${prefix}/share/info
+ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+	configure_args += --build=$(DEB_BUILD_GNU_TYPE)
+endif
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
-build: build-stamp
-build-stamp:
+# This is the debhelper compatability version to use.
+export DH_COMPAT=3
+
+configure: configure-stamp
+configure-stamp:
 	dh_testdir
+	# Add here commands to configure the package.
 
-	chmod +w *
-	./configure --prefix=/usr
-	# Add here commands to compile the package.
-	$(MAKE) 
+	touch configure-stamp
 
-	touch build-stamp
+build: $(STAMP_DIR)/pre-build-stamp $(STAMP_DIR)/build-stamp
+
+$(STAMP_DIR)/pre-build-stamp: $(unpacked) $(patched)
+	dh_testdir
+	cd $(BUILD_TREE) && chmod +w * && CFLAGS="$(CFLAGS)" CC="$(CC)" \
+		./configure $(configure_args) --host=$(DEB_BUILD_GNU_TYPE)
+	#$(MAKE) depend -C $(BUILD_TREE)
+	touch $(STAMP_DIR)/pre-build-stamp
+
+$(STAMP_DIR)/build-stamp:
+	dh_testdir
+	cd $(BUILD_TREE) && $(MAKE)
+	touch $(STAMP_DIR)/build-stamp
+
+##build: configure-stamp build-stamp
+##build-stamp:
+##	dh_testdir
+##
+##	# Add here commands to compile the package.
+##	$(MAKE)
+##	#/usr/bin/docbook-to-man debian/arpwatch.sgml > arpwatch.1
+##
+##	touch build-stamp
 
 clean:
 	dh_testdir
-	dh_testroot
-	rm -f build-stamp install-stamp
-
-	# Add here commands to clean up after the build process.
-	-$(MAKE) distclean
-
+	rm -rf $(SOURCE_DIR) $(STAMP_DIR)
+	perl debian/scripts/dh_split clean
+##	dh_testroot
+##	rm -f build-stamp configure-stamp
+##
+##	# Add here commands to clean up after the build process.
+##	-$(MAKE) distclean
+##
 	dh_clean
 
-install: install-stamp
-install-stamp: build-stamp
+install: build $(dh_mak_deps)
 	dh_testdir
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
 
-	# Add here commands to install the package into debian/tmp.
-	$(MAKE) install prefix=`pwd`/debian/tmp/usr
+	# Add here commands to install the package into debian/arpwatch.
+	$(MAKE) DESTDIR=$(DESTDIR) install -C $(BUILD_TREE) #prefix=$(DESTDIR)
 
-	# Update Ethernet codes upon every build process.
-	# rm -f Ethernet.txt
-	# wget ftp://ftp.cavebear.com/pub/Ethernet.txt
+	$(ID) $(LOCALDIR)/ethercodes.dat $(DESTDIR)/usr/share/arpwatch
 
-	# Format Ethernet codes.
-	`pwd`/massagevendor < `pwd`/Ethernet.txt > `pwd`/debian/tmp/usr/share/arpwatch/ethercodes.dat
+	chmod 0700 $(DESTDIR)/var/lib/arpwatch
 
-	# touch `pwd`/debian/tmp/var/lib/arpwatch/arp.dat
-	chmod 0700 `pwd`/debian/tmp/var/lib/arpwatch
+	$(IEN) $(BUILD_TREE)/arp2ethers $(DESTDIR)/usr/sbin
+	$(IEN) $(BUILD_TREE)/arpfetch $(DESTDIR)/usr/sbin
+	$(IEN) $(BUILD_TREE)/bihourly $(DESTDIR)/usr/sbin
+	$(IEN) $(BUILD_TREE)/massagevendor $(DESTDIR)/usr/sbin
+	$(IEN) $(LOCALDIR)/dmassagevendor $(DESTDIR)/usr/sbin
 
-	cp arp2ethers arpfetch bihourly massagevendor `pwd`/debian/tmp/usr/sbin
-	chmod u+w `pwd`/debian/tmp/usr/sbin/*
+	##mkdir -p $(DESTDIR)/usr/share/man/man8
+	$(ID) $(BUILD_TREE)/arpwatch.8 $(DESTDIR)/usr/share/man/man8
+	$(ID) $(BUILD_TREE)/arpsnmp.8 $(DESTDIR)/usr/share/man/man8
+	$(ID) $(BUILD_TREE)/arp2ethers.8 $(DESTDIR)/usr/share/man/man8
+	$(ID) $(BUILD_TREE)/arpfetch.8 $(DESTDIR)/usr/share/man/man8
+	$(ID) $(BUILD_TREE)/bihourly.8 $(DESTDIR)/usr/share/man/man8
+	$(ID) $(BUILD_TREE)/massagevendor.8 $(DESTDIR)/usr/share/man/man8
+	$(ID) $(LOCALDIR)/dmassagevendor.8 $(DESTDIR)/usr/share/man/man8
+	$(ID) $(LOCALDIR)/arpwatch.conf $(DESTDIR)/etc/arpwatch.conf
 
-	touch install-stamp
+	##mkdir -p $(DESTDIR)/usr/share/lintian/overrides
+	cp $(LOCALDIR)/override $(DESTDIR)/usr/share/lintian/overrides/$(package)
+
+	# Namespace cleanup here.
 
 # Build architecture-independent files here.
 binary-indep: build install
 # We have nothing to do by default.
 
 # Build architecture-dependent files here.
-binary-arch: build install
-#	dh_testversion
+binary-arch: build install $(dh_mak_deps)
 	dh_testdir
 	dh_testroot
+#	dh_installdebconf	
 	dh_installdocs
 	dh_installexamples
 	dh_installmenu
+#	dh_installlogrotate
 #	dh_installemacsen
-	dh_installinit
+#	dh_installpam
+#	dh_installmime
+	dh_installinit -- defaults 40
 	dh_installcron
-	dh_installmanpages
-	dh_undocumented arp2ethers.8 arpfetch.8 bihourly.8 massagevendor.8
-	dh_installchangelogs CHANGES 
+	dh_installman
+	dh_installinfo
+#	dh_undocumented
+	dh_installchangelogs
 	dh_link
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	dh_strip
+endif
 	dh_compress
 	dh_fixperms --exclude=/var/lib/arpwatch
-	dh_suidregister
+#	dh_makeshlibs
 	dh_installdeb
+#	dh_perl
 	dh_shlibdeps
 	dh_gencontrol
-#	dh_makeshlibs
 	dh_md5sums
 	dh_builddeb
 
-source diff:                                                                  
-	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
-
 binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary
+.PHONY: build clean binary-indep binary-arch binary install configure

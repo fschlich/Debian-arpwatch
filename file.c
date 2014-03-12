@@ -69,7 +69,7 @@ file_loop(register FILE *f, file_process fn, register const char *name)
 	u_int32_t a;
 	register time_t t;
 	register struct hostent *hp;
-	char *interface = NULL;
+	char *interface;
 	char line[1024];
 	u_char e[6];
 
@@ -118,6 +118,7 @@ fprintf(stderr, "file_loop: %s:%d bad hostname \"%s\"\n", name, n, cp);
 		if (cp2 == NULL) {
 			t = 0;
 			h = NULL;
+			interface = NULL;
 		} else {
 			t = atoi(cp2);
 			h = strchr(cp2, '\t');
@@ -125,18 +126,14 @@ fprintf(stderr, "file_loop: %s:%d bad hostname \"%s\"\n", name, n, cp);
 				++h;
 				++cp2;
 				while (*cp2 != '\n' && *cp2 != '\t' &&
-				       *cp2 != '\0')
+				    *cp2 != '\0')
 					++cp2;
 				if (*cp2 == '\t') {
-					*cp2++ = '\0';
-					while (*cp2 != '\n' && *cp2 != '\t' &&
-					       *cp2 != '\0') ++cp2;
-					if (*cp2 == '\t') {
-						*cp2++ = '\0';
-						interface = cp2;
-						while (*cp2 != '\n' && *cp2 != '\t' &&
-						       *cp2 != '\0') ++cp2;
-					}
+				    *cp2++ = '\0';
+				    while (*cp2 != '\n' && *cp2 != '\t' &&
+					   *cp2 != '\0') ++cp2;
+				} else {
+				    interface = NULL;
 				}
 				*cp2 = '\0';
 			}

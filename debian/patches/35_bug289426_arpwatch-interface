@@ -1,0 +1,49 @@
+Description: #289426 interface not read from arp.dat
+ In the file_loop function, the interface variable is not initialized when it is
+ passed to fn (which is ent_add). Actually, the interface is not even read.
+From: Sebastian Reichelt <SebastianR@gmx.de>
+
+--- a/file.c	2005-01-08 19:27:48.000000000 +0100
++++ b/file.c	2005-01-09 02:38:53.000000000 +0100
+@@ -69,7 +69,7 @@
+ 	u_int32_t a;
+ 	register time_t t;
+ 	register struct hostent *hp;
+-	char *interface;
++	char *interface = NULL;
+ 	char line[1024];
+ 	u_char e[6];
+ 
+@@ -118,7 +118,6 @@
+ 		if (cp2 == NULL) {
+ 			t = 0;
+ 			h = NULL;
+-			interface = NULL;
+ 		} else {
+ 			t = atoi(cp2);
+ 			h = strchr(cp2, '\t');
+@@ -126,14 +125,18 @@
+ 				++h;
+ 				++cp2;
+ 				while (*cp2 != '\n' && *cp2 != '\t' &&
+-				    *cp2 != '\0')
++				       *cp2 != '\0')
+ 					++cp2;
+ 				if (*cp2 == '\t') {
+-				    *cp2++ = '\0';
+-				    while (*cp2 != '\n' && *cp2 != '\t' &&
+-					   *cp2 != '\0') ++cp2;
+-				} else {
+-				    interface = NULL;
++					*cp2++ = '\0';
++					while (*cp2 != '\n' && *cp2 != '\t' &&
++					       *cp2 != '\0') ++cp2;
++					if (*cp2 == '\t') {
++						*cp2++ = '\0';
++						interface = cp2;
++						while (*cp2 != '\n' && *cp2 != '\t' &&
++						       *cp2 != '\0') ++cp2;
++					}
+ 				}
+ 				*cp2 = '\0';
+ 			}

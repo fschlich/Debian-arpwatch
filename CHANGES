@@ -1,3 +1,8 @@
+NG 1.2:
+-Fix make install target: man-pages will be installed now, too
+ thanks to Aleksandr Shubnik
+-Update ethercodes.dat from nmap-4.00
+
 NG 1.1:
 -Fix and update man-page to reflect the NG changes
 -Add new feature: -P pcap_filter to use tcpdump-style filters

@@ -759,7 +759,7 @@ __dead void usage(void)
                "    -N                do NOT report bogons\n" \
 	       "    -f data_file      write arp DB to file instead of default arp.dat\n" \
 	       "    -r pcap_dump      read in data from captured pcap file instead of network\n" \
-	       "    -t mail_to        mail reports To:\n" \
+	       "    -t mail_to        send mail reports To:\n" \
 	       "    -F mail_from      set mail From: header\n" \
 	       "    -s prog           use prog instead of sendmail to send mail\n" \
 	      );

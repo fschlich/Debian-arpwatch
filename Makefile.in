@@ -116,7 +116,7 @@ version.c: $(srcdir)/VERSION
 zap: zap.o intoa.o
 	$(CC) $(CFLAGS) -o $@ zap.o intoa.o -lutil
 
-install: force
+install: force install-man
 	$(INSTALL) -d -m 750 $(DESTDIR)$(BINDEST)
 	$(INSTALL) -m 750 arpwatch $(DESTDIR)$(BINDEST)
 	$(INSTALL) -m 750 arpsnmp $(DESTDIR)$(BINDEST)

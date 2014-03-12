@@ -1,0 +1,10 @@
+Q:
+The arp.dat files do not contain fresh information about observed
+stations.
+
+A:
+arpwatch uses some kind of "journalling" and information is only commited
+each CHECKPOINT seconds, defined in arpwatch.h
+It used to be historically 10*60 seconds; as of this writing it was set to 
+3*60 seconds.
+

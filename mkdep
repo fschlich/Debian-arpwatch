@@ -51,7 +51,8 @@ if [ ! -w $MAKE ]; then
 	exit 1
 fi
 
-TMP=`tempfile -p mkdep -s .tmp`
+TMP=`tempfile -p mkdep -s .tmp` || echo
+[ -z "$TMP" ] && TMP=`mktemp /tmp/mkdep.XXXXXX`
 
 trap 'rm -f $TMP ; exit 1' 1 2 3 13 15
 

@@ -30,7 +30,7 @@ arpwatch \- keep track of ethernet/ip address pairings
 .B -dN
 ] [
 .B -f
-.I datafile
+.I data_file
 ] [
 .B -i
 .I interface
@@ -42,7 +42,7 @@ arpwatch \- keep track of ethernet/ip address pairings
 .IR net [/ width
 ]] [
 .B -r
-.I file
+.I pcap_file
 ] [
 .B -m
 .I report_mode
@@ -52,10 +52,13 @@ arpwatch \- keep track of ethernet/ip address pairings
 .B -p
 ] [
 .B -s
-.I sendmail-prog
+.I sendmail_prog
 ] [
 .B -t
-.I mailto
+.I mail_to
+] [
+.B -f
+.I mail_from
 ] [
 .B -u
 .I username
@@ -123,6 +126,10 @@ flag is used to specify the path to the sendmail program.
 Any program that takes the option -odi and then text from stdin
 can be substituted. This is useful for redirecting reports
 to log files instead of mail
+.LP
+.B -F
+option is used to specify From: field of the report message. By
+default arpwatch.
 .LP
 .B -t
 option is used to specify the e-mail address to which reports will be

@@ -1,3 +1,10 @@
+DROP9:
+-Update ethercodes.dat from nmap-3.93
+-Fix usage output; -t is for mailto, not -m (thanks to Jan Ostrochovsky)
+-Add -F as mailfrom option (as everybody wants it; kudos Jan Ostrochovsky)
+-Change CHECKPOINT (write arp DB to file) time to 3*60 seconds, was 10*60
+-Change mkdep to also use mktemp if tempfile fails
+
 DROP8:
 -New configure option "--enable-fancy-mac" so MAC adresses are printed always
 in xx:xx:.. notation e.g. 00:0a: instead of 0:0a

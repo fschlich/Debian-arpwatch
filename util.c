@@ -53,6 +53,7 @@ char *arpfile=ARPFILE;
 char *ethercodes=ETHERCODESDIR "/" ETHERCODES;
 char *sendmail=PATH_SENDMAIL;
 char *mailto=WATCHER;
+char *mailfrom=WATCHEE;
 
 /* Broadcast ethernet addresses */
 u_char zero[6] = { 0, 0, 0, 0, 0, 0 };

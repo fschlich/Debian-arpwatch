@@ -249,7 +249,6 @@ static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t 
         char *title;
         char tempfile[64], cpu[64], os[64];
 	char *fmt = "%20s: %s\n";
-	char *watchee = WATCHEE;
 	char buf[132];
 	static int init = 0;
 
@@ -305,7 +304,7 @@ static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t 
 			syslog(LOG_ERR, "unlink(%s): %m", tempfile);
 	}
 
-	fprintf(f, "From: %s\n", watchee);
+	fprintf(f, "From: %s\n", mailfrom);
 	fprintf(f, "To: %s\n", mailto);
 	hn = gethname(a);
 	if(isdigit(*hn)) {

@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while((op = getopt(argc, argv, "df:i:n:Nr:m:ps:t:u:")) != EOF) {
+	while((op = getopt(argc, argv, "df:i:n:Nr:m:ps:t:F:u:")) != EOF) {
 		switch (op) {
 
 		case 'd':
@@ -216,6 +216,10 @@ int main(int argc, char **argv)
                 case 't':
                         mailto=optarg;
                         break;
+			
+		case 'F':
+			mailfrom=optarg;
+			break;
 
                 case 'p':
 			++nopromisc;
@@ -731,9 +735,9 @@ __dead void usage(void)
 
 	fprintf(stderr, "%s version %s\n", prog, version);
         fprintf(stderr,
-                "    [-dN] [-i interface] [-m mode] [-p]\n" \
-                "    [-n net[/width]] [-f datafile] [-r file]\n" \
-                "    [-s sendmail-prog] [-m mailto] [-u username]\n");
+                "    [-dN] [-i interface] [-m report_mode] [-p]\n" \
+                "    [-n net[/width]] [-f data_file] [-r pcap_dump_file]\n" \
+                "    [-s sendmail_prog] [-F mail_from] [-t mail_to] [-u username]\n");
 	exit(1);
 }
 

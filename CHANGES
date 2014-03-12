@@ -1,3 +1,8 @@
+DROP10:
+-Fix longstanding and unnoticed BUG:
+when running in default/daemon mode arp.dat was not checkpointed and as 
+such never updated.
+
 DROP9:
 -Update ethercodes.dat from nmap-3.93
 -Fix usage output; -t is for mailto, not -m (thanks to Jan Ostrochovsky)

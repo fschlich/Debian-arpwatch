@@ -328,6 +328,16 @@ int main(int argc, char **argv)
 
         initializing = 0;
 
+        /* Drop into daemon mode the latest time possible */
+	if(!debug && report_mode==REPORT_NORMAL) {
+		go_daemon();
+	}
+
+	/*
+	 setup signals after we dropped into daemon mode
+	 else they're out of effect, dumb me
+	 Fixes bug with arp.dat not being updated
+	 */
 	setsignal(SIGINT, die);
 	setsignal(SIGTERM, die);
 	setsignal(SIGHUP, die);
@@ -335,11 +345,6 @@ int main(int argc, char **argv)
 		setsignal(SIGQUIT, checkpoint);
 		setsignal(SIGALRM, checkpoint);
 		alarm(CHECKPOINT);
-	}
-
-        /* Drop into daemon mode the latest time possible */
-	if(!debug && report_mode==REPORT_NORMAL) {
-		go_daemon();
 	}
 
 	switch (linktype) {

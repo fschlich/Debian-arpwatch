@@ -5,4 +5,6 @@ o many references in code that rely on static buffer
 timestamp, delta, action, hostname, oldhostname, 
 ip, oldip, mac, oldmac, vendor, old vendor
 
+-Remove all hard-coded occurences to syslog()
+
 -Redesign ARP DB, ethercodes DB

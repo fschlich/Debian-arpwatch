@@ -111,7 +111,7 @@ arpsnmp: $(SOBJ)
 version.o: version.c
 version.c: $(srcdir)/VERSION
 	@rm -f $@
-	sed -e 's/.*/char version[] = "&";/' $(srcdir)/VERSION > $(srcdir)/$@
+	sed -e 's/.*/const char *version="&";/' $(srcdir)/VERSION > $(srcdir)/$@
 
 zap: zap.o intoa.o
 	$(CC) $(CFLAGS) -o $@ zap.o intoa.o -lutil

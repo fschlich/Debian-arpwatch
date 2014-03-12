@@ -1,3 +1,16 @@
+NG 1.6:
+-Clean up the reporting via a central report function description table
+o makes it easier to add custom reporting functions
+-Add a paragraph to FAQ about compilation under cygwin
+ thanks to Urs Meier for contributing
+-Remove unneeded stuff
+o massagevendor-old
+o missingcodes.txt
+o FILES
+-Change char version[] to a const char *version for cleanliness
+-Update arpsnmp a bit [which still is deprecated]
+-Small cleanups here&there
+
 NG 1.5:
 -Report arp.dat and ethercode.dat reading failures in an explicit way
  thanks to Chuck Chargin Jr. for pointing it out

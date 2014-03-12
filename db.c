@@ -282,7 +282,7 @@ static struct einfo *elist_alloc(u_int32_t a, u_char * e, time_t t, char *h)
 	if(h == NULL && !initializing)
 		h = getsname(a);
 	if(h != NULL && !isdigit((int)*h)) {
-                /* this came from SUSE, for savety -Freek */
+                /* this came from SUSE, for safety -Freek */
 		memset(ep->h, 0, sizeof(ep->h));
 		strncpy(ep->h, h, sizeof(ep->h)-1);
 	}
@@ -306,7 +306,7 @@ static void check_hname(struct ainfo *ap)
 	if(!isdigit((int)*h) && strcmp(h, ep->h) != 0) {
 		syslog(LOG_INFO, "hostname changed %s %s %s -> %s", intoa(ap->a), e2str(ep->e), ep->h, h);
 
-		/* this came from SUSE, for savety -Freek */
+		/* this came from SUSE, for safety -Freek */
 		memset(ep->h, 0, sizeof(ep->h));
 		strncpy(ep->h, h, sizeof(ep->h)-1);
 	}

@@ -78,11 +78,16 @@ void (*report_f)(int , u_int32_t, u_char *, u_char *, time_t *, time_t *)=report
 static int cdepth;
 static char *unknown = "<UNKNOWN>";
 
-static char *fmtdate(time_t);
-static char *fmtdelta(time_t);
+static char * fmtdate(time_t);
+static char * fmtdelta(time_t);
 RETSIGTYPE reaper(int);
 static int32_t gmt2local(void);
 
+
+/*
+ this table describes each event for
+ which there is a enum in report.h
+ */
 static char *TAB[]={
         "new activity",
         "new station",
@@ -104,7 +109,26 @@ static char *TAB[]={
 };
 
 
-static char *fmtdelta(time_t t)
+/*
+ this table holds all available reporting functions
+ enter new reporting functions here
+ */
+static const struct report_mode report_modes[]={
+        /* REPORT_NORMAL */
+	{report_orig, "arpwatch daemon, syslog+mail (DEFAULT)", 0},
+
+	/* REPORT_STDOUT */
+	{report_stdout, "print reports to stdout, no daemon", 0},
+
+	/* REPORT_RAW */
+	{report_raw, "print comma-separated to stdout, no daemon", 0},
+};
+
+/* have a macro to return the # of entries in the table above */
+#define REPORTMODES_ENTRIES (sizeof(report_modes)/sizeof(*report_modes))
+
+
+static char * fmtdelta(time_t t)
 {
 	char *cp;
 	int minus;
@@ -161,7 +185,7 @@ static char *moy[12] = {
 #define DOW(d) ((d) < 0 || (d) >= 7 ? "?" : dow[d])
 #define MOY(m) ((m) < 0 || (m) >= 12 ? "?" : moy[(m)])
 
-static char *fmtdate(time_t t)
+static char * fmtdate(time_t t)
 {
 	struct tm *tm;
 	int32_t mw;
@@ -498,31 +522,37 @@ static void report_raw(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *
 
 /*
  set function pointer to the reporting function
- dumb switch() right now
+ use report_modes tab
  */
 int setup_reportmode(int mode)
 {
 	int ret=0;
 
-	switch(mode) {
-
-	case REPORT_NORMAL:
-		report_f=report_orig;
-		break;
-
-	case REPORT_STDOUT:
-		report_f=report_stdout;
-		break;
-
-	case REPORT_RAW:
-		report_f=report_raw;
-		break;
-
-	default:
-		report_f=report_orig;
+	/*
+	 check if the mode we want is valid in the current data table
+	 else: reset to sane default mode just for safety and bail
+	 */
+	if(mode > (REPORTMODES_ENTRIES - 1)) {
+                report_f=report_orig;
 		ret=1;
+	} else {
+                report_f=report_modes[mode].func;
 	}
 
-	return ret;
+        return ret;
 }
 
+/*
+ hand out a pointer to the internal report modes description table
+ (for enumeration or informational purposes - writing should be prohibited)
+ return how many entries the table has
+ */
+int get_reportmodes(const struct report_mode **out)
+{
+	int n;
+
+	n=REPORTMODES_ENTRIES;
+	*out=report_modes;
+
+	return n;
+}

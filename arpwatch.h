@@ -2,7 +2,7 @@
 #define ETHERCODES "ethercodes.dat"
 
 /* Checkpoint time in seconds */
-#define CHECKPOINT (3*60)
+#define CHECKPOINT_INTERVAL (3*60)
 
 #define MEMCMP(a, b, n) memcmp((char *)a, (char *)b, n)
 #define BCOPY(a, b, n) memmove((char *)b, (char *)a, n)

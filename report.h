@@ -1,9 +1,11 @@
 #ifndef REPORT_H
 #define REPORT_H
 
-#define REPORT_NORMAL 0
-#define REPORT_STDOUT 1
-#define REPORT_RAW 2
+enum {
+	REPORT_NORMAL=0,
+	REPORT_STDOUT,
+	REPORT_RAW,
+};
 
 enum {
         ACTION_ACTIVITY=0,
@@ -23,9 +25,19 @@ enum {
 	ACTION_ETHER_WRONGTYPE,
 };
 
+
+/* struct describing a report function */
+struct report_mode {
+	void (*func)(int , u_int32_t, u_char *, u_char *, time_t *, time_t *);
+	const char *name;
+        unsigned int flags;
+};
+
+
 #define ACTION_MAX ACTION_ETHER_WRONGTYPE
 
 void report(int, u_int32_t, u_char *, u_char *, time_t *, time_t *);
 int setup_reportmode(int mode);
+int get_reportmodes(const struct report_mode **out);
 
 #endif

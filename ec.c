@@ -65,8 +65,6 @@ static struct ecent *list;
 static u_int ec_last = 0;
 static u_int ec_len = 0;
 
-/* Forwards */
-static int ec_a2o(char *, u_int32_t *);
 
 /* Convert an 3 octets from an ethernet address to a u_int32_t */
 static int ec_a2o(char *cp, u_int32_t * op)

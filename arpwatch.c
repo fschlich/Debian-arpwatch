@@ -176,7 +176,7 @@ int main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while((op = getopt(argc, argv, "df:i:n:Nr:m:ps:t:F:u:P:")) != EOF) {
+	while((op = getopt(argc, argv, "df:i:n:Nr:m:ps:t:F:u:P:h")) != EOF) {
 		switch (op) {
 
 		case 'd':
@@ -241,6 +241,7 @@ int main(int argc, char **argv)
 			//printf("arpwatch: using pcap filter: %s\n", pcap_filter);
 			break;
 
+		case 'h':
 		default:
 			usage();
 		}
@@ -275,7 +276,7 @@ int main(int argc, char **argv)
 
 		/* Determine network and netmask */
 		if(pcap_lookupnet(interface, &net, &netmask, errbuf) < 0) {
-			fprintf(stderr, "%s: assuming unconfigured interface %s (%s), continuing\n", prog, interface, errbuf);
+			fprintf(stderr, "%s: assuming unconfigured interface \"%s\" (%s), continuing\n", prog, interface, errbuf);
                         net=0;
                         netmask=0;
 		}
@@ -285,7 +286,7 @@ int main(int argc, char **argv)
 
 		pd = pcap_open_live(interface, snaplen, !nopromisc, timeout, errbuf);
 		if(pd == NULL) {
-			fprintf(stderr, "%s: pcap open %s (%s)\n", prog, interface, errbuf);
+			fprintf(stderr, "%s: pcap_open for interface \"%s\" failed (%s)\n", prog, interface, errbuf);
 			exit(1);
 		}
 #ifdef WORDS_BIGENDIAN
@@ -371,7 +372,7 @@ int main(int argc, char **argv)
 	if(rfilename == NULL) {
 		setsignal(SIGQUIT, checkpoint);
 		setsignal(SIGALRM, checkpoint);
-		alarm(CHECKPOINT);
+		alarm(CHECKPOINT_INTERVAL);
 	}
 
 	switch (linktype) {
@@ -795,23 +796,28 @@ RETSIGTYPE checkpoint(int signo)
 	else {
 		alarm(0);
 		dump();
-		alarm(CHECKPOINT);
+		alarm(CHECKPOINT_INTERVAL);
 	}
 	return RETSIGVAL;
 }
 
 __dead void usage(void)
 {
-	extern char version[];
+	int n, i;
+        const struct report_mode *modes;
+	extern const char *version;
+
+        n=get_reportmodes(&modes);
 
 	printf("%s version %s - released under GPL\n", prog, version);
 	printf("    -d                increase debugging level\n" \
 	       "    -i if             only listen on interface if\n" \
-	       "    -m report_mode    run in mode:\n" \
-	       "                          0 - arpwatch daemon, syslog+mail (DEFAULT)\n" \
-	       "                          1 - print reports to stdout, no daemon\n" \
-	       "                          2 - print comma-separated to stdout, no daemon\n" \
-	       "    -u username       drop privileges to username after opening interface\n"
+	       "    -m report_mode    run in mode:\n"
+	      );
+	for(i=0; i < n; i++) {
+		printf("\t\t\t%d - %s\n", i, modes[i].name);
+	}
+	printf("    -u username       drop privileges to username after opening interface\n"
 	       "    -p                do NOT put interface into promisc mode\n" \
 	       "    -P \"pcap_filter\"  attach pcap filter; see tcpdump(8) for expressions\n" \
 	       "    -n net[/width]    add networks to watch\n" \

@@ -311,10 +311,13 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 	(void)fprintf(f, "To: %s\n", watcher);
 	if (interface == NULL) interface = ""; /* shouldn't happen */
 	hn = gethname(a);
-	(void)fprintf(f, "Subject: %s (%s) %s\n", title, hn,
-		      interface);
-	if (isdigit(*hn))
+	if (!isdigit(*hn))
+		(void)fprintf(f, "Subject: %s (%s) %s\n", title, hn,
+			      interface);
+	else {
+		(void)fprintf(f, "Subject: %s %s\n", title, interface);
 		hn = unknown;
+	}
 	(void)putc('\n', f);
 	(void)fprintf(f, fmt, "hostname", hn);
 	(void)fprintf(f, fmt, "ip address", intoa(a));

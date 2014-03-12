@@ -1,0 +1,25 @@
+Description: #288994 display ip in subject if hostname unknown
+ This is a very simple patch to display the IP address in the subject in
+ case no hostname is known. A subject line such as "new station eth0" is not
+ only very uninformative, but also quite confusing at the beginning.
+From: Sebastian Reichelt <SebastianR@gmx.de>
+
+--- a/report.c	2004-12-16 22:18:26.000000000 +0100
++++ b/report.c	2005-01-06 17:44:08.000000000 +0100
+@@ -311,13 +311,10 @@
+ 	(void)fprintf(f, "To: %s\n", watcher);
+ 	if (interface == NULL) interface = ""; /* shouldn't happen */
+ 	hn = gethname(a);
+-	if (!isdigit(*hn))
+-		(void)fprintf(f, "Subject: %s (%s) %s\n", title, hn,
+-			      interface);
+-	else {
+-		(void)fprintf(f, "Subject: %s %s\n", title, interface);
++	(void)fprintf(f, "Subject: %s (%s) %s\n", title, hn,
++		      interface);
++	if (isdigit(*hn))
+ 		hn = unknown;
+-	}
+ 	(void)putc('\n', f);
+ 	(void)fprintf(f, fmt, "hostname", hn);
+ 	(void)fprintf(f, fmt, "ip address", intoa(a));

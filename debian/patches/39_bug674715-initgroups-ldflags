@@ -1,0 +1,50 @@
+Description: changes from 2.1a15-1.2 NMU
+  * Fix initgroups() adding the gid 0 group to the list. Instead of dropping
+    privileges it was in fact adding it. This is CVE-2012-2653. closes: #674715
+  * Makefile.in: add LDFLAGS support.
+Author: Yves-Alexis Perez <corsac@debian.org>
+
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -51,6 +51,7 @@ DEFS = -DDEBUG @DEFS@ -DARPDIR=\"$(ARPDIR)\" -DPATH_SENDMAIL=\"$(SENDMAIL)\" \
+ 
+ # Standard CFLAGS
+ CFLAGS = $(CCOPT) $(DEFS) $(INCLS)
++LDFLAGS = @LDFLAGS@
+ 
+ # Standard LIBS
+ LIBS = @LIBS@
+@@ -97,11 +98,11 @@ all: $(ALL)
+ 
+ arpwatch: $(WOBJ) @V_PCAPDEP@
+ 	@rm -f $@
+-	$(CC) $(CFLAGS) -o $@ $(WOBJ) $(LIBS)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(WOBJ) $(LIBS)
+ 
+ arpsnmp: $(SOBJ)
+ 	@rm -f $@
+-	$(CC) $(CFLAGS) -o $@ $(SOBJ) $(SLIBS)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SOBJ) $(SLIBS)
+ 
+ version.o: version.c
+ version.c: $(srcdir)/VERSION
+@@ -109,7 +110,7 @@ version.c: $(srcdir)/VERSION
+ 	sed -e 's/.*/char version[] = "&";/' $(srcdir)/VERSION > $(srcdir)/$@
+ 
+ zap: zap.o intoa.o
+-	$(CC) $(CFLAGS) -o $@ zap.o intoa.o -lutil
++	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ zap.o intoa.o -lutil
+ 
+ install: force
+ 	$(INSTALL) -m 555 -o bin -g bin arpwatch $(DESTDIR)$(BINDEST)
+--- a/arpwatch.c
++++ b/arpwatch.c
+@@ -153,7 +153,7 @@ void dropprivileges(const char* user)
+        struct passwd* pw;
+        pw = getpwnam( user );
+        if ( pw ) {
+-               if ( initgroups(pw->pw_name, 0) != 0 || setgid(pw->pw_gid) != 0 ||
++               if ( initgroups(pw->pw_name, pw->pw_gid) != 0 || setgid(pw->pw_gid) != 0 ||
+                        setuid(pw->pw_uid) != 0 ) {
+                        syslog(LOG_ERR, "Couldn't change to '%.32s' uid=%d gid=%d", user,pw->pw_uid, pw->pw_gid);
+                        exit(1);

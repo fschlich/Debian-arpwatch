@@ -1,3 +1,8 @@
+NG 1.0:
+-Fix small typo in man-page
+-Allow getopt() to complain about unknown options (remove opterr=0)
+-Rework help output and print to stdout, not stderr
+
 DROP10:
 -Fix longstanding and unnoticed BUG:
 when running in default/daemon mode arp.dat was not checkpointed and as 

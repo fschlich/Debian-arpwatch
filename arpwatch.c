@@ -169,7 +169,6 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	opterr = 0;
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
@@ -738,11 +737,23 @@ __dead void usage(void)
 {
 	extern char version[];
 
-	fprintf(stderr, "%s version %s\n", prog, version);
-        fprintf(stderr,
-                "    [-dN] [-i interface] [-m report_mode] [-p]\n" \
-                "    [-n net[/width]] [-f data_file] [-r pcap_dump_file]\n" \
-                "    [-s sendmail_prog] [-F mail_from] [-t mail_to] [-u username]\n");
+	printf("%s version %s\n", prog, version);
+	printf("    -d               increase debugging level\n" \
+	       "    -i if            only listen on interface if\n" \
+	       "    -m report_mode   run in mode:\n" \
+	       "                         0 - arpwatch daemon, syslog+mail (DEFAULT)\n" \
+	       "                         1 - print reports to stdout, no daemon\n" \
+	       "                         2 - print comma-separated to stdout, no daemon\n" \
+	       "    -u username      drop privileges to username after opening interface\n"
+	       "    -p               do NOT put interface into promisc mode\n" \
+	       "    -n net[/width]   add networks to watch\n" \
+               "    -N               do NOT report bogons\n" \
+	       "    -f data_file     write arp DB to file instead of default arp.dat\n" \
+	       "    -r pcap_dump     read in data from captured pcap file instead of network\n" \
+	       "    -t mail_to       mail reports To:\n" \
+	       "    -F mail_from     set mail From: header\n" \
+	       "    -s prog          use prog instead of sendmail to send mail\n" \
+	      );
 	exit(1);
 }
 

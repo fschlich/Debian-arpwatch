@@ -1,3 +1,7 @@
+NG 1.5:
+-Report arp.dat and ethercode.dat reading failures in an explicit way
+ thanks to Chuck Chargin Jr. for pointing it out
+
 NG 1.4:
 -Report all error arpwatch can detect via the standard report modes
  thanks to Russ Starr for suggesting

@@ -137,18 +137,24 @@ int dump(void)
 	return (1);
 }
 
-/* Initialize the databases */
-int readdata(void)
+
+/*
+ initialize/read from files the
+ -arp.dat database
+ -the ethercodes.dat database
+ 
+ return: 0 = OK, 1 = arp.dat failed, 2 = ethercodes.dat failed
+ */
+int readdata()
 {
 	FILE *f;
 
 	if((f = fopen(arpfile, "r")) == NULL) {
-		syslog(LOG_ERR, "fopen(%s): %m", arpfile);
-		return (0);
+		return(1);
 	}
-	if(!file_loop(f, ent_add, arpfile)) {
+	if(file_loop(f, ent_add, arpfile) == 0) {
 		fclose(f);
-		return (0);
+		return(1);
 	}
 	fclose(f);
 
@@ -160,9 +166,11 @@ int readdata(void)
 	if( ((f = fopen(ethercodes, "r")) != NULL) || ((f=fopen(ETHERCODES, "r")) != NULL) ) {
 		ec_loop(f, ec_add, ethercodes);
 		fclose(f);
+	} else {
+		return(2);
 	}
 
-	return (1);
+	return(0);
 }
 
 #if 0

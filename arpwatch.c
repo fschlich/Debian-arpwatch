@@ -147,6 +147,7 @@ int main(int argc, char **argv)
 {
 	char *cp;
 	int op, snaplen, timeout, linktype, status;
+	int ret;
 
 	pcap_t *pd;
 	char *interface, *rfilename;
@@ -322,10 +323,29 @@ int main(int argc, char **argv)
 	if(rfilename == NULL)
 		syslog(LOG_INFO, "listening on %s", interface);
 
-	/* Read in database */
+	/*
+	 read in the arp.dat and ethercodes.dat databases
+	 o exit on no arp.dat
+	 o don't exit on no ethercodes.dat
+	 o try to report meaningful errors if something fails
+
+	 sort arp db
+	 if debuglevel is high enough: dump() it
+	 */
 	initializing = 1;
-	if(!readdata())
+	ret=readdata();
+	if(ret == 1) {
+		fprintf(stderr, "%s: could not read arp db \"%s\": %s\n" \
+			"\tPlease create an arpwatch-writeable empty file \"%s\" first.\n",
+			prog, arpfile, strerror(errno), arpfile
+		       );
 		exit(1);
+	} else if(ret == 2) {
+		fprintf(stderr, "%s: could not read ethercodes.dat \"%s\": %s, continuing\n" \
+			"\tThere will be no MAC -> vendor translation.\n",
+			prog, ethercodes, strerror(errno)
+		       );
+	}
 	sorteinfo();
 
         if(debug > 2) {
@@ -784,7 +804,7 @@ __dead void usage(void)
 {
 	extern char version[];
 
-	printf("%s version %s\n", prog, version);
+	printf("%s version %s - released under GPL\n", prog, version);
 	printf("    -d                increase debugging level\n" \
 	       "    -i if             only listen on interface if\n" \
 	       "    -m report_mode    run in mode:\n" \

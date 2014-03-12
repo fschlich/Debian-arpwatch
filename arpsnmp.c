@@ -110,11 +110,17 @@ int main(int argc, char **argv)
 
 	openlog(prog, 0, LOG_DAEMON);
 
-	/* Read in database */
+	/*
+	 Read in databases
+	 XXX todo: file locking
+	 
+	 not getting both of arp.dat and ethercodes.dat is considered fatal
+	 */
 	initializing = 1;
-	/* XXX todo: file locking */
-	if(!readdata())
+	if(readdata() > 0) {
+		fprintf(stderr, "%s: could not open %s or %s\n", prog, arpfile, ethercodes);
 		exit(1);
+	}
 	sorteinfo();
 
         if(debug > 2) {

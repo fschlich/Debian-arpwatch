@@ -1,3 +1,15 @@
+
+DROP4.1:
+-Some systems don't have strndup() - sorry, overread that it's a GNU extension
+ so let configure check and have a replacement function ready [QUICKFIX]
+ Thanks to Jim Sandoz
+
+DROP4:
+-Compile fix for arpwatch.c - report_mode was missing
+-Segfault fix for arpwatch.c<-report.c: report_f was not initialized
+-Apply vendor security patch against hostname overflow + strcpy()->strncpy()
+-Shorten checkpoint time from 15 to 10 minutes (even lower values sensible?)
+
 DROP3:
 -Close stdin/out/err in daemon mode again
 -report() is now a dispatching function for the actual reporting function

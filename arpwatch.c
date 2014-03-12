@@ -104,8 +104,6 @@ char *prog;
 int can_checkpoint;
 int swapped;
 int nobogons;
-/* mode of operation, defined via report.h */
-int report_mode;
 
 static u_int32_t net;
 static u_int32_t netmask;
@@ -144,6 +142,8 @@ int main(int argc, char **argv)
 #ifdef TIOCNOTTY
 	int fd;
 #endif
+        /* default report mode is 0 == old style */
+        int report_mode=0;
 	pcap_t *pd;
 	char *interface, *rfilename;
 	struct bpf_program code;
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-        while((op = getopt(argc, argv, "df:i:n:Nr:m:")) != EOF)
+	while((op = getopt(argc, argv, "df:i:n:Nr:m:")) != EOF) {
 		switch (op) {
 
 		case 'd':
@@ -197,12 +197,11 @@ int main(int argc, char **argv)
                         break;
 
                 case 'm':
-                        report_mode=atoi(optarg);
-
 			/*
 			 set the report function pointer to whatever is requested
 			 the original mode remains default
 			 */
+			report_mode=atoi(optarg);
 			if(setup_reportmode(report_mode)) {
                                 fprintf(stderr, "%s: Unknown mode, exiting\n", prog);
                                 exit(1);
@@ -212,6 +211,7 @@ int main(int argc, char **argv)
 		default:
 			usage();
 		}
+	}
 
 	if(optind != argc)
 		usage();

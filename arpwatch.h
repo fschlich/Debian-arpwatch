@@ -1,6 +1,7 @@
 #define ARPFILE "arp.dat"
 #define ETHERCODES "ethercodes.dat"
-#define CHECKPOINT (15*60)	/* Checkpoint time in seconds */
+/* Checkpoint time in seconds */
+#define CHECKPOINT (10*60)
 
 #define MEMCMP(a, b, n) memcmp((char *)a, (char *)b, n)
 #define BCOPY(a, b, n) memmove((char *)b, (char *)a, n)

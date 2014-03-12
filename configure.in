@@ -21,7 +21,7 @@ AC_LBL_C_INIT(V_CCOPT, V_INCLS)
 AC_CHECK_HEADERS(fcntl.h memory.h)
 AC_HEADER_TIME
 
-AC_REPLACE_FUNCS(bcopy strerror)
+AC_REPLACE_FUNCS(bcopy strerror strndup)
 
 dnl The following generates a warning from autoconf...
 AC_C_BIGENDIAN
@@ -48,7 +48,7 @@ osf3*)
 esac
 
 AC_CHECK_TYPE(int32_t, int)
-AC_CHECK_TYPE(u_int32_t, u_int)
+AC_CHECK_TYPE(u_int32_t, unsigned int)
 
 AC_LBL_DEVEL(V_CCOPT)
 

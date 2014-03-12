@@ -40,8 +40,7 @@
 #include "os-proto.h"
 #endif
 
-char *strerror(num)
-int num;
+char * strerror(int num)
 {
 	extern int sys_nerr;
 	extern char *sys_errlist[];

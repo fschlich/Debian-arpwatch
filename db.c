@@ -56,9 +56,16 @@
 #define FLIPFLIP_DELTA (24*60*60)	/* 24 hours in seconds */
 
 /* Ethernet info */
+/*
+ Ramp up h[] from 34 to 64 -Freek
+ Original comment:
+ DNS name components can be up to 63 octets, and
+ that's not counting non-alphanumerics that may
+ get expanded to \nnn. --okir
+ */
 struct einfo {
 	u_char e[6];		/* ether address */
-	char h[34];		/* simple hostname */
+	char h[64];		/* simple hostname */
 	time_t t;		/* timestamp */
 };
 
@@ -267,9 +274,13 @@ static struct einfo *elist_alloc(u_int32_t a, u_char * e, time_t t, char *h)
 	BCOPY(e, ep->e, 6);
 	if(h == NULL && !initializing)
 		h = getsname(a);
-	if(h != NULL && !isdigit((int)*h))
-		strcpy(ep->h, h);
+	if(h != NULL && !isdigit((int)*h)) {
+                /* this came from SUSE, for savety -Freek */
+		memset(ep->h, 0, sizeof(ep->h));
+		strncpy(ep->h, h, sizeof(ep->h)-1);
+	}
 	ep->t = t;
+
 	return (ep);
 }
 
@@ -284,9 +295,13 @@ static void check_hname(struct ainfo *ap)
 		return;
 	ep = ap->elist[0];
 	h = getsname(ap->a);
+
 	if(!isdigit((int)*h) && strcmp(h, ep->h) != 0) {
 		syslog(LOG_INFO, "hostname changed %s %s %s -> %s", intoa(ap->a), e2str(ep->e), ep->h, h);
-		strcpy(ep->h, h);
+
+		/* this came from SUSE, for savety -Freek */
+		memset(ep->h, 0, sizeof(ep->h));
+		strncpy(ep->h, h, sizeof(ep->h)-1);
 	}
 }
 

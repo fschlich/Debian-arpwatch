@@ -1,0 +1,5 @@
+-Remove most of the calls to syslog()
+o change to use report() or some other messaging facility?
+-Make e2str() thread-safe
+o many references in code that rely on static buffer
+

@@ -3,6 +3,9 @@ int dump(void);
 void dumpone(u_int32_t, u_char *, time_t, char *);
 int readdata(void);
 char *savestr(const char *);
+#ifndef HAVE_STRNDUP
+char *strndup(const char *s, size_t n);
+#endif
 
 extern char *arpdir;
 extern char *newarpfile;

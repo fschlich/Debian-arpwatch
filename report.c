@@ -66,8 +66,13 @@ struct rtentry;
 
 #define PLURAL(n) ((n) == 1 || (n) == -1 ? "" : "s")
 
-/* the reporting function pointer */
-void (*report_f)(int , u_int32_t, u_char *, u_char *, time_t *, time_t *);
+static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p);
+    static void report_stdout(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p);
+static void report_raw(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p);
+
+
+/* the reporting function pointer -- initialize with default mode */
+void (*report_f)(int , u_int32_t, u_char *, u_char *, time_t *, time_t *)=report_orig;
 
 /* number of outstanding children */
 static int cdepth;

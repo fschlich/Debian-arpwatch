@@ -180,7 +180,6 @@ static u_char decnet[3] = { 0xaa, 0x0, 0x4 };
 /* Returns true if an ethernet address is decnet, else false */
 int isdecnet(u_char * e)
 {
-
 	return (MEMCMP(e, decnet, sizeof(decnet)) == 0);
 }
 

@@ -1,3 +1,10 @@
+NG 1.7
+-Update configure system
+o config.{sub,guess} to support x86_64 better
+o configure.in to check for pcap.h and various other headers / functions
+-Move bihourly to contrib/ and re-add man-page
+ for both, thanks to Alex Shubnik
+
 NG 1.6:
 -Clean up the reporting via a central report function description table
 o makes it easier to add custom reporting functions

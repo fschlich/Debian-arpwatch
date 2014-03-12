@@ -145,9 +145,6 @@ distclean:
 tags:	$(TAGFILES)
 	ctags -wtd $(TAGFILES)
 
-ethers.new: arp.dat
-	./arp2ethers > ethers.new
-
 tar:	force
 	@cwd=`pwd` ; name=$(PROG)-`cat VERSION` ; \
 	    list="" ; tar="tar chf" ; temp="$$name.tar.gz" ; \

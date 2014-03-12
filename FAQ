@@ -10,6 +10,15 @@ It used to be historically 10*60 seconds; as of this writing it was set to
 
 
 Q:
+Why does arpwatch show / arp.dat contain MAC adresses like 0:16:e:f7:2:fa instead of 00:16:0e:f7:2:fa ?
+
+A:
+'00' is explicit notation for high_nibble/low_nibble, both being '0'.
+'0' is just hexadecimal notation for the same bitstring.
+You can build arpwatch with --enable-fancy-mac to change this behaviour.
+
+
+Q:
 Capturing is using too much CPU on a high traffic network.
 
 A:

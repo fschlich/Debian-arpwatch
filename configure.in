@@ -18,10 +18,16 @@ fi
 
 AC_LBL_C_INIT(V_CCOPT, V_INCLS)
 
-AC_CHECK_HEADERS(fcntl.h memory.h)
+AC_CHECK_HEADERS(fcntl.h memory.h syslog.h)
+AC_CHECK_HEADERS(netdb.h netinet/in.h sys/socket.h sys/file.h sys/ioctl.h \
+sys/time.h arpa/inet.h)
+AC_CHECK_HEADERS(pcap.h)
+
 AC_HEADER_TIME
 
 AC_REPLACE_FUNCS(bcopy strerror strndup)
+
+AC_CHECK_FUNCS(setenv socket strchr strrchr strtol alarm memset memmove)
 
 AC_ARG_ENABLE( fancy-mac,
 [  --enable-fancy-mac	  always print MAC adresses in full xx:xx notation  [default=no]],,

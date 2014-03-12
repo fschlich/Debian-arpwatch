@@ -1,3 +1,8 @@
+DROP5:
+-Remove #ifdef DEBUG altogether - enabled by default, so what.
+ Since DROP2 I had no luck with stable releases, sorry.
+-Add first & dirty make install hack to install necessary files
+-Reorg and simplify arpwatch.c initialization code
 
 DROP4.1:
 -Some systems don't have strndup() - sorry, overread that it's a GNU extension

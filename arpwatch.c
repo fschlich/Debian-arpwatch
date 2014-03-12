@@ -142,12 +142,12 @@ int main(int argc, char **argv)
 #ifdef TIOCNOTTY
 	int fd;
 #endif
-        /* default report mode is 0 == old style */
-        int report_mode=0;
 	pcap_t *pd;
 	char *interface, *rfilename;
 	struct bpf_program code;
 	char errbuf[PCAP_ERRBUF_SIZE];
+	/* default report mode is 0 == old style */
+        int report_mode=0;
 
 	if(argv[0] == NULL)
 		prog = "arpwatch";
@@ -170,9 +170,6 @@ int main(int argc, char **argv)
 
 		case 'd':
 			++debug;
-#ifndef DEBUG
-			fprintf(stderr, "%s: Warning: Not compiled with -DDEBUG\n", prog);
-#endif
 			break;
 
 		case 'f':
@@ -206,20 +203,34 @@ int main(int argc, char **argv)
                                 fprintf(stderr, "%s: Unknown mode, exiting\n", prog);
                                 exit(1);
                         }
-                        break;
+			break;
 
 		default:
 			usage();
 		}
 	}
 
-	if(optind != argc)
+	if(optind != argc) {
 		usage();
+	}
 
+	openlog(prog, 0, LOG_DAEMON);
+
+	if(chdir(arpdir) < 0) {
+		fprintf(stderr, "chdir(%s) failed, using current working directory\n", arpdir);
+	}
+
+	/* run in offline mode, no fork, analyze file */
 	if(rfilename != NULL) {
-		net = 0;
-		netmask = 0;
+		pd = pcap_open_offline(rfilename, errbuf);
+		if(pd == NULL) {
+			syslog(LOG_ERR, "pcap open %s: %s", rfilename, errbuf);
+			exit(1);
+		}
+		swapped = pcap_is_swapped(pd);
+
 	} else {
+
 		/* Determine interface if not specified */
 		if(interface == NULL && (interface = pcap_lookupdev(errbuf)) == NULL) {
 			fprintf(stderr, "%s: lookup_device: %s\n", prog, errbuf);
@@ -238,10 +249,11 @@ int main(int argc, char **argv)
 			if(pid < 0) {
 				syslog(LOG_ERR, "main fork(): %m");
 				exit(1);
-			} else if(pid != 0)
+			} else if(pid != 0) {
 				exit(0);
+			}
 
-                        close(fileno(stdin));
+			close(fileno(stdin));
 			close(fileno(stdout));
 			close(fileno(stderr));
 #ifdef TIOCNOTTY
@@ -254,25 +266,10 @@ int main(int argc, char **argv)
 			setsid();
 #endif
 		}
-	}
 
-	openlog(prog, 0, LOG_DAEMON);
-
-	if(chdir(arpdir) < 0) {
-		syslog(LOG_ERR, "chdir(%s): %m", arpdir);
-		syslog(LOG_ERR, "(using current working directory)");
-	}
-
-	if(rfilename != NULL) {
-		pd = pcap_open_offline(rfilename, errbuf);
-		if(pd == NULL) {
-			syslog(LOG_ERR, "pcap open %s: %s", rfilename, errbuf);
-			exit(1);
-		}
-		swapped = pcap_is_swapped(pd);
-	} else {
 		snaplen = max(sizeof(struct ether_header), sizeof(struct fddi_header)) + sizeof(struct ether_arp);
 		timeout = 1000;
+
 		pd = pcap_open_live(interface, snaplen, 1, timeout, errbuf);
 		if(pd == NULL) {
 			syslog(LOG_ERR, "pcap open %s: %s", interface, errbuf);
@@ -314,13 +311,13 @@ int main(int argc, char **argv)
 	if(!readdata())
 		exit(1);
 	sorteinfo();
-#ifdef DEBUG
-	if(debug > 2) {
+
+        if(debug > 2) {
 		debugdump();
 		exit(0);
 	}
-#endif
-	initializing = 0;
+
+        initializing = 0;
 
 	setsignal(SIGINT, die);
 	setsignal(SIGTERM, die);

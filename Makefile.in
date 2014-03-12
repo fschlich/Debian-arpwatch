@@ -17,7 +17,7 @@
 #  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
 #  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-# @(#) $Id: Makefile.in,v 1.68 2000/06/15 00:39:54 leres Exp $ (LBL)
+# @(#) $Id: Makefile.in,v 1.1 2001/01/11 00:41:05 root Exp root $ (LBL)
 
 #
 # Various configurable paths (remember to edit Makefile.in, not Makefile)
@@ -110,13 +110,17 @@ zap: zap.o intoa.o
 	$(CC) $(CFLAGS) -o $@ zap.o intoa.o -lutil
 
 install: force
-	$(INSTALL) -m 555 -o bin -g bin arpwatch $(DESTDIR)$(BINDEST)
-	$(INSTALL) -m 555 -o bin -g bin arpsnmp $(DESTDIR)$(BINDEST)
+	$(INSTALL) -d -m 750 $(DESTDIR)$(BINDEST)
+	$(INSTALL) -m 750 arpwatch $(DESTDIR)$(BINDEST)
+	$(INSTALL) -m 750 arpsnmp $(DESTDIR)$(BINDEST)
+	$(INSTALL) -d -m 750 $(ARPDIR)
+	$(INSTALL) -m 440 ethercodes.dat $(ARPDIR)
+	$(INSTALL) -m 640 arp.dat $(ARPDIR)
 
 install-man: force
-	$(INSTALL) -m 444 -o bin -g bin $(srcdir)/arpwatch.8 \
+	$(INSTALL) -m 444 $(srcdir)/arpwatch.8 \
 	    $(DESTDIR)$(MANDEST)/man8
-	$(INSTALL) -m 444 -o bin -g bin $(srcdir)/arpsnmp.8 \
+	$(INSTALL) -m 444 $(srcdir)/arpsnmp.8 \
 	    $(DESTDIR)$(MANDEST)/man8
 
 lint:	$(GENSRC) force

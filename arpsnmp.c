@@ -87,9 +87,6 @@ int main(int argc, char **argv)
 
 		case 'd':
 			++debug;
-#ifndef DEBUG
-			fprintf(stderr, "%s: Warning: Not compiled with -DDEBUG\n", prog);
-#endif
 			break;
 
 		case 'f':
@@ -111,13 +108,13 @@ int main(int argc, char **argv)
 	if(!readdata())
 		exit(1);
 	sorteinfo();
-#ifdef DEBUG
-	if(debug > 2) {
+
+        if(debug > 2) {
 		debugdump();
 		exit(0);
 	}
-#endif
-	initializing = 0;
+
+        initializing = 0;
 
 	/* Suck files in then exit */
 	for(i = optind; i < argc; ++i)

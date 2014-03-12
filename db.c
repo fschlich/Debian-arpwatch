@@ -352,7 +352,7 @@ struct ainfo *newainfo(void)
 	return (ap);
 }
 
-#ifdef DEBUG
+
 void debugdump(void)
 {
 	int i, j;
@@ -378,4 +378,3 @@ void debugdump(void)
 			}
 		}
 }
-#endif

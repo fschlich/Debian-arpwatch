@@ -226,7 +226,9 @@ int ent_loop(ent_process fn)
 		for(ap = &ainfo_table[i]; ap != NULL; ap = ap->next)
 			for(j = 0; j < ap->ecount; ++j) {
 				ep = ap->elist[j];
-				(*fn) (ap->a, ep->e, ep->t, ep->h);
+				/* and call the dumping function pointer */
+				(*fn)(ap->a, ep->e, ep->t, ep->h);
+				
 				++n;
 			}
 	return (n);

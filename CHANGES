@@ -1,3 +1,10 @@
+NG 1.1:
+-Fix and update man-page to reflect the NG changes
+-Add new feature: -P pcap_filter to use tcpdump-style filters
+ thanks to John P. Rouillard for suggesting a filtering facility
+-Improve error handling for pcap_compile() to print expression
+-Small \n error-msg fix
+
 NG 1.0:
 -Fix small typo in man-page
 -Allow getopt() to complain about unknown options (remove opterr=0)

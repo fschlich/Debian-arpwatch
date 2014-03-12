@@ -65,6 +65,8 @@ int initializing = 1;
 /* don't activate promisc mode */
 int nopromisc = 0;
 
+static FILE *dumpf;
+
 
 /* syslog() helper routine */
 void dosyslog(int p, char *s, u_int32_t a, u_char * ea, u_char * ha)
@@ -89,7 +91,6 @@ void dosyslog(int p, char *s, u_int32_t a, u_char * ea, u_char * ha)
 		syslog(p, "%s %s %s", s, intoa(a), xbuf);
 }
 
-static FILE *dumpf;
 
 void dumpone(u_int32_t a, u_char * e, time_t t, char *h)
 {

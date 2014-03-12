@@ -19,57 +19,72 @@
 .\" WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
 .\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 .\"
-.TH ARPWATCH 8 "8 October 2000"
+.TH ARPWATCH 8 "17 NOVEMBER 2005"
 .UC 4
 .SH NAME
-arpwatch \- keep track of ethernet/ip address pairings
+arpwatch NG \- keep track of ethernet/ip address pairings
 .SH SYNOPSIS
 .na
 .B arpwatch
 [
-.B -dN
+.B -d
 ] [
 .B -f
 .I data_file
-] [
-.B -i
-.I interface
 ]
 .br
-.ti +8
+.ti +9
 [
+.B -i
+.I interface
+] [
 .B -n
 .IR net [/ width
 ]] [
+.B -N
+] [
 .B -r
 .I pcap_file
+]
+.br
+.ti +9
+[
+.B -p
 ] [
+.B -P
+.I pcap_filter
+]
+.br
+.ti +9
+[
 .B -m
 .I report_mode
 ]
 .br
+.ti +9
 [
-.B -p
-] [
 .B -s
 .I sendmail_prog
 ] [
 .B -t
 .I mail_to
 ] [
-.B -f
+.B -F
 .I mail_from
-] [
+]
+.br
+.ti +9
+[
 .B -u
 .I username
 ]
 
 .ad
 .SH DESCRIPTION
-.B Arpwatch
+.B arpwatch
 keeps track for ethernet/ip address pairings. It syslogs activity
 and reports certain changes via email.
-.B Arpwatch
+.B arpwatch
 uses
 .BR pcap (3)
 to listen for arp packets on a local ethernet interface.
@@ -77,7 +92,7 @@ to listen for arp packets on a local ethernet interface.
 .B -d
 is used enable debugging. This also inhibits forking into the
 background and emailing the reports. Instead, they are sent to
-.IR stderr .
+.IR stdout.
 .LP
 .B -f
 is used to set the ethernet/ip address database filename.
@@ -95,7 +110,7 @@ on the same wire. If the optional
 is not specified, the default netmask for the network's class is used.
 .LP
 .B -N
-disables reporting any bogons.
+disables reporting any bogons; see option -n.
 .LP
 .B -r
 is used to specify a savefile
@@ -120,6 +135,15 @@ having the interface in promiscuous mode, while saving considerable resources
 that would be wasted on processing gigabytes of non-broadcast traffic.  OTOH,
 setting promiscuous mode does not mean getting 100% traffic that would concern
 .B arpwatch.
+.LP
+.B -P
+option allows to specify a pcap filter expression for the traffic that
+will be watched by arpwatch. Prepended will be
+"(arp or rarp) and" to select only the ARP traffic. For expression please
+see tcpdump(8). Expressions must be enclosed in quotation marks ("").
+.LP
+.B Example:
+arpwatch -P "src net 10.20.23.0/24"
 .LP
 .B -s
 flag is used to specify the path to the sendmail program.
@@ -212,27 +236,39 @@ ethercodes.dat - vendor ethernet block list
 .SH "SEE ALSO"
 .na
 .nh
-.BR arpsnmp (8),
-.BR arp (8),
-.BR bpf (4),
-.BR tcpdump (1),
-.BR pcapture (1),
-.BR pcap (3)
+.BR arpsnmp(8),
+.BR arp(8),
+.BR bpf(4),
+.BR tcpdump(1),
+.BR pcapture(1),
+.BR tcpdump(8),
+.BR pcap(3)
 .ad
 .hy
 .SH AUTHORS
+arpwatch NG was forked by Freek and is based upon the original arpwatch 2.1a13 and works of:
+.LP
 Craig Leres of the
 Lawrence Berkeley National Laboratory Network Research Group,
 University of California, Berkeley, CA.
 .LP
-The current version is available via anonymous ftp:
-.LP
+The old arpwatch is available via anonymous ftp:
 .RS
 .I ftp://ftp.ee.lbl.gov/arpwatch.tar.gz
 .RE
-.SH BUGS
-Please send bug reports to arpwatch@ee.lbl.gov.
+
 .LP
+Numerous Debian vendor patches were merged, thanks to Peter Kelemen
+.LP
+.LP
+arpwatch NG versions are announced at:
+.LP
+.RS
+.I
+http://freshmeat.net/projects/arpwatch-ng
+.RE
+
+.SH BUGS
 Attempts are made to suppress DECnet flip flops but they
 aren't always successful.
 .LP

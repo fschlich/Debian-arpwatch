@@ -151,8 +151,11 @@ int main(int argc, char **argv)
 	pcap_t *pd;
 	char *interface, *rfilename;
 	struct bpf_program code;
+	
 	char errbuf[PCAP_ERRBUF_SIZE];
-
+	/* this is the default filter: only arp or rarp traffic */
+	char pcap_filter[512]={"(arp or rarp)"};
+	
 	/* default report mode is 0 == old style */
 	int report_mode=0;
         char *drop_username=NULL;
@@ -172,7 +175,7 @@ int main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while((op = getopt(argc, argv, "df:i:n:Nr:m:ps:t:F:u:")) != EOF) {
+	while((op = getopt(argc, argv, "df:i:n:Nr:m:ps:t:F:u:P:")) != EOF) {
 		switch (op) {
 
 		case 'd':
@@ -230,6 +233,11 @@ int main(int argc, char **argv)
 
                 case 'u':
 			drop_username=optarg;
+			break;
+			
+		case 'P':
+			sprintf(pcap_filter, "%s and %s", "(arp or rarp)", optarg);
+			//printf("arpwatch: using pcap filter: %s\n", pcap_filter);
 			break;
 
 		default:
@@ -303,12 +311,12 @@ int main(int argc, char **argv)
 	}
 
 	/* Compile and install filter */
-	if(pcap_compile(pd, &code, "arp or rarp", 1, netmask) < 0) {
-		fprintf(stderr, "%s: pcap_compile: %s", prog, pcap_geterr(pd));
+	if(pcap_compile(pd, &code, pcap_filter, 1, netmask) < 0) {
+		fprintf(stderr, "%s: pcap_compile %s for: %s\n", prog, pcap_geterr(pd), pcap_filter);
 		exit(1);
 	}
 	if(pcap_setfilter(pd, &code) < 0) {
-		fprintf(stderr, "%s: pcap_setfilter: %s", prog, pcap_geterr(pd));
+		fprintf(stderr, "%s: pcap_setfilter: %s\n", prog, pcap_geterr(pd));
 		exit(1);
 	}
 	if(rfilename == NULL)
@@ -738,21 +746,22 @@ __dead void usage(void)
 	extern char version[];
 
 	printf("%s version %s\n", prog, version);
-	printf("    -d               increase debugging level\n" \
-	       "    -i if            only listen on interface if\n" \
-	       "    -m report_mode   run in mode:\n" \
-	       "                         0 - arpwatch daemon, syslog+mail (DEFAULT)\n" \
-	       "                         1 - print reports to stdout, no daemon\n" \
-	       "                         2 - print comma-separated to stdout, no daemon\n" \
-	       "    -u username      drop privileges to username after opening interface\n"
-	       "    -p               do NOT put interface into promisc mode\n" \
-	       "    -n net[/width]   add networks to watch\n" \
-               "    -N               do NOT report bogons\n" \
-	       "    -f data_file     write arp DB to file instead of default arp.dat\n" \
-	       "    -r pcap_dump     read in data from captured pcap file instead of network\n" \
-	       "    -t mail_to       mail reports To:\n" \
-	       "    -F mail_from     set mail From: header\n" \
-	       "    -s prog          use prog instead of sendmail to send mail\n" \
+	printf("    -d                increase debugging level\n" \
+	       "    -i if             only listen on interface if\n" \
+	       "    -m report_mode    run in mode:\n" \
+	       "                          0 - arpwatch daemon, syslog+mail (DEFAULT)\n" \
+	       "                          1 - print reports to stdout, no daemon\n" \
+	       "                          2 - print comma-separated to stdout, no daemon\n" \
+	       "    -u username       drop privileges to username after opening interface\n"
+	       "    -p                do NOT put interface into promisc mode\n" \
+	       "    -P \"pcap_filter\"  attach pcap filter; see tcpdump(8) for expressions\n" \
+	       "    -n net[/width]    add networks to watch\n" \
+               "    -N                do NOT report bogons\n" \
+	       "    -f data_file      write arp DB to file instead of default arp.dat\n" \
+	       "    -r pcap_dump      read in data from captured pcap file instead of network\n" \
+	       "    -t mail_to        mail reports To:\n" \
+	       "    -F mail_from      set mail From: header\n" \
+	       "    -s prog           use prog instead of sendmail to send mail\n" \
 	      );
 	exit(1);
 }

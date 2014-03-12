@@ -203,8 +203,9 @@ int main(int argc, char **argv)
 			 set the report function pointer to whatever is requested
 			 the original mode remains default
 			 */
-			if(report_mode==REPORT_STDOUT) {
-				report=report_stdout;
+			if(setup_reportmode(report_mode)) {
+                                fprintf(stderr, "%s: Unknown mode, exiting\n", prog);
+                                exit(1);
                         }
                         break;
 
@@ -239,9 +240,10 @@ int main(int argc, char **argv)
 				exit(1);
 			} else if(pid != 0)
 				exit(0);
-			//close(fileno(stdin));
-			//close(fileno(stdout));
-			//close(fileno(stderr));
+
+                        close(fileno(stdin));
+			close(fileno(stdout));
+			close(fileno(stderr));
 #ifdef TIOCNOTTY
 			fd = open("/dev/tty", O_RDWR);
 			if(fd >= 0) {

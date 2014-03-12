@@ -1,3 +1,11 @@
+DROP3:
+-Close stdin/out/err in daemon mode again
+-report() is now a dispatching function for the actual reporting function
+-Change notification codes from clear-text("new station") to int
+-Add defines for the former and lookup table
+-Change all calls to report() to use ACTION_ defines
+-DECNet Flipflops are also reported via report(), not dosyslog()
+
 DROP2:
 -Add stdout reporting mode (switch -m)
 -Update ethercodes from nmap-3.81

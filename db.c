@@ -98,7 +98,7 @@ int ent_add(u_int32_t a, u_char * e, time_t t, char *h)
 		ep = ap->elist[0];
 		if(MEMCMP(e, ep->e, 6) == 0) {
 			if(t - ep->t > NEWACTIVITY_DELTA) {
-				report("new activity", a, e, NULL, &t, &ep->t);
+				report(ACTION_ACTIVITY, a, e, NULL, &t, &ep->t);
 				check_hname(ap);
 			}
 			ep->t = t;
@@ -110,7 +110,7 @@ int ent_add(u_int32_t a, u_char * e, time_t t, char *h)
 	if(ap->ecount == 0) {
 		ap->ecount = 1;
 		ap->elist[0] = elist_alloc(a, e, t, h);
-		report("new station", a, e, NULL, &t, NULL);
+		report(ACTION_NEW, a, e, NULL, &t, NULL);
 		return (1);
 	}
 
@@ -125,10 +125,7 @@ int ent_add(u_int32_t a, u_char * e, time_t t, char *h)
 			 */
 			t2 = ap->elist[0]->t;
 			e2 = ap->elist[0]->e;
-			if(t - t2 < FLIPFLIP_DELTA && (isdecnet(e) || isdecnet(e2)))
-				dosyslog(LOG_INFO, "suppressed DECnet flip flop", a, e, e2);
-			else
-				report("flip flop", a, e, e2, &t, &t2);
+			report(ACTION_FLIPFLOP, a, e, e2, &t, &t2);
 			ap->elist[1] = ap->elist[0];
 			ap->elist[0] = ep;
 			ep->t = t;
@@ -143,7 +140,7 @@ int ent_add(u_int32_t a, u_char * e, time_t t, char *h)
 			/* An old entry comes to life */
 			e2 = ap->elist[0]->e;
 			t2 = ap->elist[0]->t;
-			dosyslog(LOG_NOTICE, "reused old ethernet address", a, e, e2);
+			report(ACTION_REUSED, a, e, e2, &t, &t2);
 			/* Shift entries down */
 			len = i * sizeof(ap->elist[0]);
 			BCOPY(&ap->elist[0], &ap->elist[1], len);
@@ -157,7 +154,7 @@ int ent_add(u_int32_t a, u_char * e, time_t t, char *h)
 	/* New ether address */
 	e2 = ap->elist[0]->e;
 	t2 = ap->elist[0]->t;
-	report("changed ethernet address", a, e, e2, &t, &t2);
+	report(ACTION_CHANGED, a, e, e2, &t, &t2);
 	/* Make room at head of list */
 	alist_alloc(ap);
 	len = ap->ecount * sizeof(ap->elist[0]);

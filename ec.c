@@ -201,11 +201,14 @@ int str2e(char *str, u_char * e)
 	return (1);
 }
 
-/* Convert an ethernet address to an ascii ethernet string */
+/*
+ Convert an ethernet address to an ascii ethernet string
+ WARNING: Not reentrant nor thread-safe
+ */
 char *e2str(u_char * e)
 {
 	static char str[32];
 
 	sprintf(str, "%x:%x:%x:%x:%x:%x", e[0], e[1], e[2], e[3], e[4], e[5]);
-	return (str);
+	return(str);
 }

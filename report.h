@@ -3,13 +3,16 @@
 
 #define REPORT_NORMAL 0
 #define REPORT_STDOUT 1
+#define REPORT_RAW 2
 
+#define ACTION_ACTIVITY 0
+#define ACTION_NEW 1
+#define ACTION_REUSED 2
+#define ACTION_CHANGED 3
+#define ACTION_FLIPFLOP 4
+#define ACTION_MAX ACTION_FLIPFLOP
 
-/* the reporting function pointer */
-extern void (*report)(char *, u_int32_t, u_char *, u_char *, time_t *, time_t *);
-
-void report_orig(char *, u_int32_t, u_char *, u_char *, time_t *, time_t *);
-void report_stdout(char *, u_int32_t, u_char *, u_char *, time_t *, time_t *);
-void report_dotted(char *, u_int32_t, u_char *, u_char *, time_t *, time_t *);
+void report(int, u_int32_t, u_char *, u_char *, time_t *, time_t *);
+int setup_reportmode(int mode);
 
 #endif

@@ -129,7 +129,7 @@ clean:
 
 distclean:
 	rm -f $(CLEANFILES) Makefile config.cache config.log config.status \
-	    gnuc.h os-proto.h
+	    gnuc.h os-proto.h *~ arp.dat*
 
 tags:	$(TAGFILES)
 	ctags -wtd $(TAGFILES)

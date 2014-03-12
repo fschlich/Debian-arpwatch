@@ -67,14 +67,17 @@ struct rtentry;
 #define PLURAL(n) ((n) == 1 || (n) == -1 ? "" : "s")
 
 /* the reporting function pointer */
-void (*report)(char *, u_int32_t, u_char *, u_char *, time_t *, time_t *) = report_orig;
+void (*report_f)(int , u_int32_t, u_char *, u_char *, time_t *, time_t *);
 
-static int cdepth;		/* number of outstanding children */
+/* number of outstanding children */
+static int cdepth;
 
 static char *fmtdate(time_t);
 static char *fmtdelta(time_t);
 RETSIGTYPE reaper(int);
 static int32_t gmt2local(void);
+
+static char *TAB[]={ "new activity", "new station", "reused old mac", "changed mac", "dec flipflop", 0 };
 
 static char *fmtdelta(time_t t)
 {
@@ -218,13 +221,27 @@ RETSIGTYPE reaper(int signo)
 }
 
 
+/* main reporting entry point */
+void report(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
+{
+	/* No report until we're initialized */
+	if(initializing) {
+		return;
+	}
+
+	/* just call the setup'd report function */
+	report_f(action, a, e1, e2, t1p, t2p);
+}
+
+
 /* the original form of reporting stations */
-void report_orig(char *title, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
+static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
 {
 	char *cp, *hn;
 	int fd, pid;
 	FILE *f;
-	char tempfile[64], cpu[64], os[64];
+        char *title;
+        char tempfile[64], cpu[64], os[64];
 	char *fmt = "%20s: %s\n";
 	char *watcher = WATCHER;
 	char *watchee = WATCHEE;
@@ -233,9 +250,8 @@ void report_orig(char *title, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, 
 	char buf[132];
 	static int init = 0;
 
-	/* No report until we're initialized */
-	if(initializing)
-		return;
+        /* lookup string to action */
+        title=TAB[action];
 
 	if(debug) {
 		if(debug > 1) {
@@ -338,22 +354,17 @@ void report_orig(char *title, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, 
 
 
 /* instead of sending mail just use stdout */
-void report_stdout(char *title, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
+static void report_stdout(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
 {
 	char *cp, *hn;
-	int fd, pid;
-
-	char tempfile[64], cpu[64], os[64];
+	char cpu[64], os[64];
 	char *fmt = "%20s: %s\n";
-	char *watcher = WATCHER;
-	char *watchee = WATCHEE;
-	char *sendmail = PATH_SENDMAIL;
 	char *unknown = "<unknown>";
 	char buf[132];
-	static int init = 0;
+        FILE *f=stdout;
 
-	FILE *f=stdout;
-
+        char *title=TAB[action];
+        
 	hn = gethname(a);
 	if(!isdigit(*hn))
 		fprintf(f, "%s: %s\n", title, hn);
@@ -386,44 +397,115 @@ void report_stdout(char *title, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p
 		fprintf(f, fmt, "delta", fmtdelta(*t1p - *t2p));
 
 	fprintf(f, "\n");
-        fflush(f);
 }
 
-#if 0
-/* output fields delimited by some character -- TODO */
-void report_dotted(char *title, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
+
+/*
+ output fields delimited by ','
+ */
+static void report_raw(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
 {
-	fprintf(f, "From: %s\n", watchee);
-	fprintf(f, "To: %s\n", watcher);
+	char *hn, *ip, *mac, *oldmac, *vendor;
+	time_t delta;
+
+        char *unknown="<unknown>";
+	static int init=0;
+
+        FILE *f=stdout;
+
+        if(!init) {
+                int i=0;
+		/* print nice format banner once */
+		fprintf(f, "# Format: timestamp,delta,action,hostname,ip,mac,oldmac,vendor\n");
+		fprintf(f, "# actions: ");
+
+		for(;i <= ACTION_MAX; i++) {
+			fprintf(f, "%d=%s ", i, TAB[i]);
+		}
+                fprintf(f, "\n");
+		init = 1;
+        }
+
 	hn = gethname(a);
-	if(!isdigit(*hn))
-		fprintf(f, "Subject: %s (%s)\n", title, hn);
-	else {
-		fprintf(f, "Subject: %s\n", title);
+	if(isdigit(*hn)) {
 		hn = unknown;
 	}
-	putc('\n', f);
-	fprintf(f, fmt, "hostname", hn);
-	fprintf(f, fmt, "ip address", intoa(a));
-	fprintf(f, fmt, "ethernet address", e2str(e1));
-	if((cp = ec_find(e1)) == NULL)
-		cp = unknown;
-	fprintf(f, fmt, "ethernet vendor", cp);
-	if(hn != unknown && gethinfo(hn, cpu, sizeof(cpu), os, sizeof(os))) {
-		sprintf(buf, "%s %s", cpu, os);
-		fprintf(f, fmt, "dns cpu & os", buf);
+
+        ip=intoa(a);
+
+	if((vendor = ec_find(e1))==NULL) {
+		vendor = unknown;
 	}
+
+	/*
+	 e2str() is not reentrant nor thread safe
+	 so strndup() the result before e2str()ing e1
+	 */
 	if(e2) {
-		fprintf(f, fmt, "old ethernet address", e2str(e2));
-		if((cp = ec_find(e2)) == NULL)
-			cp = unknown;
-		fprintf(f, fmt, "old ethernet vendor", cp);
+		oldmac=strndup(e2str(e2),32);
+	} else {
+                oldmac="0:0:0:0:0:0";
 	}
-	if(t1p)
-		fprintf(f, fmt, "timestamp", fmtdate(*t1p));
-	if(t2p)
-		fprintf(f, fmt, "previous timestamp", fmtdate(*t2p));
-	if(t1p && t2p && *t1p && *t2p)
-		fprintf(f, fmt, "delta", fmtdelta(*t1p - *t2p));
+
+	mac=e2str(e1);
+
+        if(t1p && t2p && *t1p && *t2p) {
+		delta = (*t1p - *t2p);
+	} else {
+                delta=0;
+	}
+
+        /* Format: timestamp,delta,action,hostname,ip,mac,oldmac,vendor */
+	fprintf(f, "%d,%d,%d,%s,%s,%s,%s,%s\n",
+                *t1p,
+                delta,
+                action,
+                hn,
+                ip,
+                mac,
+                oldmac,
+                vendor
+               );
+        /*
+         needed to show the output immediately when it is redirected
+         costly call, I know
+         */
+        fflush(f);
+
+        /* clean up */
+	if(e2) {
+                free(oldmac);
+	}
 }
-#endif
+
+
+/*
+ set function pointer to the reporting function
+ dumb switch() right now
+ */
+int setup_reportmode(int mode)
+{
+	int ret=0;
+
+	switch(mode) {
+
+	case REPORT_NORMAL:
+		report_f=report_orig;
+		break;
+
+	case REPORT_STDOUT:
+		report_f=report_stdout;
+		break;
+
+	case REPORT_RAW:
+		report_f=report_raw;
+		break;
+
+	default:
+		report_f=report_orig;
+		ret=1;
+	}
+
+	return ret;
+}
+

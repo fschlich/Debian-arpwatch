@@ -71,6 +71,7 @@ struct rtentry;
 #include "machdep.h"
 #include "setsignal.h"
 #include "util.h"
+#include "report.h"
 
 /* Some systems don't define these */
 #ifndef ETHERTYPE_REVARP
@@ -103,6 +104,8 @@ char *prog;
 int can_checkpoint;
 int swapped;
 int nobogons;
+/* mode of operation, defined via report.h */
+int report_mode;
 
 static u_int32_t net;
 static u_int32_t netmask;
@@ -162,7 +165,7 @@ int main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while((op = getopt(argc, argv, "df:i:n:Nr:")) != EOF)
+        while((op = getopt(argc, argv, "df:i:n:Nr:m:")) != EOF)
 		switch (op) {
 
 		case 'd':
@@ -191,7 +194,19 @@ int main(int argc, char **argv)
 
 		case 'r':
 			rfilename = optarg;
-			break;
+                        break;
+
+                case 'm':
+                        report_mode=atoi(optarg);
+
+			/*
+			 set the report function pointer to whatever is requested
+			 the original mode remains default
+			 */
+			if(report_mode==REPORT_STDOUT) {
+				report=report_stdout;
+                        }
+                        break;
 
 		default:
 			usage();
@@ -217,16 +232,16 @@ int main(int argc, char **argv)
 		}
 
 		/* Drop into the background if not debugging */
-		if(!debug) {
+		if(!debug && report_mode==REPORT_NORMAL) {
 			pid = fork();
 			if(pid < 0) {
 				syslog(LOG_ERR, "main fork(): %m");
 				exit(1);
 			} else if(pid != 0)
 				exit(0);
-			close(fileno(stdin));
-			close(fileno(stdout));
-			close(fileno(stderr));
+			//close(fileno(stdin));
+			//close(fileno(stdout));
+			//close(fileno(stderr));
 #ifdef TIOCNOTTY
 			fd = open("/dev/tty", O_RDWR);
 			if(fd >= 0) {
@@ -266,10 +281,10 @@ int main(int argc, char **argv)
 #endif
 	}
 
-	/*
-	 * Revert to non-privileged user after opening sockets
-	 * (not needed on most systems).
-	 */
+        /*
+         Revert to non-privileged user after opening sockets
+         Just to be safe
+         */
 	setgid(getgid());
 	setuid(getuid());
 
@@ -328,11 +343,13 @@ int main(int argc, char **argv)
 		syslog(LOG_ERR, "bad linktype %d (can't happen)", linktype);
 		exit(1);
 	}
-	if(status < 0) {
+
+        if(status < 0) {
 		syslog(LOG_ERR, "pcap_loop: %s", pcap_geterr(pd));
 		exit(1);
 	}
-	pcap_close(pd);
+
+        pcap_close(pd);
 	if(!dump())
 		exit(1);
 	exit(0);
@@ -701,6 +718,6 @@ __dead void usage(void)
 	extern char version[];
 
 	fprintf(stderr, "Version %s\n", version);
-	fprintf(stderr, "usage: %s [-dN] [-f datafile] [-i interface]" " [-n net[/width]] [-r file]\n", prog);
+        fprintf(stderr, "usage: %s [-dN] [-f datafile] [-i interface] [-n net[/width]] [-r file] [-m mode]\n", prog);
 	exit(1);
 }

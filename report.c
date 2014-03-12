@@ -66,6 +66,9 @@ struct rtentry;
 
 #define PLURAL(n) ((n) == 1 || (n) == -1 ? "" : "s")
 
+/* the reporting function pointer */
+void (*report)(char *, u_int32_t, u_char *, u_char *, time_t *, time_t *) = report_orig;
+
 static int cdepth;		/* number of outstanding children */
 
 static char *fmtdate(time_t);
@@ -214,8 +217,9 @@ RETSIGTYPE reaper(int signo)
 	return RETSIGVAL;
 }
 
-void
-report(char *title, u_int32_t a, u_char * e1, u_char * e2, time_t * t1p, time_t * t2p)
+
+/* the original form of reporting stations */
+void report_orig(char *title, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
 {
 	char *cp, *hn;
 	int fd, pid;
@@ -331,3 +335,95 @@ report(char *title, u_int32_t a, u_char * e1, u_char * e2, time_t * t1p, time_t 
 	syslog(LOG_ERR, "execl: %s: %m", sendmail);
 	exit(1);
 }
+
+
+/* instead of sending mail just use stdout */
+void report_stdout(char *title, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
+{
+	char *cp, *hn;
+	int fd, pid;
+
+	char tempfile[64], cpu[64], os[64];
+	char *fmt = "%20s: %s\n";
+	char *watcher = WATCHER;
+	char *watchee = WATCHEE;
+	char *sendmail = PATH_SENDMAIL;
+	char *unknown = "<unknown>";
+	char buf[132];
+	static int init = 0;
+
+	FILE *f=stdout;
+
+	hn = gethname(a);
+	if(!isdigit(*hn))
+		fprintf(f, "%s: %s\n", title, hn);
+	else {
+		fprintf(f, "%s\n", title);
+		hn = unknown;
+	}
+	putc('\n', f);
+	fprintf(f, fmt, "hostname", hn);
+	fprintf(f, fmt, "ip address", intoa(a));
+	fprintf(f, fmt, "ethernet address", e2str(e1));
+	if((cp = ec_find(e1)) == NULL)
+		cp = unknown;
+	fprintf(f, fmt, "ethernet vendor", cp);
+	if(hn != unknown && gethinfo(hn, cpu, sizeof(cpu), os, sizeof(os))) {
+		sprintf(buf, "%s %s", cpu, os);
+		fprintf(f, fmt, "dns cpu & os", buf);
+	}
+	if(e2) {
+		fprintf(f, fmt, "old ethernet address", e2str(e2));
+		if((cp = ec_find(e2)) == NULL)
+			cp = unknown;
+		fprintf(f, fmt, "old ethernet vendor", cp);
+	}
+	if(t1p)
+		fprintf(f, fmt, "timestamp", fmtdate(*t1p));
+	if(t2p)
+		fprintf(f, fmt, "previous timestamp", fmtdate(*t2p));
+	if(t1p && t2p && *t1p && *t2p)
+		fprintf(f, fmt, "delta", fmtdelta(*t1p - *t2p));
+
+	fprintf(f, "\n");
+        fflush(f);
+}
+
+#if 0
+/* output fields delimited by some character -- TODO */
+void report_dotted(char *title, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p)
+{
+	fprintf(f, "From: %s\n", watchee);
+	fprintf(f, "To: %s\n", watcher);
+	hn = gethname(a);
+	if(!isdigit(*hn))
+		fprintf(f, "Subject: %s (%s)\n", title, hn);
+	else {
+		fprintf(f, "Subject: %s\n", title);
+		hn = unknown;
+	}
+	putc('\n', f);
+	fprintf(f, fmt, "hostname", hn);
+	fprintf(f, fmt, "ip address", intoa(a));
+	fprintf(f, fmt, "ethernet address", e2str(e1));
+	if((cp = ec_find(e1)) == NULL)
+		cp = unknown;
+	fprintf(f, fmt, "ethernet vendor", cp);
+	if(hn != unknown && gethinfo(hn, cpu, sizeof(cpu), os, sizeof(os))) {
+		sprintf(buf, "%s %s", cpu, os);
+		fprintf(f, fmt, "dns cpu & os", buf);
+	}
+	if(e2) {
+		fprintf(f, fmt, "old ethernet address", e2str(e2));
+		if((cp = ec_find(e2)) == NULL)
+			cp = unknown;
+		fprintf(f, fmt, "old ethernet vendor", cp);
+	}
+	if(t1p)
+		fprintf(f, fmt, "timestamp", fmtdate(*t1p));
+	if(t2p)
+		fprintf(f, fmt, "previous timestamp", fmtdate(*t2p));
+	if(t1p && t2p && *t1p && *t2p)
+		fprintf(f, fmt, "delta", fmtdelta(*t1p - *t2p));
+}
+#endif

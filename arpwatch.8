@@ -43,7 +43,12 @@ arpwatch - keep track of ethernet/ip address pairings
 ]] [
 .B -r
 .I file
+] [
+.B -m
+.I report_mode
 ]
+
+
 .ad
 .SH DESCRIPTION
 .B Arpwatch
@@ -93,6 +98,11 @@ to read from instead
 of reading from the network. In this case,
 .B arpwatch
 does not fork.
+.LP
+.B -m
+selects the output mode (report mode). Currently, 0 means the old mode
+(via sendmail), 1 is a simple stdout mode and arpwatch will not fork
+into the background.
 .LP
 Note that an empty
 .I arp.dat

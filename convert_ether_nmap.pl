@@ -6,9 +6,9 @@
 #
 while(<>) {
 	chomp;
-	($mac, $info)= split(/ /);
+	($mac, @info)= split(/ /);
 	$x=substr $mac, 0,2;
 	$y=substr $mac, 2,2;
 	$z=substr $mac, 4, 2;
-	print "$x:$y:$z\t$info\n"
+	print "$x:$y:$z\t@info\n"
 }

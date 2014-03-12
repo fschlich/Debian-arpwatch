@@ -46,10 +46,20 @@ arpwatch \- keep track of ethernet/ip address pairings
 ] [
 .B -m
 .I report_mode
-] [
-.B -p
 ]
-
+.br
+[
+.B -p
+] [
+.B -s
+.I sendmail-prog
+] [
+.B -t
+.I mailto
+] [
+.B -u
+.I username
+]
 
 .ad
 .SH DESCRIPTION
@@ -107,8 +117,27 @@ having the interface in promiscuous mode, while saving considerable resources
 that would be wasted on processing gigabytes of non-broadcast traffic.  OTOH,
 setting promiscuous mode does not mean getting 100% traffic that would concern
 .B arpwatch.
-
 .LP
+.B -s
+flag is used to specify the path to the sendmail program.
+Any program that takes the option -odi and then text from stdin
+can be substituted. This is useful for redirecting reports
+to log files instead of mail
+.LP
+.B -t
+option is used to specify the e-mail address to which reports will be
+sent.  By default, reports are sent to
+.I root
+on the local machine.
+.LP
+.B -u
+instructs arpwatch to drop root privileges and change the UID to
+.I username
+and GID to the primary group of username.
+This is recommended for security reasons, but username
+has to have write access to the default directory.
+.LP
+
 Note that an empty
 .I arp.dat
 file must be created before the first time you run

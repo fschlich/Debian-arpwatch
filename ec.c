@@ -100,7 +100,11 @@ int ec_add(u_int32_t o, char *text)
 		}
 	}
 	list[ec_last].o = o;
-	list[ec_last].text = savestr(text);
+	/*
+         list[ec_last].text = savestr(text);
+	 512 was the previous limit of savestr
+ 	 */
+	list[ec_last].text=strndup(text, 512);
 	++ec_last;
 	return (1);
 }

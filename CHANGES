@@ -1,3 +1,14 @@
+DROP7:
+-Continue merging of Debian patches
+o 11opt_sendmail_path: specify sendmail prog path
+o 14opt_mailto: specify mailto address
+o 15opt_username: drop privileges to this username (without restart)
+
+-Disable savestr() - functionality covered by strndup()
+-Make replacement strndup() safer with checks
+-Drop into daemon mode the latest possible moment
+o replace some syslog() calls with fprintf()s
+
 DROP6:
 -Merge a lot of vendor fixes from Debian (thanks to Peter Kelemen)
 o 06debian_manpages: man-pages for arpfetch, arp2ethers

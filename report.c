@@ -249,9 +249,7 @@ static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t 
         char *title;
         char tempfile[64], cpu[64], os[64];
 	char *fmt = "%20s: %s\n";
-	char *watcher = WATCHER;
 	char *watchee = WATCHEE;
-	char *sendmail = PATH_SENDMAIL;
 	char buf[132];
 	static int init = 0;
 
@@ -308,7 +306,7 @@ static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t 
 	}
 
 	fprintf(f, "From: %s\n", watchee);
-	fprintf(f, "To: %s\n", watcher);
+	fprintf(f, "To: %s\n", mailto);
 	hn = gethname(a);
 	if(isdigit(*hn)) {
 		hn = unknown;
@@ -350,7 +348,7 @@ static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t 
 	}
 	/* XXX Need to freopen()? */
 	/* Always Deliver interactively (pause when child depth gets large) */
-	execl(sendmail, "sendmail", "-odi", watcher, NULL);
+	execl(sendmail, "sendmail", "-odi", mailto, NULL);
 	syslog(LOG_ERR, "execl: %s: %m", sendmail);
 	exit(1);
 }

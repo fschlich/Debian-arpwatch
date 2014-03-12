@@ -12,6 +12,8 @@ extern char *newarpfile;
 extern char *arpfile;
 extern char *oldarpfile;
 extern char *ethercodes;
+extern char *sendmail;
+extern char *mailto;
 
 extern u_char zero[6];
 extern u_char allones[6];

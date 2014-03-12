@@ -56,6 +56,9 @@ struct rtentry;
 #include <syslog.h>
 #include <unistd.h>
 
+#include <pwd.h>
+#include <grp.h>
+
 #include <pcap.h>
 
 #include "gnuc.h"
@@ -134,11 +137,14 @@ int snmp_add(u_int32_t, u_char *, time_t, char *);
 int sanity_ether(struct ether_header *, struct ether_arp *, int);
 int sanity_fddi(struct fddi_header *, struct ether_arp *, int);
 __dead void usage(void) __attribute__ ((volatile));
+static void drop_privileges(const char* user);
+static void go_daemon(void);
+
 
 int main(int argc, char **argv)
 {
 	char *cp;
-	int op, pid, snaplen, timeout, linktype, status;
+	int op, snaplen, timeout, linktype, status;
 #ifdef TIOCNOTTY
 	int fd;
 #endif
@@ -146,8 +152,10 @@ int main(int argc, char **argv)
 	char *interface, *rfilename;
 	struct bpf_program code;
 	char errbuf[PCAP_ERRBUF_SIZE];
+
 	/* default report mode is 0 == old style */
-        int report_mode=0;
+	int report_mode=0;
+        char *drop_username=NULL;
 
 	if(argv[0] == NULL)
 		prog = "arpwatch";
@@ -165,7 +173,7 @@ int main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while((op = getopt(argc, argv, "df:i:n:Nr:m:p")) != EOF) {
+	while((op = getopt(argc, argv, "df:i:n:Nr:m:ps:t:u:")) != EOF) {
 		switch (op) {
 
 		case 'd':
@@ -205,11 +213,23 @@ int main(int argc, char **argv)
                         }
 			break;
 
+                case 't':
+                        mailto=optarg;
+                        break;
+
                 case 'p':
 			++nopromisc;
                         break;
 
-                default:
+                case 's':
+			sendmail=optarg;
+			break;
+
+                case 'u':
+			drop_username=optarg;
+			break;
+
+		default:
 			usage();
 		}
 	}
@@ -248,36 +268,12 @@ int main(int argc, char **argv)
                         netmask=0;
 		}
 
-		/* Drop into the background if not debugging */
-		if(!debug && report_mode==REPORT_NORMAL) {
-			pid = fork();
-			if(pid < 0) {
-				syslog(LOG_ERR, "main fork(): %m");
-				exit(1);
-			} else if(pid != 0) {
-				exit(0);
-			}
-
-			close(fileno(stdin));
-			close(fileno(stdout));
-			close(fileno(stderr));
-#ifdef TIOCNOTTY
-			fd = open("/dev/tty", O_RDWR);
-			if(fd >= 0) {
-				ioctl(fd, TIOCNOTTY, 0);
-				close(fd);
-			}
-#else
-			setsid();
-#endif
-		}
-
 		snaplen = max(sizeof(struct ether_header), sizeof(struct fddi_header)) + sizeof(struct ether_arp);
 		timeout = 1000;
 
 		pd = pcap_open_live(interface, snaplen, !nopromisc, timeout, errbuf);
 		if(pd == NULL) {
-			syslog(LOG_ERR, "pcap open %s: %s", interface, errbuf);
+			fprintf(stderr, "%s: pcap open %s (%s)\n", prog, interface, errbuf);
 			exit(1);
 		}
 #ifdef WORDS_BIGENDIAN
@@ -289,14 +285,17 @@ int main(int argc, char **argv)
          Revert to non-privileged user after opening sockets
          Just to be safe
          */
-	setgid(getgid());
-	setuid(getuid());
+	if(drop_username) {
+		drop_privileges(drop_username);
+	} else {
+		setgid(getgid());
+		setuid(getuid());
+	}
 
 	/* Must be ethernet or fddi */
 	linktype = pcap_datalink(pd);
 	if(linktype != DLT_EN10MB && linktype != DLT_FDDI) {
 		fprintf(stderr, "%s: Link layer type %d not ethernet or fddi", prog, linktype);
-		syslog(LOG_ERR, "Link layer type %d not ethernet or fddi", linktype);
 		exit(1);
 	}
 
@@ -334,6 +333,11 @@ int main(int argc, char **argv)
 		alarm(CHECKPOINT);
 	}
 
+        /* Drop into daemon mode the latest time possible */
+	if(!debug && report_mode==REPORT_NORMAL) {
+		go_daemon();
+	}
+
 	switch (linktype) {
 
 	case DLT_EN10MB:
@@ -361,6 +365,7 @@ int main(int argc, char **argv)
 		exit(1);
 	exit(0);
 }
+
 
 /* Process an ethernet arp/rarp packet */
 void process_ether(u_char * u, const struct pcap_pkthdr *h, const u_char * p)
@@ -724,7 +729,61 @@ __dead void usage(void)
 {
 	extern char version[];
 
-	fprintf(stderr, "Version %s\n", version);
-        fprintf(stderr, "usage: %s [-dN] [-f datafile] [-i interface] [-n net[/width]] [-r file] [-m mode] [-p]\n", prog);
+	fprintf(stderr, "%s version %s\n", prog, version);
+        fprintf(stderr,
+                "    [-dN] [-i interface] [-m mode] [-p]\n" \
+                "    [-n net[/width]] [-f datafile] [-r file]\n" \
+                "    [-s sendmail-prog] [-m mailto] [-u username]\n");
 	exit(1);
+}
+
+
+static void drop_privileges(const char* user)
+{
+	struct passwd* pw;
+	pw=getpwnam(user);
+	if(pw) {
+		if( initgroups(pw->pw_name, 0) != 0 ||
+		    setgid(pw->pw_gid) != 0 ||
+		    setuid(pw->pw_uid) != 0
+		  ){
+			fprintf(stderr, "%s: could not change to %.32s uid=%d gid=%d; exiting", prog, user,pw->pw_uid, pw->pw_gid);
+			exit(1);
+		}
+
+	} else {
+		fprintf(stderr, "%s: could not find user '%.32s'; exiting\n", prog, user);
+		exit(1);
+	}
+
+	//syslog(LOG_INFO, "Running as uid=%d gid=%d", getuid(), getgid());
+}
+
+
+static void go_daemon()
+{
+	pid_t pid;
+        int fd;
+
+	pid = fork();
+	if(pid < 0) {
+		syslog(LOG_ERR, "main fork(): %m");
+		exit(1);
+	} else if(pid != 0) {
+		exit(0);
+	}
+
+	close(fileno(stdin));
+	close(fileno(stdout));
+	close(fileno(stderr));
+#ifdef TIOCNOTTY
+	fd = open("/dev/tty", O_RDWR);
+	if(fd >= 0) {
+		ioctl(fd, TIOCNOTTY, 0);
+		close(fd);
+	}
+#else
+	setsid();
+#endif
+
 }

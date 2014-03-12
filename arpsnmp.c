@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 	}
 
 	opterr = 0;
-	while((op = getopt(argc, argv, "df:")) != EOF)
+        while((op = getopt(argc, argv, "df:s:t:")) != EOF)
 		switch (op) {
 
 		case 'd':
@@ -91,6 +91,14 @@ int main(int argc, char **argv)
 
 		case 'f':
 			arpfile = optarg;
+			break;
+
+                case 's':
+                        sendmail=optarg;
+                        break;
+
+                case 't':
+			mailto=optarg;
 			break;
 
 		default:
@@ -168,7 +176,7 @@ __dead void usage(void)
 {
 	extern char version[];
 
-	fprintf(stderr, "Version %s\n", version);
-	fprintf(stderr, "usage: %s [-d] [-f datafile] file [...]\n", prog);
+	fprintf(stderr, "%s version %s\n", prog, version);
+        fprintf(stderr, "    [-d] [-f datafile] [-s sendmail-prog] [-t mailto] file [...]\n");
 	exit(1);
 }

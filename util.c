@@ -46,10 +46,13 @@
 #include "ec.h"
 #include "file.h"
 #include "util.h"
+#include "addresses.h"
 
-char *arpdir = ARPDIR;
-char *arpfile = ARPFILE;
-char *ethercodes = ETHERCODESDIR "/" ETHERCODES;
+char *arpdir=ARPDIR;
+char *arpfile=ARPFILE;
+char *ethercodes=ETHERCODESDIR "/" ETHERCODES;
+char *sendmail=PATH_SENDMAIL;
+char *mailto=WATCHER;
 
 /* Broadcast ethernet addresses */
 u_char zero[6] = { 0, 0, 0, 0, 0, 0 };
@@ -160,6 +163,7 @@ int readdata(void)
 	return (1);
 }
 
+#if 0
 char *savestr(const char *str)
 {
 	int i;
@@ -183,4 +187,5 @@ char *savestr(const char *str)
 	strsize -= i;
 	return (cp);
 }
+#endif
 

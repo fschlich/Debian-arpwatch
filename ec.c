@@ -212,6 +212,10 @@ char *e2str(u_char * e)
 {
 	static char str[32];
 
-	sprintf(str, "%x:%x:%x:%x:%x:%x", e[0], e[1], e[2], e[3], e[4], e[5]);
+#ifndef FANCY_MAC
+        sprintf(str, "%x:%x:%x:%x:%x:%x", e[0], e[1], e[2], e[3], e[4], e[5]);
+#else
+        sprintf(str, "%02x:%02x:%02x:%02x:%02x:%02x", e[0], e[1], e[2], e[3], e[4], e[5]);
+#endif
 	return(str);
 }

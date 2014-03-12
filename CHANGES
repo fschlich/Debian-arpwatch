@@ -1,3 +1,7 @@
+DROP8:
+-New configure option "--enable-fancy-mac" so MAC adresses are printed always
+in xx:xx:.. notation e.g. 00:0a: instead of 0:0a
+
 DROP7:
 -Continue merging of Debian patches
 o 11opt_sendmail_path: specify sendmail prog path

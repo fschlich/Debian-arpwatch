@@ -439,7 +439,11 @@ static void report_raw(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *
 	if(e2) {
 		oldmac=strndup(e2str(e2),32);
 	} else {
+#ifndef FANCY_MAC
                 oldmac="0:0:0:0:0:0";
+#else
+                oldmac="00:00:00:00:00:00";
+#endif
 	}
 
 	mac=e2str(e1);

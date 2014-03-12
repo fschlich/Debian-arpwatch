@@ -1,4 +1,5 @@
 #include <sys/types.h>
+#include <stdio.h>
 
 /* strndup() may be useful, but is a GNU extension */
 #ifndef HAVE_STRNDUP

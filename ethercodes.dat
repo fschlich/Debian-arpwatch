@@ -1,7 +1,8 @@
-#::	$Id: nmap-mac-prefixes 3092 2006-01-28 07:57:37Z fyodor $ generated with make-mac-prefixes.pl
+#::	$Id: nmap-mac-prefixes 3413 2006-06-01 00:39:02Z fyodor $ generated with make-mac-prefixes.pl
 #::	Original data comes from http://standards.ieee.org/regauth/oui/oui.txt
-#::	These values are known as Organizationally Unique Identifiers (OUIs)
 #::	See http://standards.ieee.org/faqs/OUI.html
+#::	These values are known as Organizationally Unique Identifiers (OUIs)
+#::	We have added a few unregistered OUIs at the end.
 00:00:00	Xerox
 00:00:01	Xerox
 00:00:02	Xerox
@@ -337,7 +338,7 @@
 00:01:4C	Berkeley Process Control
 00:01:4D	Shin Kin Enterprises Co.
 00:01:4E	WIN Enterprises
-00:01:4F	Luminous Networks
+00:01:4F	Adtran
 00:01:50	Gilat Communications
 00:01:51	Ensemble Communications
 00:01:52	Chromatek
@@ -458,8 +459,8 @@
 00:01:C5	Simpler Networks
 00:01:C6	Quarry Technologies
 00:01:C7	Cisco Systems
-00:01:C8	Thomas Conrad
 00:01:C8	Conrad
+00:01:C8	Thomas Conrad
 00:01:C9	Cisco Systems
 00:01:CA	Geocast Network Systems
 00:01:CB	EVR
@@ -1179,7 +1180,7 @@
 00:04:95	Tejas Networks
 00:04:96	Extreme Networks
 00:04:97	MacroSystem Digital Video AG
-00:04:98	Private
+00:04:98	Mahi Networks
 00:04:99	Chino
 00:04:9A	Cisco Systems
 00:04:9B	Cisco Systems
@@ -1277,7 +1278,7 @@
 00:04:F7	Omega Band
 00:04:F8	Qualicable TV Industria E Com.
 00:04:F9	Xtera Communications
-00:04:FA	Mist
+00:04:FA	NBS Technologies
 00:04:FB	Commtech
 00:04:FC	Stratus Computer (DE)
 00:04:FD	Japan Control Engineering Co.
@@ -1837,7 +1838,7 @@
 00:07:2C	Fabricom
 00:07:2D	CNSystems
 00:07:2E	North Node AB
-00:07:2F	Instransa
+00:07:2F	Intransa
 00:07:30	Hutchison Optel Telecom Technology Co.
 00:07:31	Spiricon
 00:07:32	Aaeon Technology
@@ -1974,7 +1975,7 @@
 00:07:B7	Samurai Ind. Prods Eletronicos Ltda
 00:07:B8	American Predator
 00:07:B9	Ginganet
-00:07:BA	Xebeo Communications
+00:07:BA	UTStarcom
 00:07:BB	Candera
 00:07:BC	Identix
 00:07:BD	Radionet
@@ -2160,7 +2161,7 @@
 00:08:90	Avilinks SA
 00:08:91	Lyan
 00:08:92	EM Solutions
-00:08:93	Private
+00:08:93	LE Information Communication
 00:08:94	InnoVISION Multimedia
 00:08:95	Dirc Technologie Gmbh &KG
 00:08:96	Printronix
@@ -2457,7 +2458,7 @@
 00:09:B9	Action Imaging Solutions
 00:09:BA	Maku Informationstechik Gmbh
 00:09:BB	MathStar
-00:09:BC	Digital Safety Technologies
+00:09:BC	Integrian
 00:09:BD	Epygi Technologies
 00:09:BE	Mamiya-OP Co.
 00:09:BF	Nintendo Co.
@@ -2554,7 +2555,7 @@
 00:0A:1B	Stream Labs
 00:0A:1C	Bridge Information Co.
 00:0A:1D	Optical Communications Products
-00:0A:1E	Red-M (Communications) Limited
+00:0A:1E	Red-M Products Limited
 00:0A:1F	ART Ware Telecommunication Co.
 00:0A:20	SVA Networks
 00:0A:21	Integra Telecom Co.
@@ -3002,10 +3003,10 @@
 00:0B:DB	Dell ESG Pcba Test
 00:0B:DC	Akcp
 00:0B:DD	Tohoku Ricoh Co.
-00:0B:DE	Private
+00:0B:DE	Teldix Gmbh
 00:0B:DF	Shenzhen RouterD Networks Limited
 00:0B:E0	SercoNet
-00:0B:E1	Private
+00:0B:E1	Nokia NET Product Operations
 00:0B:E2	Lumenera
 00:0B:E3	Key Stream Co.
 00:0B:E4	Hosiden
@@ -3013,7 +3014,7 @@
 00:0B:E6	Datel Electronics
 00:0B:E7	Comflux Technology
 00:0B:E8	Aoip
-00:0B:E9	Private
+00:0B:E9	Actel
 00:0B:EA	Zultys Technologies
 00:0B:EB	Systegra AG
 00:0B:EC	Nippon Electric Instrument
@@ -3030,7 +3031,7 @@
 00:0B:F7	Nidek Co.
 00:0B:F8	Infinera
 00:0B:F9	Gemstone communications
-00:0B:FA	Private
+00:0B:FA	Exemys SRL
 00:0B:FB	D-NET International
 00:0B:FC	Cisco Systems
 00:0B:FD	Cisco Systems
@@ -3240,7 +3241,7 @@
 00:0C:C9	Ilwoo Data & Technology Co.
 00:0C:CA	Hitachi Global Storage Technologies
 00:0C:CB	Design Combus
-00:0C:CC	Bluesoft
+00:0C:CC	Aeroscout
 00:0C:CD	IEC - Tc57
 00:0C:CE	Cisco Systems
 00:0C:CF	Cisco Systems
@@ -3747,7 +3748,7 @@
 00:0E:C4	Iskra Transmission d.d.
 00:0E:C5	Digital Multitools
 00:0E:C6	Asix Electronics
-00:0E:C7	Appeal Telecom Co.
+00:0E:C7	Motorola Korea
 00:0E:C8	Zoran
 00:0E:C9	Yoko Technology
 00:0E:CA	Wtss
@@ -3776,7 +3777,7 @@
 00:0E:E1	ExtremeSpeed
 00:0E:E2	Custom Engineering S.p.A.
 00:0E:E3	Chiyu Technology Co.
-00:0E:E4	Private
+00:0E:E4	BOE Technology Group Co.
 00:0E:E5	bitWallet
 00:0E:E6	Adimos Systems
 00:0E:E7	AAC Electronics
@@ -3964,7 +3965,7 @@
 00:0F:9D	Newnham Research
 00:0F:9E	Murrelektronik GmbH
 00:0F:9F	Motorola BCS
-00:0F:A0	Lotte Canon Co.
+00:0F:A0	Canon Korea Business Solutions
 00:0F:A1	Gigabit Systems
 00:0F:A2	Digital Path Networks
 00:0F:A3	Alpha Networks
@@ -4279,7 +4280,7 @@
 00:10:D8	Calista
 00:10:D9	IBM Japan, Fujisawa Mt+d
 00:10:DA	Motion Engineering
-00:10:DB	Private
+00:10:DB	Juniper Networks
 00:10:DC	Micro-star International CO.
 00:10:DD	Enable Semiconductor
 00:10:DE	International Datacasting
@@ -4695,7 +4696,7 @@
 00:12:79	Hewlett Packard
 00:12:7A	Sanyu Industry Co.
 00:12:7B	VIA Networking Technologies
-00:12:7C	Pm-luft AB
+00:12:7C	Swegon AB
 00:12:7D	MobileAria
 00:12:7E	Digital Lifestyles Group
 00:12:7F	Cisco
@@ -4834,7 +4835,7 @@
 00:13:04	Flaircomm Technologies Co.
 00:13:05	Epicom
 00:13:06	Always On Wireless
-00:13:07	Accenia
+00:13:07	Paravirtual
 00:13:08	Nuvera Fuel Cells
 00:13:09	Ocean Broadband Networks
 00:13:0A	Nortel
@@ -4935,7 +4936,7 @@
 00:13:69	Honda Electron Co.
 00:13:6A	Hach Ultra Analytics
 00:13:6B	E-tec
-00:13:6C	TomTom
+00:13:6C	Private
 00:13:6D	Tentaculus AB
 00:13:6E	Techmetro
 00:13:6F	PacketMotion
@@ -5901,6 +5902,342 @@
 00:17:2F	NeuLion Incorporated
 00:17:30	Automation Electronics
 00:17:31	Asustek Computer
+00:17:32	Science-technical Center "rissa"
+00:17:33	neuf cegetel
+00:17:34	LGC Wireless
+00:17:35	Private
+00:17:36	iiTron
+00:17:37	Industrie Dial Face S.p.A.
+00:17:38	XIV
+00:17:39	Bright Headphone Electronics Company
+00:17:3A	Edge Integration Systems
+00:17:3B	Arched Rock
+00:17:3C	Extreme Engineering Solutions
+00:17:3D	Neology
+00:17:3E	LeucotronEquipamentos Ltda.
+00:17:3F	Belkin
+00:17:40	Technologies Labtronix
+00:17:41	Defidev
+00:17:42	Fujitsu Limited
+00:17:43	Private
+00:17:44	Araneo
+00:17:45	Innotz CO.
+00:17:46	Freedom9
+00:17:47	Trimble
+00:17:48	Neokoros Brasil Ltda
+00:17:49	Hyundae Yong-o-sa Co.
+00:17:4A	Socomec
+00:17:4B	Nokia Danmark A/S
+00:17:4C	Millipore
+00:17:4D	Dynamic Network Factory
+00:17:4E	Parama-tech Co.
+00:17:4F	iCatch
+00:17:50	GSI Group, MicroE Systems
+00:17:51	Online
+00:17:52	DAGS
+00:17:53	nFore Technology
+00:17:54	Arkino
+00:17:55	GE Security
+00:17:56	Vinci Labs Oy
+00:17:57	RIX Technology Limited
+00:17:58	ThruVision
+00:17:59	Cisco Systems
+00:17:5A	Cisco Systems
+00:17:5B	ACS Solutions Switzerland
+00:17:5C	Sharp
+00:17:5D	Dongseo system.
+00:17:5E	Anta Systems
+00:17:5F	Xenolink Communications Co.
+00:17:60	Naito Densei Machida MFG.CO.
+00:17:61	ZKSoftware
+00:17:62	Solar Technology
+00:17:63	Essentia S.p.A.
+00:17:64	ATMedia GmbH
+00:17:65	Nortel
+00:17:66	Accense Technology
+00:17:67	Earforce AS
+00:17:68	Zinwave
+00:17:69	Cymphonix
+00:17:6A	Avago Technologies
+00:17:6B	Kiyon
+00:17:6C	Pivot3
+00:17:6D	Core
+00:17:6E	Ducati Sistemi
+00:17:6F	PAX Computer Technology(Shenzhen)
+00:17:70	Arti Industrial Electronics
+00:17:71	APD Communications
+00:17:72	Astro Strobel Kommunikationssysteme Gmbh
+00:17:73	Laketune Technologies Co.
+00:17:74	Elesta GmbH
+00:17:75	TTE Germany GmbH
+00:17:76	Meso Scale Diagnostics
+00:17:77	Obsidian Research
+00:17:78	Central Music Co.
+00:17:79	QuickTel
+00:17:7A	Assa Abloy AB
+00:17:7B	Azalea Networks
+00:17:7C	D-Link India
+00:17:7D	IDT International Limited
+00:17:7E	Meshcom Technologies
+00:17:7F	Worldsmart Retech
+00:17:80	Applera Holding B.V. Singapore Operations
+00:17:81	Greystone Data System
+00:17:82	LoBenn
+00:17:83	Texas Instruments
+00:17:84	Motorola Mobile Devices
+00:17:85	Sparr Electronics
+00:17:86	wisembed
+00:17:87	Brother, Brother & Sons ApS
+00:17:88	Philips Lighting BV
+00:17:89	Zenitron
+00:17:8A	Darts Technologies
+00:17:8B	Teledyne Technologies Incorporated
+00:17:8C	Independent Witness
+00:17:8D	Checkpoint Systems
+00:17:8E	Gunnebo Cash Automation AB
+00:17:8F	Ningbo Yidong Electronic Co.
+00:17:90	Hyundai Digitech Co
+00:17:91	LinTech GmbH
+00:17:92	Falcom Wireless Comunications Gmbh
+00:17:93	Tigi
+00:17:94	Cisco Systems
+00:17:95	Cisco Systems
+00:17:96	Rittmeyer AG
+00:17:97	Telsy Elettronica S.p.A.
+00:17:98	Azonic Technology Co.
+00:17:99	SmarTire Systems
+00:17:9A	D-Link
+00:17:9B	Chant Sincere CO.
+00:17:9C	Deprag Schulz Gmbh u. CO.
+00:17:9D	Kelman Limited
+00:17:9E	Samsys Technologies
+00:17:9F	Apricorn
+00:17:A0	RoboTech srl
+00:17:A1	3soft
+00:17:A2	Camrivox
+00:17:A3	MIX s.r.l.
+00:17:A4	Global Data Services
+00:17:A5	TrendChip Technologies
+00:17:A6	Yosin Electronics CO.
+00:17:A7	Mobile Computing Promotion Consortium
+00:17:A8	EDM
+00:17:A9	Sentivision
+00:17:AA	elab-experience
+00:17:AB	Nintendo Co.
+00:17:AC	O'Neil Product Development
+00:17:AD	AceNet
+00:17:AE	GAI-Tronics
+00:17:AF	Enermet
+00:17:B0	Nokia Danmark A/S
+00:17:B1	Acist Medical Systems
+00:17:B2	SK Telesys
+00:17:B3	Aftek Infosys Limited
+00:17:B4	Remote Security Systems
+00:17:B5	Peerless Systems
+00:17:B6	Aquantia
+00:17:B7	Tonze Technology Co.
+00:17:B8	Novatron CO.
+00:17:B9	Gambro Lundia AB
+00:17:BA	Sedo CO.
+00:17:BB	Syrinx Industrial Electronics
+00:17:BC	Touchtunes Music
+00:17:BD	Tibetsystem
+00:17:BE	Tratec Telecom B.V.
+00:17:BF	Coherent Research Limited
+00:17:C0	PureTech Systems
+00:17:C1	CM Precision Technology
+00:17:C2	Pirelli Broadband Solutions
+00:17:C3	KTF Technologies
+00:17:C4	Quanta Microsystems
+00:17:C5	SonicWALL
+00:17:C6	Labcal Technologies
+00:17:C7	Mara Systems Consulting AB
+00:17:C8	Kyocera Mita
+00:17:C9	Samsung Electronics Co.
+00:17:CA	BenQ
+00:17:CB	Juniper Networks
+00:17:CC	Alcatel USA Sourcing LP
+00:17:CD	CEC Wireless R&D
+00:17:CE	MB International Telecom Labs srl
+00:17:CF	iMCA-GmbH
+00:17:D0	Opticom Communications
+00:17:D1	Nortel
+00:17:D2	Thinlinx
+00:17:D3	Etymotic Research
+00:17:D4	Monsoon Multimedia
+00:17:D5	Samsung Electronics Co.
+00:17:D6	Bluechips Microhouse Co.
+00:17:D7	Input/Output
+00:17:D8	Magnum Semiconductor
+00:17:D9	AAI
+00:17:DA	Spans Logic
+00:17:DB	Private
+00:17:DC	Daemyung Zero1
+00:17:DD	Clipsal Australia
+00:17:DE	Advantage Six
+00:17:DF	Cisco Systems
+00:17:E0	Cisco Systems
+00:17:E1	Dacos Technologies Co.
+00:17:E2	Motorola Mobile Devices
+00:17:E3	Texas Instruments
+00:17:E4	Texas Instruments
+00:17:E5	Texas Instruments
+00:17:E6	Texas Instruments
+00:17:E7	Texas Instruments
+00:17:E8	Texas Instruments
+00:17:E9	Texas Instruments
+00:17:EA	Texas Instruments
+00:17:EB	Texas Instruments
+00:17:EC	Texas Instruments
+00:17:ED	WooJooIT
+00:17:EE	Motorola CHS
+00:17:EF	Blade Network Technologies
+00:17:F0	Szcom Broadband Network Technology Co.
+00:17:F1	Renu Electronics Pvt
+00:17:F2	Apple Computer
+00:17:F3	M/A-COM Wireless Systems
+00:17:F4	Zeron Alliance
+00:17:F5	Neoptek
+00:17:F6	Pyramid Meriden
+00:17:F7	CEM Solutions Pvt
+00:17:F8	Motech Industries
+00:17:F9	Forcom Sp. z o.o.
+00:17:FA	Microsoft
+00:17:FB	FA
+00:17:FC	Suprema
+00:17:FD	Amulet Hotkey
+00:17:FE	Talos System
+00:17:FF	Playline Co.
+00:18:00	Unigrand
+00:18:01	Actiontec Electronics
+00:18:02	Alpha Networks
+00:18:03	ArcSoft Shanghai Co.
+00:18:04	E-tek Digital Technology Limited
+00:18:05	Beijing InHand Networking
+00:18:06	Hokkei Industries Co.
+00:18:07	Fanstel
+00:18:08	SightLogix
+00:18:09	Cresyn
+00:18:0A	Meraki Networks
+00:18:0B	Brilliant Telecommunications
+00:18:0C	Optelian Access Networks
+00:18:0D	Terabytes Server Storage Tech
+00:18:0E	Avega Systems
+00:18:0F	Nokia Danmark A/S
+00:18:10	IPTrade S.A.
+00:18:11	Neuros Technology International
+00:18:12	Beijing Xinwei Telecom Technology Co.
+00:18:13	Sony Ericsson Mobile Communications
+00:18:14	Mitutoyo
+00:18:15	GZ Technologies
+00:18:16	Ubixon Co.
+00:18:17	D. E. Shaw Research
+00:18:18	Cisco Systems
+00:18:19	Cisco Systems
+00:18:1A	AVerMedia Technologies
+00:18:1B	TaiJin Metal Co.
+00:18:1C	Exterity Limited
+00:18:1D	Asia Electronics Co.
+00:18:1E	GDX Technologies
+00:18:1F	Palmmicro Communications
+00:18:20	w5networks
+00:18:21	Sindoricoh
+00:18:22	CEC Telecom Co.
+00:18:23	Delta Electronics
+00:18:24	Kimaldi Electronics
+00:18:25	Wavion
+00:18:26	Cale Access AB
+00:18:27	NEC Philips Unified Solutions Nederland BV
+00:18:28	e2v technologies (UK)
+00:18:29	Gatsometer
+00:18:2A	Taiwan Video & Monitor
+00:18:2B	Softier
+00:18:2C	Ascend Networks
+00:18:2D	Artec Group OÜ
+00:18:2E	Wireless Ventures USA
+00:18:2F	Texas Instruments
+00:18:30	Texas Instruments
+00:18:31	Texas Instruments
+00:18:32	Texas Instruments
+00:18:33	Texas Instruments
+00:18:34	Texas Instruments
+00:18:35	ITC
+00:18:36	Reliance Electric Limited
+00:18:37	Universal Abit Co.
+00:18:38	PanAccess Communications
+00:18:39	Cisco-Linksys
+00:18:3A	Westell Technologies
+00:18:3B	Cenits Co.
+00:18:3C	Encore Software Limited
+00:18:3D	Vertex Link
+00:18:3E	Digilent
+00:18:3F	2Wire
+00:18:40	3 Phoenix
+00:18:41	High Tech Computer
+00:18:42	Nokia Danmark A/S
+00:18:43	Dawevision
+00:18:44	Heads Up Technologies
+00:18:45	NPL Pulsar
+00:18:46	Crypto S.A.
+00:18:47	AceNet Technology
+00:18:48	Vcom
+00:18:49	Pigeon Point Systems
+00:18:4A	Catcher
+00:18:4B	Las Vegas Gaming
+00:18:4C	Bogen Communications
+00:18:4D	Netgear
+00:18:4E	Lianhe Technologies
+00:18:4F	8 Ways Technology
+00:18:50	Secfone Kft
+00:18:51	SWsoft
+00:18:52	StorLink Semiconductors
+00:18:53	Atera Networks
+00:18:54	Airtube
+00:18:55	Aeromaritime Systembau GmbH
+00:18:56	EyeFi
+00:18:57	Unilever R&D
+00:18:58	TagMaster AB
+00:18:59	Strawberry Linux Co.
+00:18:5A	uControl
+00:18:5B	Network Chemistry
+00:18:5C	EDS Lab Pte
+00:18:5D	Taiguen Technology (shen-zhen) CO.
+00:18:5E	Nexterm
+00:18:5F	TAC
+00:18:60	SIM Technology Group Shanghai Simcom,
+00:18:61	Ooma
+00:18:62	Seagate Technology
+00:18:63	Veritech Electronics Limited
+00:18:64	Cybectec
+00:18:65	Bayer Diagnostics Sudbury
+00:18:66	Leutron Vision
+00:18:67	Evolution Robotics Retail
+00:18:68	Scientific Atlanta, A Cisco Company
+00:18:69	Kingjim
+00:18:6A	Global Link Digital Technology Co
+00:18:6B	Sambu Communics CO.
+00:18:6C	Neonode AB
+00:18:6D	Zhenjiang Sapphire Electronic Industry CO.
+00:18:6E	3COM Europe
+00:18:6F	Setha Industria Eletronica Ltda
+00:18:70	E28 Shanghai Limited
+00:18:71	Global Data Services
+00:18:72	Expertise Engineering
+00:18:73	Cisco Systems
+00:18:74	Cisco Systems
+00:18:75	AnaCise Testnology Pte
+00:18:76	WowWee
+00:18:77	Amplex A/S
+00:18:78	Mackware GmbH
+00:18:79	dSys
+00:18:7A	Wiremold
+00:18:7B	4NSYS Co.
+00:18:7C	Intercross
+00:18:7D	Armorlink shanghai Co.
+00:18:7E	RGB Spectrum
+00:18:7F	Zodianet
+00:18:80	Mobilygen
+00:18:81	Buyang Electronics Industrial Co.
 00:1C:7C	Perq Systems
 00:20:00	Lexmark International
 00:20:01	DSP Solutions
@@ -6120,7 +6457,7 @@
 00:20:D7	Japan Minicomputer Systems CO.
 00:20:D8	Nortel Networks
 00:20:D9	Panasonic Technologies,/mieco-us
-00:20:DA	Xylan
+00:20:DA	Alcatel North America ESD
 00:20:DB	Xnet Technology
 00:20:DC	Densitron Taiwan
 00:20:DD	Cybertec
@@ -6337,7 +6674,7 @@
 00:30:AF	Honeywell GmbH
 00:30:B0	Convergenet Technologies
 00:30:B1	aXess-pro networks GmbH
-00:30:B2	Wescam - Healdsburg
+00:30:B2	L-3 Sonoma EO
 00:30:B3	San Valley Systems
 00:30:B4	Intersil
 00:30:B5	Tadiran Microwave Networks
@@ -6438,7 +6775,7 @@
 00:40:14	Comsoft Gmbh
 00:40:15	Ascom Infrasys AG
 00:40:16	Hadax Electronics
-00:40:17	Troy Group
+00:40:17	Silex Technology America
 00:40:18	Adobe Systems
 00:40:19	Aeon Systems
 00:40:1A	Fuji Electric CO.
@@ -6730,7 +7067,7 @@
 00:50:3C	Tsinghua Novel Electronics
 00:50:3E	Cisco Systems
 00:50:3F	Anchor Games
-00:50:40	Emware
+00:50:40	Panasonic Electric Works Laboratory of America,/SLC Lab
 00:50:41	CTX Opto Electronic
 00:50:42	SCI Manufacturing Singapore PTE
 00:50:43	Marvell Semiconductor
@@ -6755,7 +7092,7 @@
 00:50:56	VMWare
 00:50:57	Broadband Access Systems
 00:50:58	VegaStream Limted
-00:50:59	Suite Technology Systems Network
+00:50:59	iBAHN
 00:50:5A	Network Alchemy
 00:50:5B	Kawasaki LSI U.s.a.
 00:50:5C	Tundo
@@ -7534,7 +7871,7 @@
 00:90:69	Juniper Networks
 00:90:6A	Turnstone Systems
 00:90:6B	Applied Resources
-00:90:6C	GWT Global Weighing Technologies Gmbh
+00:90:6C	Sartorius Hamburg GmbH
 00:90:6D	Cisco Systems
 00:90:6E	Praxon
 00:90:6F	Cisco Systems
@@ -7666,7 +8003,7 @@
 00:90:ED	Central System Research CO.
 00:90:EE	Personal Communications Technologies
 00:90:EF	Integrix
-00:90:F0	Harmonic Lightwaves
+00:90:F0	Harmonic Video Systems
 00:90:F1	DOT Hill Systems
 00:90:F2	Cisco Systems
 00:90:F3	Aspect Communications
@@ -7921,7 +8258,7 @@
 00:A0:EA	Ethercom
 00:A0:EB	Encore Networks
 00:A0:EC	Transmitton
-00:A0:ED	PRI Automation
+00:A0:ED	Brooks Automation
 00:A0:EE	Nashoba Networks
 00:A0:EF	Lucidata
 00:A0:F0	Toronto Microelectronics
@@ -8266,7 +8603,7 @@
 00:D0:17	Syntech Information CO.
 00:D0:18	QWES. COM
 00:D0:19	Dainippon Screen Corporate
-00:D0:1A	Urmet SUD S.p.a.
+00:D0:1A	Urmet  TLC S.p.a.
 00:D0:1B	Mimaki Engineering CO.
 00:D0:1C	SBS Technologies,
 00:D0:1D	Furuno Electric CO.
@@ -8389,7 +8726,7 @@
 00:D0:92	Glenayre Western Multiplex
 00:D0:93	TQ - Components Gmbh
 00:D0:94	Timeline Vista
-00:D0:95	Xylan
+00:D0:95	Alcatel North America ESD
 00:D0:96	3com Europe
 00:D0:97	Cisco Systems
 00:D0:98	Photon Dynamics Canada
@@ -8689,7 +9026,7 @@
 00:E0:AE	Xaqti
 00:E0:AF	General Dynamics Information Systems
 00:E0:B0	Cisco Systems
-00:E0:B1	Packet Engines
+00:E0:B1	Alcatel North America ESD
 00:E0:B2	Telmax Communications
 00:E0:B3	EtherWAN Systems
 00:E0:B4	Techno Scope CO.
@@ -8730,7 +9067,7 @@
 00:E0:D7	Sunshine Electronics
 00:E0:D8	Lanbit Computer
 00:E0:D9	Tazmo CO.
-00:E0:DA	Assured Access Technology
+00:E0:DA	Alcatel North America ESD
 00:E0:DB	ViaVideo Communications
 00:E0:DC	Nexware
 00:E0:DD	Zenith Electronics
@@ -8830,8 +9167,8 @@
 08:00:2D	Lan-tec
 08:00:2E	Metaphor Computer Systems
 08:00:2F	Prime Computer
-08:00:30	Network Research
 08:00:30	Cern
+08:00:30	Network Research
 08:00:30	Royal Melbourne Inst OF Tech
 08:00:31	Little Machines
 08:00:32	Tigan Incorporated
@@ -8933,6 +9270,7 @@
 10:00:5A	IBM
 10:00:E8	National Semiconductor
 11:00:AA	Private
+52:54:00	QEMU
 80:00:10	ATT Bell Laboratories
 A0:6A:00	Verilink
 AA:00:00	Digital Equipment
@@ -8941,3 +9279,4 @@ AA:00:02	Digital Equipment
 AA:00:03	Digital Equipment
 AA:00:04	Digital Equipment
 AC:DE:48	Private
+B0:C4:20	Bochs

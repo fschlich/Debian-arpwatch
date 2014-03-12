@@ -20,7 +20,11 @@
  */
 
 /*
- * arpwatch - keep track of ethernet/ip address pairings, report changes
+ arpwatch NG has been forked by and is copyrighted by freek
+ numerous changes have been made - please consult the CHANGES file in
+ this distribution
+
+ arpwatch NG is distributed under the GPL
  */
 
 #include <sys/param.h>
@@ -125,29 +129,25 @@ extern int opterr;
 extern char *optarg;
 
 /* Forwards */
-int addnet(const char *);
-RETSIGTYPE checkpoint(int);
-RETSIGTYPE die(int);
-int isbogon(u_int32_t);
-int main(int, char **);
-void process_ether(u_char *, const struct pcap_pkthdr *, const u_char *);
-void process_fddi(u_char *, const struct pcap_pkthdr *, const u_char *);
-int readsnmp(char *);
-int snmp_add(u_int32_t, u_char *, time_t, char *);
-int sanity_ether(struct ether_header *, struct ether_arp *, int);
-int sanity_fddi(struct fddi_header *, struct ether_arp *, int);
+static void process_ether(u_char *, const struct pcap_pkthdr *, const u_char *);
+static void process_fddi(u_char *, const struct pcap_pkthdr *, const u_char *);
+static int sanity_ether(struct ether_header *, struct ether_arp *, int, time_t *);
+static int sanity_fddi(struct fddi_header *, struct ether_arp *, int, time_t *);
+static int isbogon(u_int32_t);
+static int addnet(const char *);
+
 __dead void usage(void) __attribute__ ((volatile));
 static void drop_privileges(const char* user);
 static void go_daemon(void);
+RETSIGTYPE checkpoint(int);
+RETSIGTYPE die(int);
 
 
 int main(int argc, char **argv)
 {
 	char *cp;
 	int op, snaplen, timeout, linktype, status;
-#ifdef TIOCNOTTY
-	int fd;
-#endif
+
 	pcap_t *pd;
 	char *interface, *rfilename;
 	struct bpf_program code;
@@ -384,7 +384,7 @@ int main(int argc, char **argv)
 
 
 /* Process an ethernet arp/rarp packet */
-void process_ether(u_char * u, const struct pcap_pkthdr *h, const u_char * p)
+static void process_ether(u_char *u, const struct pcap_pkthdr *h, const u_char *p)
 {
 	struct ether_header *eh;
 	struct ether_arp *ea;
@@ -395,7 +395,10 @@ void process_ether(u_char * u, const struct pcap_pkthdr *h, const u_char * p)
 	eh = (struct ether_header *)p;
 	ea = (struct ether_arp *)(eh + 1);
 
-	if(!sanity_ether(eh, ea, h->caplen))
+        /* extract time of observation */
+        t=h->ts.tv_sec;
+
+	if(!sanity_ether(eh, ea, h->caplen, &t))
 		return;
 
 	/* Source hardware ethernet address */
@@ -407,26 +410,27 @@ void process_ether(u_char * u, const struct pcap_pkthdr *h, const u_char * p)
 	/* Source ip address */
 	BCOPY(SPA(ea), &sia, 4);
 
+
 	/* Watch for bogons */
 	if(isbogon(sia)) {
-		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
+                report(ACTION_BOGON, sia, sea, sha, &t, NULL);
 		return;
 	}
 
 	/* Watch for ethernet broadcast */
-	if(MEMCMP(sea, zero, 6) == 0 || MEMCMP(sea, allones, 6) == 0 || MEMCMP(sha, zero, 6) == 0 || MEMCMP(sha, allones, 6) == 0) {
-		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha);
+        if(MEMCMP(sea, zero, 6) == 0 || MEMCMP(sea, allones, 6) == 0
+           || MEMCMP(sha, zero, 6) == 0 || MEMCMP(sha, allones, 6) == 0) {
+                report(ACTION_ETHER_BROADCAST, sia, sea, sha, &t, NULL);
 		return;
 	}
 
 	/* Double check ethernet addresses */
 	if(MEMCMP(sea, sha, 6) != 0) {
-		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha);
+                report(ACTION_ETHER_MISMATCH, sia, sea, sha, &t, NULL);
 		return;
 	}
 
-	/* Got a live one */
-	t = h->ts.tv_sec;
+	/* when all checks have been passed add(check) the entry into the arp db */
 	can_checkpoint = 0;
 	if(!ent_add(sia, sea, t, NULL))
 		syslog(LOG_ERR, "ent_add(%s, %s, %ld) failed", intoa(sia), e2str(sea), t);
@@ -434,7 +438,7 @@ void process_ether(u_char * u, const struct pcap_pkthdr *h, const u_char * p)
 }
 
 /* Perform sanity checks on an ethernet arp/rarp packet, return true if ok */
-int sanity_ether(struct ether_header *eh, struct ether_arp *ea, int len)
+static int sanity_ether(struct ether_header *eh, struct ether_arp *ea, int len, time_t *t)
 {
 	/* XXX use bsd style ether_header to avoid messy ifdef's */
 	struct bsd_ether_header {
@@ -449,25 +453,38 @@ int sanity_ether(struct ether_header *eh, struct ether_arp *ea, int len)
 	ea->arp_pro = ntohs(ea->arp_pro);
 	ea->arp_op = ntohs(ea->arp_op);
 
+        /* these are cheap, but maybe don't do them twice */
+	u_char *sea, *sha;
+	u_int32_t sia;
+	/* Source addresses */
+	sea = (u_char *) ESRC(eh);
+	sha = (u_char *) SHA(ea);
+	/* Source ip address */
+	BCOPY(SPA(ea), &sia, 4);
+
 	if(len < sizeof(*eh) + sizeof(*ea)) {
-		syslog(LOG_ERR, "short (want %d)\n", sizeof(*eh) + sizeof(*ea));
+		//syslog(LOG_ERR, "short (want %d)\n", sizeof(*eh) + sizeof(*ea));
+                report(ACTION_ETHER_TOOSHORT, sia, sea, sha, t, NULL);
 		return (0);
 	}
 
 	/* XXX sysv r4 seems to use hardware format 6 */
 	if(ea->arp_hrd != ARPHRD_ETHER && ea->arp_hrd != 6) {
-		syslog(LOG_ERR, "%s sent bad hardware format 0x%x\n", e2str(shost), ea->arp_hrd);
+		//syslog(LOG_ERR, "%s sent bad hardware format 0x%x\n", e2str(shost), ea->arp_hrd);
+                report(ACTION_ETHER_BADFORMAT, sia, sea, sha, t, NULL);
 		return (0);
 	}
 
 	/* XXX hds X terminals sometimes send trailer arp replies */
 	if(ea->arp_pro != ETHERTYPE_IP && ea->arp_pro != ETHERTYPE_TRAIL) {
-		syslog(LOG_ERR, "%s sent packet not ETHERTYPE_IP (0x%x)\n", e2str(shost), ea->arp_pro);
+		//syslog(LOG_ERR, "%s sent packet not ETHERTYPE_IP (0x%x)\n", e2str(shost), ea->arp_pro);
+		report(ACTION_ETHER_WRONGTYPE_IP, sia, sea, sha, t, NULL);
 		return (0);
 	}
 
 	if(ea->arp_hln != 6 || ea->arp_pln != 4) {
-		syslog(LOG_ERR, "%s sent bad addr len (hard %d, prot %d)\n", e2str(shost), ea->arp_hln, ea->arp_pln);
+		//syslog(LOG_ERR, "%s sent bad addr len (hard %d, prot %d)\n", e2str(shost), ea->arp_hln, ea->arp_pln);
+		report(ACTION_ETHER_BADLENGTH, sia, sea, sha, t, NULL);
 		return (0);
 	}
 
@@ -477,7 +494,8 @@ int sanity_ether(struct ether_header *eh, struct ether_arp *ea, int len)
 	 */
 	if(eh->ether_type == ETHERTYPE_ARP) {
 		if(ea->arp_op != ARPOP_REQUEST && ea->arp_op != ARPOP_REPLY) {
-			syslog(LOG_ERR, "%s sent wrong arp op %d\n", e2str(shost), ea->arp_op);
+			//syslog(LOG_ERR, "%s sent wrong arp op %d\n", e2str(shost), ea->arp_op);
+			report(ACTION_ETHER_WRONGOP, sia, sea, sha, t, NULL);
 			return (0);
 		}
 	} else if(eh->ether_type == ETHERTYPE_REVARP) {
@@ -485,19 +503,21 @@ int sanity_ether(struct ether_header *eh, struct ether_arp *ea, int len)
 			/* no useful information here */
 			return (0);
 		} else if(ea->arp_op != REVARP_REPLY) {
+			report(ACTION_ETHER_WRONGRARP, sia, sea, sha, t, NULL);
 			if(debug)
 				syslog(LOG_ERR, "%s sent wrong revarp op %d\n", e2str(shost), ea->arp_op);
 			return (0);
 		}
 	} else {
-		syslog(LOG_ERR, "%s sent bad type 0x%x\n", e2str(shost), eh->ether_type);
+		//syslog(LOG_ERR, "%s sent bad type 0x%x\n", e2str(shost), eh->ether_type);
+		report(ACTION_ETHER_WRONGTYPE, sia, sea, sha, t, NULL);
 		return (0);
 	}
 
 	return (1);
 }
 
-static void bit_reverse(u_char * p, unsigned len)
+static void bit_reverse(u_char *p, unsigned len)
 {
 	unsigned i;
 	u_char b;
@@ -515,7 +535,7 @@ static void bit_reverse(u_char * p, unsigned len)
 	}
 }
 
-void process_fddi(u_char * u, const struct pcap_pkthdr *h, const u_char * p)
+static void process_fddi(u_char *u, const struct pcap_pkthdr *h, const u_char *p)
 {
 	struct fddi_header *fh;
 	struct ether_arp *ea;
@@ -530,7 +550,10 @@ void process_fddi(u_char * u, const struct pcap_pkthdr *h, const u_char * p)
 		bit_reverse(fh->src, 6);
 		bit_reverse(fh->dst, 6);
 	}
-	if(!sanity_fddi(fh, ea, h->caplen))
+        /* extract time of observation */
+	t = h->ts.tv_sec;
+
+	if(!sanity_fddi(fh, ea, h->caplen, &t))
 		return;
 
 	/* Source MAC hardware ethernet address */
@@ -544,24 +567,23 @@ void process_fddi(u_char * u, const struct pcap_pkthdr *h, const u_char * p)
 
 	/* Watch for bogons */
 	if(isbogon(sia)) {
-		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
+                report(ACTION_BOGON, sia, sea, sha, &t, NULL);
 		return;
 	}
 
 	/* Watch for ethernet broadcast */
 	if(MEMCMP(sea, zero, 6) == 0 || MEMCMP(sea, allones, 6) == 0 || MEMCMP(sha, zero, 6) == 0 || MEMCMP(sha, allones, 6) == 0) {
-		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha);
+                report(ACTION_ETHER_BROADCAST, sia, sea, sha, &t, NULL);
 		return;
 	}
 
 	/* Double check ethernet addresses */
 	if(MEMCMP(sea, sha, 6) != 0) {
-		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha);
+                report(ACTION_ETHER_MISMATCH, sia, sea, sha, &t, NULL);
 		return;
 	}
 
 	/* Got a live one */
-	t = h->ts.tv_sec;
 	can_checkpoint = 0;
 	if(!ent_add(sia, sea, t, NULL))
 		syslog(LOG_ERR, "ent_add(%s, %s, %ld) failed", intoa(sia), e2str(sea), t);
@@ -569,10 +591,20 @@ void process_fddi(u_char * u, const struct pcap_pkthdr *h, const u_char * p)
 }
 
 /* Perform sanity checks on arp/rarp packet, return true if ok */
-int sanity_fddi(struct fddi_header *fh, struct ether_arp *ea, int len)
+static int sanity_fddi(struct fddi_header *fh, struct ether_arp *ea, int len, time_t *t)
 {
 	u_char *shost = fh->src;
 	u_short type, hrd, pro, op;
+
+        /* these are cheap, but maybe don't do them twice */
+	u_char *sea, *sha;
+	u_int32_t sia;
+	/* Source MAC hardware ethernet address */
+	sea = (u_char *) fh->src;
+	/* Source ARP ethernet address */
+	sha = (u_char *) SHA(ea);
+	/* Source ARP ip address */
+	BCOPY(SPA(ea), &sia, 4);
 
 	/* This rather clunky copy stuff is needed because the fddi header
 	 * has an odd (i.e. not even) length, causing memory alignment
@@ -588,25 +620,29 @@ int sanity_fddi(struct fddi_header *fh, struct ether_arp *ea, int len)
 	op = ntohs(op);
 
 	if(len < sizeof(*fh) + sizeof(*ea)) {
-		syslog(LOG_ERR, "short (want %d)\n", sizeof(*fh) + sizeof(*ea));
+		//syslog(LOG_ERR, "short (want %d)\n", sizeof(*fh) + sizeof(*ea));
+		report(ACTION_ETHER_TOOSHORT, sia, sea, sha, t, NULL);
 		return (0);
 	}
 
 	/* XXX sysv r4 seems to use hardware format 6 */
 	if(hrd != ARPHRD_ETHER && hrd != 6) {
-		syslog(LOG_ERR, "%s sent bad hardware format 0x%x\n", e2str(shost), hrd);
+		//syslog(LOG_ERR, "%s sent bad hardware format 0x%x\n", e2str(shost), hrd);
+		report(ACTION_ETHER_BADFORMAT, sia, sea, sha, t, NULL);
 		return (0);
 	}
 
 
 	/* XXX hds X terminals sometimes send trailer arp replies */
 	if(pro != ETHERTYPE_IP && pro != ETHERTYPE_TRAIL && pro != ETHERTYPE_APOLLO) {
-		syslog(LOG_ERR, "%s sent packet not ETHERTYPE_IP (0x%x)\n", e2str(shost), pro);
+		//syslog(LOG_ERR, "%s sent packet not ETHERTYPE_IP (0x%x)\n", e2str(shost), pro);
+		report(ACTION_ETHER_WRONGTYPE_IP, sia, sea, sha, t, NULL);
 		return (0);
 	}
 
 	if(ea->arp_hln != 6 || ea->arp_pln != 4) {
-		syslog(LOG_ERR, "%s sent bad addr len (hard %d, prot %d)\n", e2str(shost), ea->arp_hln, ea->arp_pln);
+		//syslog(LOG_ERR, "%s sent bad addr len (hard %d, prot %d)\n", e2str(shost), ea->arp_hln, ea->arp_pln);
+		report(ACTION_ETHER_BADLENGTH, sia, sea, sha, t, NULL);
 		return (0);
 	}
 
@@ -616,7 +652,8 @@ int sanity_fddi(struct fddi_header *fh, struct ether_arp *ea, int len)
 	 */
 	if(type == ETHERTYPE_ARP) {
 		if(op != ARPOP_REQUEST && op != ARPOP_REPLY) {
-			syslog(LOG_ERR, "%s sent wrong arp op %d\n", e2str(shost), op);
+			//syslog(LOG_ERR, "%s sent wrong arp op %d\n", e2str(shost), op);
+			report(ACTION_ETHER_WRONGOP, sia, sea, sha, t, NULL);
 			return (0);
 		}
 	} else if(type == ETHERTYPE_REVARP) {
@@ -624,18 +661,20 @@ int sanity_fddi(struct fddi_header *fh, struct ether_arp *ea, int len)
 			/* no useful information here */
 			return (0);
 		} else if(op != REVARP_REPLY) {
+			report(ACTION_ETHER_WRONGRARP, sia, sea, sha, t, NULL);
 			if(debug)
 				syslog(LOG_ERR, "%s sent wrong revarp op %d\n", e2str(shost), op);
 			return (0);
 		}
 	} else {
-		syslog(LOG_ERR, "%s sent bad type 0x%x\n", e2str(shost), type);
+		//syslog(LOG_ERR, "%s sent bad type 0x%x\n", e2str(shost), type);
+		report(ACTION_ETHER_WRONGTYPE, sia, sea, sha, t, NULL);
 		return (0);
 	}
 	return (1);
 }
 
-int addnet(const char *str)
+static int addnet(const char *str)
 {
 	char *cp;
 	int width;
@@ -705,7 +744,7 @@ int addnet(const char *str)
 	return (1);
 }
 
-int isbogon(u_int32_t sia)
+static int isbogon(u_int32_t sia)
 {
 	int i;
 	struct nets *np;
@@ -767,7 +806,7 @@ __dead void usage(void)
 }
 
 
-static void drop_privileges(const char* user)
+static void drop_privileges(const char *user)
 {
 	struct passwd* pw;
 	pw=getpwnam(user);

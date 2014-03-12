@@ -55,7 +55,7 @@ endif
 	
 
 # Standard CFLAGS
-CFLAGS = $(CCOPT) $(DEFS) $(INCLS)
+CFLAGS = $(CCOPT) $(DEFS) $(INCLS) -Wall
 
 # Standard LIBS
 LIBS = @LIBS@
@@ -126,10 +126,9 @@ install: force install-man
 	$(INSTALL) -m 640 arp.dat $(ARPDIR)
 
 install-man: force
-	$(INSTALL) -m 444 $(srcdir)/arpwatch.8 \
-	    $(DESTDIR)$(MANDEST)/man8
-	$(INSTALL) -m 444 $(srcdir)/arpsnmp.8 \
-	    $(DESTDIR)$(MANDEST)/man8
+	$(INSTALL) -d -m 755 $(DESTDIR)$(MANDEST)/man8
+	$(INSTALL) -m 444 $(srcdir)/arpwatch.8 $(DESTDIR)$(MANDEST)/man8
+	$(INSTALL) -m 444 $(srcdir)/arpsnmp.8 $(DESTDIR)$(MANDEST)/man8
 
 lint:	$(GENSRC) force
 	lint -hbxn $(SRC) | \

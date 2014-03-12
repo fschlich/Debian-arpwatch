@@ -67,7 +67,7 @@ struct rtentry;
 #define PLURAL(n) ((n) == 1 || (n) == -1 ? "" : "s")
 
 static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p);
-    static void report_stdout(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p);
+static void report_stdout(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p);
 static void report_raw(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *t1p, time_t *t2p);
 
 
@@ -83,7 +83,26 @@ static char *fmtdelta(time_t);
 RETSIGTYPE reaper(int);
 static int32_t gmt2local(void);
 
-static char *TAB[]={ "new activity", "new station", "reused old mac", "changed mac", "dec flipflop", 0 };
+static char *TAB[]={
+        "new activity",
+        "new station",
+        "reused old mac",
+        "changed mac",
+        "dec flipflop",
+        "bogon",
+        "ether broadcast",
+        "ether mismatch",
+        "ether too short",
+        "ether bad format",
+        "ether wrong type_ip",
+        "ether bad length",
+        "ether wrong op",
+        /* RevARP really is called RARP */
+	"ether wrong RARP",
+	"ether wrong type",
+        0
+};
+
 
 static char *fmtdelta(time_t t)
 {
@@ -414,7 +433,7 @@ static void report_raw(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *
 		fprintf(f, "# actions: ");
 
 		for(;i <= ACTION_MAX; i++) {
-			fprintf(f, "%d=%s ", i, TAB[i]);
+			fprintf(f, "%d=%s,", i, TAB[i]);
 		}
                 fprintf(f, "\n");
 		init = 1;

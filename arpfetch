@@ -1,39 +1,33 @@
 #!/bin/sh
+# @(#) $Id: arpfetch,v 1.6 2006/07/28 18:10:29 leres Exp $ (LBL)
 #
-# arpfetch - collect arp data from a cisco using snmpwalk
+# arpfetch - collect arp data from a cisco using net-snmp
 #
-if test $# -ne 2; then
-	echo "usage: $0 host cname"
+
+export PATH="/usr/local/bin:${PATH}"
+
+prog=`basename $0`
+
+if [ $# -ne 2 ]; then
+	echo "usage: ${prog} host cname" 2>&1
 	exit 1
 fi
+
+host="$1"
+cname="$2"
+
+what="ip.ipNetToMediaTable.ipNetToMediaEntry.ipNetToMediaPhysAddress"
 #
-host=$1
-cname=$2
-temp=`tempfile -p arpft -s .temp.tmp`
-errs=`tempfile -p arpft -s .errs.tmp`
-what="ip.ipnettomediatable.ipnettomediaentry.ipnettomediaphysaddress"
+# Get the data and convert it
 #
-# Get the data
-#
-snmpwalk -v 1 $host $cname $what | 2>&1 tr A-Z a-z > $temp
-#
-# Try to make up for the fact that snmpwalk doesn't write errors to stderr
-#
-grep -v $what $temp > $errs
-if test -s $errs; then
-	cat $errs 1>&2
-	rm -f $temp $errs
-	exit 1
-fi
-#
-# Convert the results
-#
-sed -e 's/[ 	][ 	]*/ /g' \
-    -e 's/ = hex: /=/' \
-    -e 's/ $//' \
-    -e 's/ /:/g' \
-    -e 's/^.*\.\([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\)=\(.*\)/\2	\1/' \
-    -e 's/:0/:/g' \
-    -e 's/^0//' $temp
-#
-rm -f $temp $errs
+snmpwalk -Oq -Os -v 1 -c ${cname} ${host} ${what} | 2>&1 tr A-Z a-z |
+    awk '{
+	    ip = $1
+	    n = split(ip, a, ".")
+	    if (n > 4)
+		    ip =  a[n - 3] "." a[n - 2] "." a[n - 1] "." a[n]
+	    ea = $2
+	    print ea "\t" ip
+    }'
+
+rm -f ${t1}

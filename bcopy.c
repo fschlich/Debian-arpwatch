@@ -34,10 +34,6 @@
  * SUCH DAMAGE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)bcopy.c	8.1 (Berkeley) 6/4/93";
-#endif /* LIBC_SCCS and not lint */
-
 #include <sys/types.h>
 #include <string.h>
 
@@ -49,7 +45,7 @@ void bcopy(const void *, void *, size_t);
  * sizeof(word) MUST BE A POWER OF TWO
  * SO THAT wmask BELOW IS ALL ONES
  */
-typedef	int word;		/* "word" used for optimal copy speed */
+typedef int word;		/* "word" used for optimal copy speed */
 
 #define	wsize	sizeof(word)
 #define	wmask	(wsize - 1)
@@ -60,26 +56,23 @@ typedef	int word;		/* "word" used for optimal copy speed */
  * (the portable versions of) bcopy, memcpy, and memmove.
  */
 #ifdef MEMCOPY
-void *
-memcpy(dst0, src0, length)
+void *memcpy(dst0, src0, length)
 #else
 #ifdef MEMMOVE
-void *
-memmove(dst0, src0, length)
+void *memmove(dst0, src0, length)
 #else
-void
-bcopy(src0, dst0, length)
+void bcopy(src0, dst0, length)
 #endif
 #endif
-	void *dst0;
-	const void *src0;
-	register size_t length;
+void *dst0;
+const void *src0;
+size_t length;
 {
-	register char *dst = dst0;
-	register const char *src = src0;
-	register size_t t;
+	char *dst = dst0;
+	const char *src = src0;
+	size_t t;
 
-	if (length == 0 || dst == src)		/* nothing to do */
+	if(length == 0 || dst == src)	/* nothing to do */
 		goto done;
 
 	/*
@@ -88,17 +81,17 @@ bcopy(src0, dst0, length)
 #define	TLOOP(s) if (t) TLOOP1(s)
 #define	TLOOP1(s) do { s; } while (--t)
 
-	if ((unsigned long)dst < (unsigned long)src) {
+	if((unsigned long)dst < (unsigned long)src) {
 		/*
 		 * Copy forward.
 		 */
 		t = (int)src;	/* only need low bits */
-		if ((t | (int)dst) & wmask) {
+		if((t | (int)dst) & wmask) {
 			/*
 			 * Try to align operands.  This cannot be done
 			 * unless the low bits match.
 			 */
-			if ((t ^ (int)dst) & wmask || length < wsize)
+			if((t ^ (int)dst) & wmask || length < wsize)
 				t = length;
 			else
 				t = wsize - (t & wmask);
@@ -109,7 +102,9 @@ bcopy(src0, dst0, length)
 		 * Copy whole words, then mop up any trailing bytes.
 		 */
 		t = length / wsize;
-		TLOOP(*(word *)dst = *(word *)src; src += wsize; dst += wsize);
+		TLOOP(*(word *) dst = *(word *) src;
+		      src += wsize;
+		      dst += wsize);
 		t = length & wmask;
 		TLOOP(*dst++ = *src++);
 	} else {
@@ -121,8 +116,8 @@ bcopy(src0, dst0, length)
 		src += length;
 		dst += length;
 		t = (int)src;
-		if ((t | (int)dst) & wmask) {
-			if ((t ^ (int)dst) & wmask || length <= wsize)
+		if((t | (int)dst) & wmask) {
+			if((t ^ (int)dst) & wmask || length <= wsize)
 				t = length;
 			else
 				t &= wmask;
@@ -130,11 +125,13 @@ bcopy(src0, dst0, length)
 			TLOOP1(*--dst = *--src);
 		}
 		t = length / wsize;
-		TLOOP(src -= wsize; dst -= wsize; *(word *)dst = *(word *)src);
+		TLOOP(src -= wsize;
+		      dst -= wsize;
+		      *(word *) dst = *(word *) src);
 		t = length & wmask;
 		TLOOP(*--dst = *--src);
 	}
-done:
+      done:
 #if defined(MEMCOPY) || defined(MEMMOVE)
 	return (dst0);
 #else

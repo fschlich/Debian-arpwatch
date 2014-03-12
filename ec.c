@@ -18,10 +18,6 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-#ifndef lint
-static const char rcsid[] =
-    "@(#) $Id: ec.c,v 1.28 2000/10/13 22:49:15 leres Exp $ (LBL)";
-#endif
 
 /*
  * ec - manufactures ethernet code routines
@@ -73,14 +69,13 @@ static u_int ec_len = 0;
 static int ec_a2o(char *, u_int32_t *);
 
 /* Convert an 3 octets from an ethernet address to a u_int32_t */
-static int
-ec_a2o(register char *cp, register u_int32_t *op)
+static int ec_a2o(char *cp, u_int32_t * op)
 {
 	char xbuf[128];
 	u_char e[6];
 
-	(void)sprintf(xbuf, "%.32s:0:0:0", cp);
-	if (!str2e(xbuf, e))
+	sprintf(xbuf, "%.32s:0:0:0", cp);
+	if(!str2e(xbuf, e))
 		return (0);
 	*op = 0;
 	BCOPY(e, op, 3);
@@ -88,19 +83,18 @@ ec_a2o(register char *cp, register u_int32_t *op)
 }
 
 /* Add a ethernet code to the database */
-int
-ec_add(register u_int32_t o, register char *text)
+int ec_add(u_int32_t o, char *text)
 {
 
-	if (ec_last >= ec_len) {
-		if (list == NULL) {
+	if(ec_last >= ec_len) {
+		if(list == NULL) {
 			ec_len = 512;
 			list = malloc(ec_len * sizeof(*list));
 		} else {
 			ec_len *= 2;
 			list = realloc(list, ec_len * sizeof(*list));
 		}
-		if (list == NULL) {
+		if(list == NULL) {
 			syslog(LOG_ERR, "ec_add(): malloc: %m");
 			exit(1);
 		}
@@ -112,41 +106,39 @@ ec_add(register u_int32_t o, register char *text)
 }
 
 /* Find the manufacture for a given ethernet address */
-char *
-ec_find(register u_char *e)
+char *ec_find(u_char * e)
 {
 	u_int32_t o;
-	register int i;
+	int i;
 
 	o = 0;
 	BCOPY(e, &o, 3);
-	for (i = 0; i < ec_last; ++i)
-		if (list[i].o == o)
+	for(i = 0; i < ec_last; ++i)
+		if(list[i].o == o)
 			return (list[i].text);
 
 	return (NULL);
 }
 
 /* Loop through the ethernet code database */
-int
-ec_loop(register FILE *f, ec_process fn, register const char *nm)
+int ec_loop(FILE * f, ec_process fn, const char *nm)
 {
-	register int n;
-	register char *cp, *cp2, *text;
-	register int sawblank;
+	int n;
+	char *cp, *cp2, *text;
+	int sawblank;
 	u_int32_t o;
 	char line[1024];
 
 	n = 0;
-	while (fgets(line, sizeof(line), f)) {
+	while(fgets(line, sizeof(line), f)) {
 		++n;
 		cp = line;
 		cp2 = cp + strlen(cp) - 1;
-		if (cp2 >= cp && *cp2 == '\n')
+		if(cp2 >= cp && *cp2 == '\n')
 			*cp2++ = '\0';
-		if (*cp == '#')
+		if(*cp == '#')
 			continue;
-		if ((cp2 = strchr(cp, '\t')) == 0) {
+		if((cp2 = strchr(cp, '\t')) == 0) {
 			syslog(LOG_ERR, "ec_loop(): %s:%d missing tab", nm, n);
 			continue;
 		}
@@ -154,7 +146,7 @@ ec_loop(register FILE *f, ec_process fn, register const char *nm)
 		/* 3 octets come first */
 		*cp2++ = '\0';
 		text = cp2;
-		if (!ec_a2o(cp, &o)) {
+		if(!ec_a2o(cp, &o)) {
 			syslog(LOG_ERR, "ec_loop(): %s:%d bad octets", nm, n);
 			continue;
 		}
@@ -162,20 +154,20 @@ ec_loop(register FILE *f, ec_process fn, register const char *nm)
 		/* Compress blanks */
 		cp = cp2 = text;
 		sawblank = 0;
-		while (*cp != '\0') {
-			if (sawblank) {
+		while(*cp != '\0') {
+			if(sawblank) {
 				*cp2++ = ' ';
 				sawblank = 0;
 			}
 			*cp2++ = *cp++;
-			while (isspace((int)*cp)) {
+			while(isspace((int)*cp)) {
 				++cp;
 				sawblank = 1;
 			}
 		}
 		*cp2 = '\0';
 
-		if (!(*fn)(o, text))
+		if(!(*fn) (o, text))
 			return (0);
 	}
 
@@ -186,26 +178,23 @@ ec_loop(register FILE *f, ec_process fn, register const char *nm)
 static u_char decnet[3] = { 0xaa, 0x0, 0x4 };
 
 /* Returns true if an ethernet address is decnet, else false */
-int
-isdecnet(register u_char *e)
+int isdecnet(u_char * e)
 {
 
 	return (MEMCMP(e, decnet, sizeof(decnet)) == 0);
 }
 
 /* Convert an ascii ethernet string to ethernet address */
-int
-str2e(register char *str, register u_char *e)
+int str2e(char *str, u_char * e)
 {
-	register int i;
+	int i;
 	u_int n[6];
 
 	MEMSET(n, 0, sizeof(n));
-	if (sscanf(str, "%x:%x:%x:%x:%x:%x",
-	    &n[0], &n[1], &n[2], &n[3], &n[4], &n[5]) != 6)
+	if(sscanf(str, "%x:%x:%x:%x:%x:%x", &n[0], &n[1], &n[2], &n[3], &n[4], &n[5]) != 6)
 		return (0);
-	for (i = 0; i < 6; ++i) {
-		if (n[i] > 0xff)
+	for(i = 0; i < 6; ++i) {
+		if(n[i] > 0xff)
 			return (0);
 		e[i] = n[i];
 	}
@@ -213,12 +202,10 @@ str2e(register char *str, register u_char *e)
 }
 
 /* Convert an ethernet address to an ascii ethernet string */
-char *
-e2str(register u_char *e)
+char *e2str(u_char * e)
 {
 	static char str[32];
 
-	(void)sprintf(str, "%x:%x:%x:%x:%x:%x",
-	    e[0], e[1], e[2], e[3], e[4], e[5]);
+	sprintf(str, "%x:%x:%x:%x:%x:%x", e[0], e[1], e[2], e[3], e[4], e[5]);
 	return (str);
 }

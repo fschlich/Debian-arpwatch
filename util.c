@@ -18,10 +18,6 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-#ifndef lint
-static const char rcsid[] =
-    "@(#) $Id: util.c,v 1.10 2004/01/22 22:25:27 leres Exp $ (LBL)";
-#endif
 
 /*
  * util - arpwatch utility routines
@@ -60,28 +56,26 @@ u_char zero[6] = { 0, 0, 0, 0, 0, 0 };
 u_char allones[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
 int debug = 0;
-int initializing = 1;			/* true if initializing */
+int initializing = 1;		/* true if initializing */
 
 /* syslog() helper routine */
-void
-dosyslog(register int p, register char *s, register u_int32_t a,
-    register u_char *ea, register u_char *ha)
+void dosyslog(int p, char *s, u_int32_t a, u_char * ea, u_char * ha)
 {
 	char xbuf[64];
 
 	/* No report until we're initialized */
-	if (initializing)
+	if(initializing)
 		return;
 
 	/* Display both ethernet addresses if they don't match */
-	(void)strcpy(xbuf, e2str(ea));
-	if (ha != NULL && MEMCMP(ea, ha, 6) != 0) {
-		(void)strcat(xbuf, " (");
-		(void)strcat(xbuf, e2str(ha));
-		(void)strcat(xbuf, ")");
+	strcpy(xbuf, e2str(ea));
+	if(ha != NULL && MEMCMP(ea, ha, 6) != 0) {
+		strcat(xbuf, " (");
+		strcat(xbuf, e2str(ha));
+		strcat(xbuf, ")");
 	}
 
-	if (debug)
+	if(debug)
 		fprintf(stderr, "%s: %s %s %s\n", prog, s, intoa(a), xbuf);
 	else
 		syslog(p, "%s %s %s", s, intoa(a), xbuf);
@@ -89,98 +83,93 @@ dosyslog(register int p, register char *s, register u_int32_t a,
 
 static FILE *dumpf;
 
-void
-dumpone(register u_int32_t a, register u_char *e, register time_t t,
-    register char *h)
+void dumpone(u_int32_t a, u_char * e, time_t t, char *h)
 {
-	(void)fprintf(dumpf, "%s\t%s", e2str(e), intoa(a));
-	if (t != 0 || h != NULL)
-		(void)fprintf(dumpf, "\t%u", (u_int32_t)t);
-	if (h != NULL && *h != '\0')
-		(void)fprintf(dumpf, "\t%s", h);
-	(void)putc('\n', dumpf);
+	fprintf(dumpf, "%s\t%s", e2str(e), intoa(a));
+	if(t != 0 || h != NULL)
+		fprintf(dumpf, "\t%u", (u_int32_t) t);
+	if(h != NULL && *h != '\0')
+		fprintf(dumpf, "\t%s", h);
+	putc('\n', dumpf);
 }
 
-int
-dump(void)
+int dump(void)
 {
-	register int fd;
+	int fd;
 	char oldarpfile[256], newarpfile[256];
 
-	(void)sprintf(oldarpfile, "%s-", arpfile);
-	(void)sprintf(newarpfile, "%s.new", arpfile);
+	sprintf(oldarpfile, "%s-", arpfile);
+	sprintf(newarpfile, "%s.new", arpfile);
 
-	if ((fd = creat(newarpfile, 0644)) < 0) {
+	if((fd = creat(newarpfile, 0644)) < 0) {
 		syslog(LOG_ERR, "creat(%s): %m", newarpfile);
-		return(0);
+		return (0);
 	}
-	if ((dumpf = fdopen(fd, "w")) == NULL) {
+	if((dumpf = fdopen(fd, "w")) == NULL) {
 		syslog(LOG_ERR, "fdopen(%s): %m", newarpfile);
-		return(0);
+		return (0);
 	}
 
-	(void)ent_loop(dumpone);
-	if (ferror(dumpf)) {
+	ent_loop(dumpone);
+	if(ferror(dumpf)) {
 		syslog(LOG_ERR, "ferror %s: %m", newarpfile);
-		return(0);
+		return (0);
 	}
 
-	(void)fclose(dumpf);
-	if (rename(arpfile, oldarpfile) < 0) {
+	fclose(dumpf);
+	if(rename(arpfile, oldarpfile) < 0) {
 		syslog(LOG_ERR, "rename %s -> %s: %m", arpfile, oldarpfile);
-		return(0);
+		return (0);
 	}
-	if (rename(newarpfile, arpfile) < 0) {
+	if(rename(newarpfile, arpfile) < 0) {
 		syslog(LOG_ERR, "rename %s -> %s: %m", newarpfile, arpfile);
-		return(0);
+		return (0);
 	}
-	return(1);
+	return (1);
 }
 
 /* Initialize the databases */
-int
-readdata(void)
+int readdata(void)
 {
-	register FILE *f;
+	FILE *f;
 
-	if ((f = fopen(arpfile, "r")) == NULL) {
+	if((f = fopen(arpfile, "r")) == NULL) {
 		syslog(LOG_ERR, "fopen(%s): %m", arpfile);
-		return(0);
+		return (0);
 	}
-	if (!file_loop(f, ent_add, arpfile)) {
-		(void)fclose(f);
-		return(0);
+	if(!file_loop(f, ent_add, arpfile)) {
+		fclose(f);
+		return (0);
 	}
-	(void)fclose(f);
+	fclose(f);
 
 	/* It's not fatal if we can't open the ethercodes file */
-	if ((f = fopen(ethercodes, "r")) != NULL) {
-		(void)ec_loop(f, ec_add, ethercodes);
-		(void)fclose(f);
+	if((f = fopen(ethercodes, "r")) != NULL) {
+		ec_loop(f, ec_add, ethercodes);
+		fclose(f);
 	}
 
-	return(1);
+	return (1);
 }
 
-char *
-savestr(register const char *str)
+char *savestr(const char *str)
 {
-	register int i;
-	register char *cp;
+	int i;
+	char *cp;
 	static char *strptr = NULL;
 	static int strsize = 0;
 
 	i = strlen(str) + 1;
-	if (i > strsize) {
+	if(i > strsize) {
 		strsize = 512;
 		strptr = malloc(strsize);
-		if (strptr == NULL) {
+		if(strptr == NULL) {
 			syslog(LOG_ERR, "savestr(): malloc: %m");
 			exit(1);
 		}
 		memset(strptr, 0, strsize);
 	}
-	(void)strcpy(strptr, str);
+	strcpy(strptr, str);
 	cp = strptr;
 	strptr += i;
 	strsize -= i;

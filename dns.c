@@ -18,10 +18,6 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-#ifndef lint
-static const char rcsid[] =
-    "@(#) $Id: dns.c,v 1.15 2000/09/30 23:40:40 leres Exp $ (LBL)";
-#endif
 
 /*
  * dns - domain name system routines
@@ -57,7 +53,7 @@ static const char rcsid[] =
 #define BUFSIZ 1024
 #endif
 
-static char hostbuf[BUFSIZ+1];
+static char hostbuf[BUFSIZ + 1];
 
 #if PACKETSZ > 1024
 #define	MAXPACKET	PACKETSZ
@@ -71,22 +67,20 @@ typedef union {
 } querybuf;
 #endif
 
-int
-gethinfo(register char *hostname, register char *cpu, register int cpulen,
-    register char *os, register int oslen)
+int gethinfo(char *hostname, char *cpu, int cpulen, char *os, int oslen)
 {
 #ifdef HAVE_DN_SKIPNAME
-	register querybuf *qb;
-	register u_char *cp, *eom;
-	register char *bp;
-	register int n;
-	register HEADER *hp;
-	register int type, class, buflen, ancount, qdcount;
+	querybuf *qb;
+	u_char *cp, *eom;
+	char *bp;
+	int n;
+	HEADER *hp;
+	int type, class, buflen, ancount, qdcount;
 	querybuf qbuf;
 
 	qb = &qbuf;
 	n = res_query(hostname, C_IN, T_HINFO, qb->buf, sizeof(qb->buf));
-	if (n < 0)
+	if(n < 0)
 		return (0);
 
 	eom = qb->buf + n;
@@ -99,32 +93,31 @@ gethinfo(register char *hostname, register char *cpu, register int cpulen,
 	bp = hostbuf;
 	buflen = sizeof(hostbuf);
 	cp = qb->buf + sizeof(HEADER);
-	if (qdcount) {
+	if(qdcount) {
 		cp += dn_skipname(cp, eom) + QFIXEDSZ;
-		while (--qdcount > 0)
+		while(--qdcount > 0)
 			cp += dn_skipname(cp, eom) + QFIXEDSZ;
 	}
-	while (--ancount >= 0 && cp < eom) {
-		if ((n = dn_expand((u_char *)qb->buf, (u_char *)eom,
-		    (u_char *)cp, (u_char *)bp, buflen)) < 0)
+	while(--ancount >= 0 && cp < eom) {
+		if((n = dn_expand((u_char *) qb->buf, (u_char *) eom, (u_char *) cp, (u_char *) bp, buflen)) < 0)
 			break;
 		cp += n;
 		type = _getshort(cp);
- 		cp += sizeof(u_short);
+		cp += sizeof(u_short);
 		class = _getshort(cp);
- 		cp += sizeof(u_short) + sizeof(u_int32_t);
+		cp += sizeof(u_short) + sizeof(u_int32_t);
 		n = _getshort(cp);
 		cp += sizeof(u_short);
-		if (type == T_HINFO) {
+		if(type == T_HINFO) {
 			/* Unpack */
 			n = *cp++;
-			if (n > cpulen - 1)
+			if(n > cpulen - 1)
 				return (0);
 			BCOPY(cp, cpu, n);
 			cp += n;
 			cpu[n] = '\0';
 			n = *cp++;
-			if (n > oslen - 1)
+			if(n > oslen - 1)
 				return (0);
 			BCOPY(cp, os, n);
 			os[n] = '\0';
@@ -138,32 +131,30 @@ gethinfo(register char *hostname, register char *cpu, register int cpulen,
 }
 
 /* Return the cannonical name of the host */
-char *
-gethname(u_int32_t a)
+char *gethname(u_int32_t a)
 {
-	register int32_t options;
-	register struct hostent *hp;
+	int32_t options;
+	struct hostent *hp;
 
 	options = _res.options;
 	_res.options |= RES_AAONLY;
 	_res.options &= ~(RES_DEFNAMES | RES_DNSRCH);
 	hp = gethostbyaddr((char *)&a, sizeof(a), AF_INET);
 	_res.options = options;
-	if (hp == NULL)
+	if(hp == NULL)
 		return (intoa(a));
 	return (hp->h_name);
 }
 
 /* Return the simple name of the host */
-char *
-getsname(register u_int32_t a)
+char *getsname(u_int32_t a)
 {
-	register char *s, *cp;
+	char *s, *cp;
 
 	s = gethname(a);
-	if (!isdigit((int)*s)) {
+	if(!isdigit((int)*s)) {
 		cp = strchr(s, '.');
-		if (cp != NULL)
+		if(cp != NULL)
 			*cp = '\0';
 	}
 	return (s);

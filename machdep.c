@@ -19,11 +19,6 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef lint
-static const char rcsid[] =
-    "@(#) $Header: machdep.c,v 1.4 97/09/30 15:03:53 leres Exp $ (LBL)";
-#endif
-
 #include <sys/types.h>
 #ifdef __osf__
 #include <sys/sysinfo.h>
@@ -32,14 +27,13 @@ static const char rcsid[] =
 
 #include "machdep.h"
 
-int
-abort_on_misalignment(char *ebuf)
+int abort_on_misalignment(char *ebuf)
 {
 #ifdef __osf__
 	static int buf[2] = { SSIN_UACPROC, UAC_SIGBUS };
 
-	if (setsysinfo(SSI_NVPAIRS, (caddr_t)buf, 1, 0, 0) < 0) {
-		(void)sprintf(ebuf, "setsysinfo: errno %d", errno);
+	if(setsysinfo(SSI_NVPAIRS, (caddr_t) buf, 1, 0, 0) < 0) {
+		sprintf(ebuf, "setsysinfo: errno %d", errno);
 		return (-1);
 	}
 #endif

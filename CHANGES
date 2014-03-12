@@ -1,3 +1,13 @@
+DROP1:
+-Remove all unnecessary (void) casts when retcode was not used
+-Update ethercodes.dat to the ones from nmap
+-indent the code
+-Remove register hints for variables (nothing really considered)
+-Remove {scss,rcs}id 
+
+
+-- FORKED Mon Feb  7 13:31:36 CET 2005
+
 @(#) $Id: CHANGES,v 1.41 2004/01/22 22:25:43 leres Exp $ (LBL)
 
 v2.1 Thu Jan 22 14:05:27 PST 2004

@@ -18,10 +18,6 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-#ifndef lint
-static const char rcsid[] =
-    "@(#) $Id: db.c,v 1.34 2000/09/30 23:39:57 leres Exp $ (LBL)";
-#endif
 
 /*
  * db - arpwatch database routines
@@ -57,7 +53,7 @@ static const char rcsid[] =
 #define HASHSIZE (2 << 15)
 
 #define NEWACTIVITY_DELTA (6*30*24*60*60)	/* 6 months in seconds */
-#define FLIPFLIP_DELTA (24*60*60)		/* 24 hours in seconds */
+#define FLIPFLIP_DELTA (24*60*60)	/* 24 hours in seconds */
 
 /* Ethernet info */
 struct einfo {
@@ -85,13 +81,12 @@ static struct ainfo *ainfo_find(u_int32_t);
 static void check_hname(struct ainfo *);
 struct ainfo *newainfo(void);
 
-int
-ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
+int ent_add(u_int32_t a, u_char * e, time_t t, char *h)
 {
-	register struct ainfo *ap;
-	register struct einfo *ep;
-	register int i;
-	register u_int len;
+	struct ainfo *ap;
+	struct einfo *ep;
+	int i;
+	u_int len;
 	u_char *e2;
 	time_t t2;
 
@@ -99,10 +94,10 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 	ap = ainfo_find(a);
 
 	/* Check for the usual case first */
-	if (ap->ecount > 0) {
+	if(ap->ecount > 0) {
 		ep = ap->elist[0];
-		if (MEMCMP(e, ep->e, 6) == 0) {
-			if (t - ep->t > NEWACTIVITY_DELTA) {
+		if(MEMCMP(e, ep->e, 6) == 0) {
+			if(t - ep->t > NEWACTIVITY_DELTA) {
 				report("new activity", a, e, NULL, &t, &ep->t);
 				check_hname(ap);
 			}
@@ -112,7 +107,7 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 	}
 
 	/* Check for a virgin ainfo record */
-	if (ap->ecount == 0) {
+	if(ap->ecount == 0) {
 		ap->ecount = 1;
 		ap->elist[0] = elist_alloc(a, e, t, h);
 		report("new station", a, e, NULL, &t, NULL);
@@ -120,9 +115,9 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 	}
 
 	/* Check for a flip-flop */
-	if (ap->ecount > 1) {
+	if(ap->ecount > 1) {
 		ep = ap->elist[1];
-		if (MEMCMP(e, ep->e, 6) == 0) {
+		if(MEMCMP(e, ep->e, 6) == 0) {
 			/*
 			 * Suppress report when less than
 			 * FLIPFLOP_DELTA and one of the two ethernet
@@ -130,10 +125,8 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 			 */
 			t2 = ap->elist[0]->t;
 			e2 = ap->elist[0]->e;
-			if (t - t2 < FLIPFLIP_DELTA &&
-			    (isdecnet(e) || isdecnet(e2)))
-				dosyslog(LOG_INFO,
-				    "suppressed DECnet flip flop", a, e, e2);
+			if(t - t2 < FLIPFLIP_DELTA && (isdecnet(e) || isdecnet(e2)))
+				dosyslog(LOG_INFO, "suppressed DECnet flip flop", a, e, e2);
 			else
 				report("flip flop", a, e, e2, &t, &t2);
 			ap->elist[1] = ap->elist[0];
@@ -144,14 +137,13 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 		}
 	}
 
-	for (i = 2; i < ap->ecount; ++i) {
+	for(i = 2; i < ap->ecount; ++i) {
 		ep = ap->elist[i];
-		if (MEMCMP(e, ep->e, 6) == 0) {
+		if(MEMCMP(e, ep->e, 6) == 0) {
 			/* An old entry comes to life */
 			e2 = ap->elist[0]->e;
 			t2 = ap->elist[0]->t;
-			dosyslog(LOG_NOTICE, "reused old ethernet address",
-			    a, e, e2);
+			dosyslog(LOG_NOTICE, "reused old ethernet address", a, e, e2);
 			/* Shift entries down */
 			len = i * sizeof(ap->elist[0]);
 			BCOPY(&ap->elist[0], &ap->elist[1], len);
@@ -175,23 +167,22 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 	return (1);
 }
 
-static struct ainfo *
-ainfo_find(register u_int32_t a)
+static struct ainfo *ainfo_find(u_int32_t a)
 {
-	register u_int size;
-	register struct ainfo *ap;
+	u_int size;
+	struct ainfo *ap;
 
 	ap = &ainfo_table[a & (HASHSIZE - 1)];
-	for (;;) {
-		if (ap->esize == 0) {
+	for(;;) {
+		if(ap->esize == 0) {
 			/* Emtpy cell; use it */
 			ap->a = a;
 			break;
 		}
-		if (a == ap->a)
+		if(a == ap->a)
 			break;
 
-		if (ap->next != NULL) {
+		if(ap->next != NULL) {
 			/* Try linked cell */
 			ap = ap->next;
 			continue;
@@ -202,11 +193,11 @@ ainfo_find(register u_int32_t a)
 		ap->a = a;
 		break;
 	}
-	if (ap->esize == 0) {
+	if(ap->esize == 0) {
 		ap->esize = 2;
 		size = sizeof(ap->elist[0]) * ap->esize;
 		ap->elist = (struct einfo **)malloc(size);
-		if (ap->elist == NULL) {
+		if(ap->elist == NULL) {
 			syslog(LOG_ERR, "ainfo_find(): malloc: %m");
 			exit(1);
 		}
@@ -215,40 +206,38 @@ ainfo_find(register u_int32_t a)
 	return (ap);
 }
 
-int
-ent_loop(ent_process fn)
+int ent_loop(ent_process fn)
 {
-	register int i, j, n;
-	register struct ainfo *ap;
-	register struct einfo *ep;
+	int i, j, n;
+	struct ainfo *ap;
+	struct einfo *ep;
 
 	n = 0;
-	for (i = 0; i < HASHSIZE; ++i)
-		for (ap = &ainfo_table[i]; ap != NULL; ap = ap->next)
-			for (j = 0; j < ap->ecount; ++j) {
+	for(i = 0; i < HASHSIZE; ++i)
+		for(ap = &ainfo_table[i]; ap != NULL; ap = ap->next)
+			for(j = 0; j < ap->ecount; ++j) {
 				ep = ap->elist[j];
-				(*fn)(ap->a, ep->e, ep->t, ep->h);
+				(*fn) (ap->a, ep->e, ep->t, ep->h);
 				++n;
 			}
 	return (n);
 }
 
 /* Insure enough room for at least one more einfo pointer */
-static void
-alist_alloc(register struct ainfo *ap)
+static void alist_alloc(struct ainfo *ap)
 {
-	register u_int size;
+	u_int size;
 
-	if (ap->esize == 0) {
+	if(ap->esize == 0) {
 		syslog(LOG_ERR, "alist_alloc(): esize 0, can't happen");
 		exit(1);
 	}
-	if (ap->ecount < ap->esize)
+	if(ap->ecount < ap->esize)
 		return;
 	ap->esize += 2;
 	size = ap->esize * sizeof(ap->elist[0]);
 	ap->elist = (struct einfo **)realloc(ap->elist, size);
-	if (ap->elist == NULL) {
+	if(ap->elist == NULL) {
 		syslog(LOG_ERR, "alist_alloc(): realloc(): %m");
 		exit(1);
 	}
@@ -257,21 +246,19 @@ alist_alloc(register struct ainfo *ap)
 }
 
 /* Allocate and initialize a elist struct */
-static struct einfo *
-elist_alloc(register u_int32_t a, register u_char *e, register time_t t,
-    register char *h)
+static struct einfo *elist_alloc(u_int32_t a, u_char * e, time_t t, char *h)
 {
-	register struct einfo *ep;
-	register u_int size;
+	struct einfo *ep;
+	u_int size;
 	static struct einfo *elist = NULL;
 	static int eleft = 0;
 
-	if (eleft <= 0) {
+	if(eleft <= 0) {
 		/* Allocate some more */
 		eleft = 16;
 		size = eleft * sizeof(struct einfo);
 		elist = (struct einfo *)malloc(size);
-		if (elist == NULL) {
+		if(elist == NULL) {
 			syslog(LOG_ERR, "elist_alloc(): malloc: %m");
 			exit(1);
 		}
@@ -281,73 +268,67 @@ elist_alloc(register u_int32_t a, register u_char *e, register time_t t,
 	ep = elist++;
 	--eleft;
 	BCOPY(e, ep->e, 6);
-	if (h == NULL && !initializing)
+	if(h == NULL && !initializing)
 		h = getsname(a);
-	if (h != NULL && !isdigit((int)*h))
+	if(h != NULL && !isdigit((int)*h))
 		strcpy(ep->h, h);
 	ep->t = t;
 	return (ep);
 }
 
 /* Check to see if the simple hostname needs updating; syslog if so */
-static void
-check_hname(register struct ainfo *ap)
+static void check_hname(struct ainfo *ap)
 {
-	register struct einfo *ep;
-	register char *h;
+	struct einfo *ep;
+	char *h;
 
 	/* Don't waste time if we're loading the initial arp.dat */
-	if (initializing)
+	if(initializing)
 		return;
 	ep = ap->elist[0];
 	h = getsname(ap->a);
-	if (!isdigit((int)*h) && strcmp(h, ep->h) != 0) {
-		syslog(LOG_INFO, "hostname changed %s %s %s -> %s",
-		    intoa(ap->a), e2str(ep->e), ep->h, h);
+	if(!isdigit((int)*h) && strcmp(h, ep->h) != 0) {
+		syslog(LOG_INFO, "hostname changed %s %s %s -> %s", intoa(ap->a), e2str(ep->e), ep->h, h);
 		strcpy(ep->h, h);
 	}
 }
 
-int
-cmpeinfo(register const void *p1, register const void *p2)
+int cmpeinfo(const void *p1, const void *p2)
 {
-	register time_t t1, t2;
+	time_t t1, t2;
 
 	t1 = (*(struct einfo **)p1)->t;
 	t2 = (*(struct einfo **)p2)->t;
-	if (t1 > t2)
+	if(t1 > t2)
 		return (-1);
-	if (t1 < t2)
+	if(t1 < t2)
 		return (1);
 	return (0);
 }
 
-void
-sorteinfo(void)
+void sorteinfo(void)
 {
-	register int i;
-	register struct ainfo *ap;
+	int i;
+	struct ainfo *ap;
 
-	for (i = 0; i < HASHSIZE; ++i)
-		for (ap = &ainfo_table[i]; ap != NULL; ap = ap->next)
-			if (ap->ecount > 0)
-				qsort(ap->elist, ap->ecount,
-				    sizeof(ap->elist[0]), cmpeinfo);
+	for(i = 0; i < HASHSIZE; ++i)
+		for(ap = &ainfo_table[i]; ap != NULL; ap = ap->next)
+			if(ap->ecount > 0)
+				qsort(ap->elist, ap->ecount, sizeof(ap->elist[0]), cmpeinfo);
 }
 
-struct ainfo *
-newainfo(void)
+struct ainfo *newainfo(void)
 {
-	register struct ainfo *ap;
-	register u_int size;
+	struct ainfo *ap;
+	u_int size;
 	static struct ainfo *ainfoptr = NULL;
 	static u_int ainfosize = 0;
 
-	if (ainfosize == 0) {
+	if(ainfosize == 0) {
 		ainfosize = 512;
 		size = ainfosize * sizeof(*ap);
 		ap = (struct ainfo *)malloc(size);
-		if (ap == NULL) {
+		if(ap == NULL) {
 			syslog(LOG_ERR, "newainfo(): malloc: %m");
 			exit(1);
 		}
@@ -360,29 +341,27 @@ newainfo(void)
 }
 
 #ifdef DEBUG
-void
-debugdump(void)
+void debugdump(void)
 {
-	register int i, j;
-	register time_t t;
-	register struct ainfo *ap;
-	register struct einfo *ep;
+	int i, j;
+	time_t t;
+	struct ainfo *ap;
+	struct einfo *ep;
 
-	for (i = 0; i < HASHSIZE; ++i)
-		for (ap = &ainfo_table[i]; ap != NULL; ap = ap->next) {
-			if (ap->esize == 0)
+	for(i = 0; i < HASHSIZE; ++i)
+		for(ap = &ainfo_table[i]; ap != NULL; ap = ap->next) {
+			if(ap->esize == 0)
 				continue;
-			if (ap->ecount == 0) {
+			if(ap->ecount == 0) {
 				printf("%s\n", intoa(ap->a));
 				continue;
 			}
 			t = 0;
-			for (j = 0; j < ap->ecount; ++j) {
+			for(j = 0; j < ap->ecount; ++j) {
 				ep = ap->elist[j];
-				if (t != 0 && t < ep->t)
+				if(t != 0 && t < ep->t)
 					printf("*");
-				printf("%s\t%s\t%u\t%s\n", intoa(ap->a),
-				    e2str(ep->e), (u_int)ep->t, ep->h);
+				printf("%s\t%s\t%u\t%s\n", intoa(ap->a), e2str(ep->e), (u_int) ep->t, ep->h);
 				t = ep->t;
 			}
 		}

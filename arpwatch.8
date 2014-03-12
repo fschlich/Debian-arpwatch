@@ -22,7 +22,7 @@
 .TH ARPWATCH 8 "8 October 2000"
 .UC 4
 .SH NAME
-arpwatch - keep track of ethernet/ip address pairings
+arpwatch \- keep track of ethernet/ip address pairings
 .SH SYNOPSIS
 .na
 .B arpwatch
@@ -46,6 +46,8 @@ arpwatch - keep track of ethernet/ip address pairings
 ] [
 .B -m
 .I report_mode
+] [
+.B -p
 ]
 
 
@@ -59,37 +61,31 @@ uses
 .BR pcap (3)
 to listen for arp packets on a local ethernet interface.
 .LP
-The
 .B -d
-flag is used enable debugging. This also inhibits forking into the
+is used enable debugging. This also inhibits forking into the
 background and emailing the reports. Instead, they are sent to
 .IR stderr .
 .LP
-The
 .B -f
-flag is used to set the ethernet/ip address database filename.
+is used to set the ethernet/ip address database filename.
 The default is
 .IR arp.dat .
 .LP
-The
 .B -i
-flag is used to override the default interface.
+is used to override the default interface.
 .LP
-The
 .B -n
-flag specifies additional local networks. This can be useful to
+specifies additional local networks. This can be useful to
 avoid "bogon" warnings when there is more than one network running
 on the same wire. If the optional
 .I width
 is not specified, the default netmask for the network's class is used.
 .LP
-The
 .B -N
-flag disables reporting any bogons.
+disables reporting any bogons.
 .LP
-The
 .B -r
-flag is used to specify a savefile
+is used to specify a savefile
 (perhaps created by
 .BR tcpdump (1)
 or
@@ -104,6 +100,14 @@ selects the output mode (report mode). Currently, 0 means the old mode
 (via sendmail), 1 is a simple stdout mode and arpwatch will not fork
 into the background. 2 means raw mode, where the fields are separated.
 by a ",". Default is 0.
+.LP
+.B -p
+flag disables promiscuous operation.  ARP broadcasts get through hubs without
+having the interface in promiscuous mode, while saving considerable resources
+that would be wasted on processing gigabytes of non-broadcast traffic.  OTOH,
+setting promiscuous mode does not mean getting 100% traffic that would concern
+.B arpwatch.
+
 .LP
 Note that an empty
 .I arp.dat

@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while((op = getopt(argc, argv, "df:i:n:Nr:m:")) != EOF) {
+	while((op = getopt(argc, argv, "df:i:n:Nr:m:p")) != EOF) {
 		switch (op) {
 
 		case 'd':
@@ -200,12 +200,16 @@ int main(int argc, char **argv)
 			 */
 			report_mode=atoi(optarg);
 			if(setup_reportmode(report_mode)) {
-                                fprintf(stderr, "%s: Unknown mode, exiting\n", prog);
+                                fprintf(stderr, "%s: Unknown report mode %d, exiting\n", prog, report_mode);
                                 exit(1);
                         }
 			break;
 
-		default:
+                case 'p':
+			++nopromisc;
+                        break;
+
+                default:
 			usage();
 		}
 	}
@@ -217,14 +221,14 @@ int main(int argc, char **argv)
 	openlog(prog, 0, LOG_DAEMON);
 
 	if(chdir(arpdir) < 0) {
-		fprintf(stderr, "chdir(%s) failed, using current working directory\n", arpdir);
+		fprintf(stderr, "%s: chdir(%s) failed, using cwd for data.\n", prog, arpdir);
 	}
 
 	/* run in offline mode, no fork, analyze file */
 	if(rfilename != NULL) {
 		pd = pcap_open_offline(rfilename, errbuf);
 		if(pd == NULL) {
-			syslog(LOG_ERR, "pcap open %s: %s", rfilename, errbuf);
+			fprintf(stderr, "pcap open %s (%s)", rfilename, errbuf);
 			exit(1);
 		}
 		swapped = pcap_is_swapped(pd);
@@ -233,14 +237,15 @@ int main(int argc, char **argv)
 
 		/* Determine interface if not specified */
 		if(interface == NULL && (interface = pcap_lookupdev(errbuf)) == NULL) {
-			fprintf(stderr, "%s: lookup_device: %s\n", prog, errbuf);
+			fprintf(stderr, "%s: lookup_device (%s)\n", prog, errbuf);
 			exit(1);
 		}
 
 		/* Determine network and netmask */
 		if(pcap_lookupnet(interface, &net, &netmask, errbuf) < 0) {
-			fprintf(stderr, "%s: bad interface %s: %s\n", prog, interface, errbuf);
-			exit(1);
+			fprintf(stderr, "%s: assuming unconfigured interface %s (%s), continuing\n", prog, interface, errbuf);
+                        net=0;
+                        netmask=0;
 		}
 
 		/* Drop into the background if not debugging */
@@ -270,7 +275,7 @@ int main(int argc, char **argv)
 		snaplen = max(sizeof(struct ether_header), sizeof(struct fddi_header)) + sizeof(struct ether_arp);
 		timeout = 1000;
 
-		pd = pcap_open_live(interface, snaplen, 1, timeout, errbuf);
+		pd = pcap_open_live(interface, snaplen, !nopromisc, timeout, errbuf);
 		if(pd == NULL) {
 			syslog(LOG_ERR, "pcap open %s: %s", interface, errbuf);
 			exit(1);
@@ -290,17 +295,18 @@ int main(int argc, char **argv)
 	/* Must be ethernet or fddi */
 	linktype = pcap_datalink(pd);
 	if(linktype != DLT_EN10MB && linktype != DLT_FDDI) {
+		fprintf(stderr, "%s: Link layer type %d not ethernet or fddi", prog, linktype);
 		syslog(LOG_ERR, "Link layer type %d not ethernet or fddi", linktype);
 		exit(1);
 	}
 
 	/* Compile and install filter */
 	if(pcap_compile(pd, &code, "arp or rarp", 1, netmask) < 0) {
-		syslog(LOG_ERR, "pcap_compile: %s", pcap_geterr(pd));
+		fprintf(stderr, "%s: pcap_compile: %s", prog, pcap_geterr(pd));
 		exit(1);
 	}
 	if(pcap_setfilter(pd, &code) < 0) {
-		syslog(LOG_ERR, "pcap_setfilter: %s", pcap_geterr(pd));
+		fprintf(stderr, "%s: pcap_setfilter: %s", prog, pcap_geterr(pd));
 		exit(1);
 	}
 	if(rfilename == NULL)
@@ -339,11 +345,13 @@ int main(int argc, char **argv)
 		break;
 
 	default:
-		syslog(LOG_ERR, "bad linktype %d (can't happen)", linktype);
+		fprintf(stderr, "%s: bad linktype %d (can't happen)\n", prog, linktype);
+                syslog(LOG_ERR, "bad linktype %d (can't happen)", linktype);
 		exit(1);
 	}
 
         if(status < 0) {
+		fprintf(stderr, "%s: pcap_loop: %s\n", prog, pcap_geterr(pd));
 		syslog(LOG_ERR, "pcap_loop: %s", pcap_geterr(pd));
 		exit(1);
 	}
@@ -717,6 +725,6 @@ __dead void usage(void)
 	extern char version[];
 
 	fprintf(stderr, "Version %s\n", version);
-        fprintf(stderr, "usage: %s [-dN] [-f datafile] [-i interface] [-n net[/width]] [-r file] [-m mode]\n", prog);
+        fprintf(stderr, "usage: %s [-dN] [-f datafile] [-i interface] [-n net[/width]] [-r file] [-m mode] [-p]\n", prog);
 	exit(1);
 }

@@ -11,6 +11,7 @@ cd /usr/operator/arpwatch
 list=`cat list`
 cname=`cat cname`
 errs=/tmp/bihourly.$$
+errs=`tempfile -p arpbh -s .tmp`
 #
 alist=""
 for r in $list; do \

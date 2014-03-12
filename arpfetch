@@ -1,5 +1,4 @@
 #!/bin/sh
-# @(#) $Id: arpfetch,v 1.4 2000/03/21 02:27:45 leres Exp $ (LBL)
 #
 # arpfetch - collect arp data from a cisco using snmpwalk
 #
@@ -10,8 +9,8 @@ fi
 #
 host=$1
 cname=$2
-temp=/tmp/arpfetch.temp.$$
-errs=/tmp/arpfetch.errs.$$
+temp=`tempfile -p arpft -s .temp.tmp`
+errs=`tempfile -p arpft -s .errs.tmp`
 what="ip.ipnettomediatable.ipnettomediaentry.ipnettomediaphysaddress"
 #
 # Get the data

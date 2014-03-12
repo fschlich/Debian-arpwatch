@@ -1,5 +1,6 @@
 #define ARPFILE "arp.dat"
 #define ETHERCODES "ethercodes.dat"
+
 /* Checkpoint time in seconds */
 #define CHECKPOINT (10*60)
 

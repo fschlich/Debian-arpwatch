@@ -49,14 +49,18 @@
 
 char *arpdir = ARPDIR;
 char *arpfile = ARPFILE;
-char *ethercodes = ETHERCODES;
+char *ethercodes = ETHERCODESDIR "/" ETHERCODES;
 
 /* Broadcast ethernet addresses */
 u_char zero[6] = { 0, 0, 0, 0, 0, 0 };
 u_char allones[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
 int debug = 0;
-int initializing = 1;		/* true if initializing */
+/* true if initializing */
+int initializing = 1;
+/* don't activate promisc mode */
+int nopromisc = 0;
+
 
 /* syslog() helper routine */
 void dosyslog(int p, char *s, u_int32_t a, u_char * ea, u_char * ha)
@@ -143,8 +147,12 @@ int readdata(void)
 	}
 	fclose(f);
 
-	/* It's not fatal if we can't open the ethercodes file */
-	if((f = fopen(ethercodes, "r")) != NULL) {
+        /*
+         It's not fatal if we can't open the ethercodes file
+         Try first official installed, then version in CWD
+         Make use of short-circuit in ||
+         */
+	if( ((f = fopen(ethercodes, "r")) != NULL) || ((f=fopen(ETHERCODES, "r")) != NULL) ) {
 		ec_loop(f, ec_add, ethercodes);
 		fclose(f);
 	}

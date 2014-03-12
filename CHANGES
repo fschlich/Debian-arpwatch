@@ -1,3 +1,17 @@
+DROP6:
+-Merge a lot of vendor fixes from Debian (thanks to Peter Kelemen)
+o 06debian_manpages: man-pages for arpfetch, arp2ethers
+o 21arp2ethers: misc. awk fixes
+o 26unconf_iface: continue if unconfigured interface, but don't use syslog()
+o 25ignore_zero_ip: don't enter IP 0.0.0.0 into db
+o 22secure_tempfile: use a secure tmpfile name in bihourly, mkdep and arpfetch
+o 07debian_srcdir: add some missing $(srcdir)
+o 12opt_nopromisc: -p not enter the device promisc mode
+o 05debian_fhs: ethercodes into share/arpwatch, arp.dat into var/lib/arpwatch
+
+-Add more fprintf(stderr, ...) on failures and make error reporting better
+-Misc cleanups
+
 DROP5:
 -Remove #ifdef DEBUG altogether - enabled by default, so what.
  Since DROP2 I had no luck with stable releases, sorry.

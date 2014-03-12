@@ -31,7 +31,8 @@ BINDEST = @sbindir@
 # Pathname of directory to install the man page
 MANDEST = @mandir@
 # Pathname of directory to install database file
-ARPDIR = $(prefix)/arpwatch
+ARPDIR = $(prefix)/var/lib/arpwatch
+ETHERCODESDIR = $(prefix)/share/arpwatch
 
 # VPATH
 srcdir = @srcdir@
@@ -45,7 +46,7 @@ CC = @CC@
 PROG = arpwatch
 CCOPT = @V_CCOPT@
 INCLS = -I. @V_INCLS@
-DEFS = @DEFS@ -DARPDIR=\"$(ARPDIR)\" -DPATH_SENDMAIL=\"$(SENDMAIL)\"
+DEFS = @DEFS@ -DARPDIR=\"$(ARPDIR)\" -DPATH_SENDMAIL=\"$(SENDMAIL)\" -DETHERCODESDIR=\"$(ETHERCODESDIR)\"
 
 # Standard CFLAGS
 CFLAGS = $(CCOPT) $(DEFS) $(INCLS)
@@ -104,7 +105,7 @@ arpsnmp: $(SOBJ)
 version.o: version.c
 version.c: $(srcdir)/VERSION
 	@rm -f $@
-	sed -e 's/.*/char version[] = "&";/' $(srcdir)/VERSION > $@
+	sed -e 's/.*/char version[] = "&";/' $(srcdir)/VERSION > $(srcdir)/$@
 
 zap: zap.o intoa.o
 	$(CC) $(CFLAGS) -o $@ zap.o intoa.o -lutil
@@ -114,7 +115,8 @@ install: force
 	$(INSTALL) -m 750 arpwatch $(DESTDIR)$(BINDEST)
 	$(INSTALL) -m 750 arpsnmp $(DESTDIR)$(BINDEST)
 	$(INSTALL) -d -m 750 $(ARPDIR)
-	$(INSTALL) -m 440 ethercodes.dat $(ARPDIR)
+	$(INSTALL) -d -m 750 $(ETHERCODESDIR)
+	$(INSTALL) -m 440 ethercodes.dat $(ETHERCODESDIR)
 	$(INSTALL) -m 640 arp.dat $(ARPDIR)
 
 install-man: force

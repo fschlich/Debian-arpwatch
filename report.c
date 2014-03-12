@@ -76,6 +76,7 @@ void (*report_f)(int , u_int32_t, u_char *, u_char *, time_t *, time_t *)=report
 
 /* number of outstanding children */
 static int cdepth;
+static char *unknown = "<UNKNOWN>";
 
 static char *fmtdate(time_t);
 static char *fmtdelta(time_t);
@@ -251,7 +252,6 @@ static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t 
 	char *watcher = WATCHER;
 	char *watchee = WATCHEE;
 	char *sendmail = PATH_SENDMAIL;
-	char *unknown = "<unknown>";
 	char buf[132];
 	static int init = 0;
 
@@ -310,13 +310,11 @@ static void report_orig(int action, u_int32_t a, u_char *e1, u_char *e2, time_t 
 	fprintf(f, "From: %s\n", watchee);
 	fprintf(f, "To: %s\n", watcher);
 	hn = gethname(a);
-	if(!isdigit(*hn))
-		fprintf(f, "Subject: %s (%s)\n", title, hn);
-	else {
-		fprintf(f, "Subject: %s\n", title);
+	if(isdigit(*hn)) {
 		hn = unknown;
 	}
-	putc('\n', f);
+	fprintf(f, "Subject: %s (%s)\n", title, hn);
+        putc('\n', f);
 	fprintf(f, fmt, "hostname", hn);
 	fprintf(f, fmt, "ip address", intoa(a));
 	fprintf(f, fmt, "ethernet address", e2str(e1));
@@ -364,20 +362,16 @@ static void report_stdout(int action, u_int32_t a, u_char *e1, u_char *e2, time_
 	char *cp, *hn;
 	char cpu[64], os[64];
 	char *fmt = "%20s: %s\n";
-	char *unknown = "<unknown>";
 	char buf[132];
         FILE *f=stdout;
 
         char *title=TAB[action];
         
 	hn = gethname(a);
-	if(!isdigit(*hn))
-		fprintf(f, "%s: %s\n", title, hn);
-	else {
-		fprintf(f, "%s\n", title);
+	if(isdigit(*hn)) {
 		hn = unknown;
 	}
-	putc('\n', f);
+        fprintf(f, "%s: %s\n\n", title, hn);
 	fprintf(f, fmt, "hostname", hn);
 	fprintf(f, fmt, "ip address", intoa(a));
 	fprintf(f, fmt, "ethernet address", e2str(e1));
@@ -413,9 +407,7 @@ static void report_raw(int action, u_int32_t a, u_char *e1, u_char *e2, time_t *
 	char *hn, *ip, *mac, *oldmac, *vendor;
 	time_t delta;
 
-        char *unknown="<unknown>";
 	static int init=0;
-
         FILE *f=stdout;
 
         if(!init) {

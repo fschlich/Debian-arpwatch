@@ -1,7 +1,7 @@
 /* @(#) $Id: arpwatch.h,v 1.29 2000/09/30 23:40:49 leres Exp $ (LBL) */
 
 #define ARPFILE "arp.dat"
-/* #define ETHERCODES "ethercodes.dat" */
+#define ETHERCODES "ethercodes.dat"
 #define CHECKPOINT (15*60)		/* Checkpoint time in seconds */
 
 #define MEMCMP(a, b, n) memcmp((char *)a, (char *)b, n)

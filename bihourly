@@ -6,7 +6,7 @@
 PATH=$PATH:/usr/local/sbin
 export PATH
 #
-cd /var/lib/arpwatch
+cd /usr/operator/arpwatch
 #
 list=`cat list`
 cname=`cat cname`
@@ -14,7 +14,7 @@ errs=/tmp/bihourly.$$
 #
 alist=""
 for r in $list; do \
-	arpfetch $r $cname > $r 2> $errs
+	./arpfetch $r $cname > $r 2> $errs
 	if test -s $errs; then
 		echo "arpfetch $r failed:"
 		sed -e 's/^/    /' $errs

@@ -106,7 +106,6 @@ struct rtentry;
 #endif
 
 char *prog;
-char *path_sendmail = PATH_SENDMAIL;
 
 int can_checkpoint;
 int swapped;
@@ -173,9 +172,6 @@ main(int argc, char **argv)
 		"r:"
 		/**/
 		/**/
-		"s:"
-		/**/
-		/**/
 	;
 
 	if (argv[0] == NULL)
@@ -224,11 +220,6 @@ main(int argc, char **argv)
 
 		case 'r':
 			rfilename = optarg;
-			break;
-		/**/
-		/**/
-		case 's':
-			path_sendmail = optarg;
 			break;
 		/**/
 		/**/
@@ -792,9 +783,6 @@ usage(void)
 		/**/
 		/**/
 		"[-r file] "
-		/**/
-		/**/
-		"[-s sendmail_path] "
 		/**/
 		/**/
 		"\n"

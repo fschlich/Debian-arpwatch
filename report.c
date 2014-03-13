@@ -235,7 +235,6 @@ void
 report(register char *title, register u_int32_t a, register u_char *e1,
     register u_char *e2, register time_t *t1p, register time_t *t2p)
 {
-        extern char *path_sendmail;
 	register char *cp, *hn;
 	register int fd, pid;
 	register FILE *f;
@@ -243,7 +242,7 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 	char *fmt = "%20s: %s\n";
 	char *watcher = WATCHER;
 	char *watchee = WATCHEE;
-	char *sendmail = path_sendmail;
+	char *sendmail = PATH_SENDMAIL;
 	char *unknown = "<unknown>";
 	char buf[132];
 	static int init = 0;

@@ -40,14 +40,6 @@ arpsnmp \- keep track of ethernet/ip address pairings
 .\" **
 .br
 .ti +8
-[
-.B -s
-.I sendmail_path
-]
-.\" **
-.\" **
-.br
-.ti +8
 .I file
 [
 .I ...
@@ -75,15 +67,6 @@ The
 flag is used to set the ethernet/ip address database filename.
 The default is
 .IR arp.dat .
-.\" **
-.\" **
-.LP
-(Debian) The
-.B -s
-flag is used to specify the path to the sendmail program.
-Any program that takes the option -odi and then text from stdin
-can be substituted. This is useful for redirecting reports
-to log files instead of mail.
 .\" **
 .\" **
 .LP

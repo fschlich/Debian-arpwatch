@@ -67,7 +67,6 @@ int	snmp_add(u_int32_t, u_char *, time_t, char *);
 __dead	void usage(void) __attribute__((volatile));
 
 char *prog;
-char *path_sendmail = PATH_SENDMAIL;
 
 extern int optind;
 extern int opterr;
@@ -82,7 +81,6 @@ main(int argc, char **argv)
 	char options[] =
 		"d"
 		"f:"
-		"s:"
 	;
 
 	if ((cp = strrchr(argv[0], '/')) != NULL)
@@ -109,10 +107,6 @@ main(int argc, char **argv)
 
 		case 'f':
 			arpfile = optarg;
-			break;
-
-		case 's':
-			path_sendmail = optarg;
 			break;
 
 		default:
@@ -195,7 +189,6 @@ usage(void)
 	char usage[] =
 		"[-d] "
 		"[-f datafile] "
-		"[-s sendmail_path] "
 		"file [...]\n"
 	;
 

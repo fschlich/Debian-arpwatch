@@ -1,0 +1,177 @@
+Description: option -s to specify the path to sendmail
+Author: KELEMEN Péter <fuji@debian.org>
+
+Index: arpwatch/arpsnmp.8
+diff -u arpwatch/arpsnmp.8:1.1.1.1.2.1 arpwatch/arpsnmp.8:1.1.1.1.4.4
+--- arpwatch/arpsnmp.8:1.1.1.1.2.1	Thu Aug 12 22:16:18 2004
++++ arpwatch/arpsnmp.8	Thu Aug 12 22:23:48 2004
+@@ -40,6 +40,14 @@
+ .\" **
+ .br
+ .ti +8
++[
++.B -s
++.I sendmail_path
++]
++.\" **
++.\" **
++.br
++.ti +8
+ .I file
+ [
+ .I ...
+@@ -70,6 +78,15 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
++.B -s
++flag is used to specify the path to the sendmail program.
++Any program that takes the option -odi and then text from stdin
++can be substituted. This is useful for redirecting reports
++to log files instead of mail.
++.\" **
++.\" **
++.LP
+ Note that an empty
+ .I arp.dat
+ file must be created before the first time you run
+Index: arpwatch/arpsnmp.c
+diff -u arpwatch/arpsnmp.c:1.1.1.1.2.2 arpwatch/arpsnmp.c:1.1.1.1.2.1.2.2
+--- arpwatch/arpsnmp.c:1.1.1.1.2.2	Tue Aug 10 11:14:13 2004
++++ arpwatch/arpsnmp.c	Tue Aug 10 11:16:17 2004
+@@ -67,6 +67,7 @@
+ __dead	void usage(void) __attribute__((volatile));
+ 
+ char *prog;
++char *path_sendmail = PATH_SENDMAIL;
+ 
+ extern int optind;
+ extern int opterr;
+@@ -81,6 +82,7 @@
+ 	char options[] =
+ 		"d"
+ 		"f:"
++		"s:"
+ 	;
+ 
+ 	if ((cp = strrchr(argv[0], '/')) != NULL)
+@@ -109,6 +111,10 @@
+ 			arpfile = optarg;
+ 			break;
+ 
++		case 's':
++			path_sendmail = optarg;
++			break;
++
+ 		default:
+ 			usage();
+ 		}
+@@ -189,6 +195,7 @@
+ 	char usage[] =
+ 		"[-d] "
+ 		"[-f datafile] "
++		"[-s sendmail_path] "
+ 		"file [...]\n"
+ 	;
+ 
+Index: arpwatch/arpwatch.8
+diff -u arpwatch/arpwatch.8:1.1.1.1.2.2 arpwatch/arpwatch.8:1.1.1.1.4.5
+--- arpwatch/arpwatch.8:1.1.1.1.2.2	Thu Aug 12 22:31:09 2004
++++ arpwatch/arpwatch.8	Thu Aug 12 22:35:07 2004
+@@ -63,6 +63,14 @@
+ ]
+ .\" **
+ .\" **
++.br
++.ti +8
++[
++.B -s
++.I sendmail_path
++]
++.\" **
++.\" **
+ .ad
+ .SH DESCRIPTION
+ .B Arpwatch
+@@ -127,6 +135,15 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
++.B -s
++flag is used to specify the path to the sendmail program.
++Any program that takes the option -odi and then text from stdin
++can be substituted. This is useful for redirecting reports
++to log files instead of mail.
++.\" **
++.\" **
++.LP
+ Note that an empty
+ .I arp.dat
+ file must be created before the first time you run
+Index: arpwatch/arpwatch.c
+diff -u arpwatch/arpwatch.c:1.1.1.1.2.5 arpwatch/arpwatch.c:1.1.1.1.2.1.2.3
+--- arpwatch/arpwatch.c:1.1.1.1.2.5	Sat Aug 14 02:33:07 2004
++++ arpwatch/arpwatch.c	Fri Aug 13 00:12:22 2004
+@@ -106,6 +106,7 @@
+ #endif
+ 
+ char *prog;
++char *path_sendmail = PATH_SENDMAIL;
+ 
+ int can_checkpoint;
+ int swapped;
+@@ -172,6 +173,9 @@
+ 		"r:"
+ 		/**/
+ 		/**/
++		"s:"
++		/**/
++		/**/
+ 	;
+ 
+ 	if (argv[0] == NULL)
+@@ -223,6 +227,11 @@
+ 			break;
+ 		/**/
+ 		/**/
++		case 's':
++			path_sendmail = optarg;
++			break;
++		/**/
++		/**/
+ 		default:
+ 			usage();
+ 		}
+@@ -785,6 +794,9 @@
+ 		"[-r file] "
+ 		/**/
+ 		/**/
++		"[-s sendmail_path] "
++		/**/
++		/**/
+ 		"\n"
+ 	;
+ 
+Index: arpwatch/report.c
+diff -u arpwatch/report.c:1.1.1.1 arpwatch/report.c:1.1.1.1.4.1
+--- arpwatch/report.c:1.1.1.1	Tue Apr 17 13:31:37 2001
++++ arpwatch/report.c	Tue Apr 17 13:49:16 2001
+@@ -235,6 +235,7 @@
+ report(register char *title, register u_int32_t a, register u_char *e1,
+     register u_char *e2, register time_t *t1p, register time_t *t2p)
+ {
++        extern char *path_sendmail;
+ 	register char *cp, *hn;
+ 	register int fd, pid;
+ 	register FILE *f;
+@@ -242,7 +243,7 @@
+ 	char *fmt = "%20s: %s\n";
+ 	char *watcher = WATCHER;
+ 	char *watchee = WATCHEE;
+-	char *sendmail = PATH_SENDMAIL;
++	char *sendmail = path_sendmail;
+ 	char *unknown = "<unknown>";
+ 	char buf[132];
+ 	static int init = 0;

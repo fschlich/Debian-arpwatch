@@ -143,17 +143,17 @@ if test $ac_cv_have_dn_skipname = yes ; then
 	AC_DEFINE(HAVE_DN_SKIPNAME)
 fi
 
-if test -f $srcdir/.devel ; then
+if test -f .devel ; then
 	AC_DEFINE(LBL)
 fi
 
-if test -r $srcdir/lbl/gnuc.h ; then
-	rm -f $srcdir/gnuc.h
-	ln -s lbl/gnuc.h $srcdir/gnuc.h 
+if test -r lbl/gnuc.h ; then
+	rm -f gnuc.h
+	ln -s lbl/gnuc.h gnuc.h
 fi
 
-if test ! -r $srcdir/addresses.h ; then
-	cp $srcdir/addresses.h.in $srcdir/addresses.h
+if test ! -r addresses.h ; then
+	cp addresses.h.in addresses.h
 fi
 
 AC_SUBST(V_CCOPT)
@@ -166,12 +166,12 @@ AC_PROG_INSTALL
 
 AC_OUTPUT(Makefile)
 
-if test ! -f $srcdir/arp.dat ; then
+if test ! -f arp.dat ; then
 	echo 'creating empty arp.dat file'
-	touch $srcdir/arp.dat
+	touch arp.dat
 fi
 
-if test -f $srcdir/.devel ; then
+if test -f .devel ; then
 	make depend
 fi
 exit 0

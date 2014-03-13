@@ -1,0 +1,67 @@
+Description: fix Debian srcdir
+Author: KELEMEN Péter <fuji@debian.org>
+
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -106,7 +106,7 @@
+ version.o: version.c
+ version.c: $(srcdir)/VERSION
+ 	@rm -f $@
+-	sed -e 's/.*/char version[] = "&";/' $(srcdir)/VERSION > $@
++	sed -e 's/.*/char version[] = "&";/' $(srcdir)/VERSION > $(srcdir)/$@
+ 
+ zap: zap.o intoa.o
+ 	$(CC) $(CFLAGS) -o $@ zap.o intoa.o -lutil
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -50,7 +50,7 @@
+     $1="-O"
+     $2=""
+     if test "${srcdir}" != "." ; then
+-	    $2="-I\$\(srcdir\)"
++	    $2="-I\$(srcdir)"
+     fi
+     if test "${CFLAGS+set}" = set; then
+ 	    LBL_CFLAGS="$CFLAGS"
+--- a/configure.in
++++ b/configure.in
+@@ -143,17 +143,17 @@
+ 	AC_DEFINE(HAVE_DN_SKIPNAME)
+ fi
+ 
+-if test -f .devel ; then
++if test -f $srcdir/.devel ; then
+ 	AC_DEFINE(LBL)
+ fi
+ 
+-if test -r lbl/gnuc.h ; then
+-	rm -f gnuc.h
+-	ln -s lbl/gnuc.h gnuc.h
++if test -r $srcdir/lbl/gnuc.h ; then
++	rm -f $srcdir/gnuc.h
++	ln -s lbl/gnuc.h $srcdir/gnuc.h
+ fi
+ 
+-if test ! -r addresses.h ; then
+-	cp addresses.h.in addresses.h
++if test ! -r $srcdir/addresses.h ; then
++	cp $srcdir/addresses.h.in $srcdir/addresses.h
+ fi
+ 
+ AC_SUBST(V_CCOPT)
+@@ -166,12 +166,12 @@
+ 
+ AC_OUTPUT(Makefile)
+ 
+-if test ! -f arp.dat ; then
++if test ! -f $srcdir/arp.dat ; then
+ 	echo 'creating empty arp.dat file'
+-	touch arp.dat
++	touch $srcdir/arp.dat
+ fi
+ 
+-if test -f .devel ; then
++if test -f $srcdir/.devel ; then
+ 	make depend
+ fi
+ exit 0

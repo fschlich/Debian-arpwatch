@@ -1,0 +1,17 @@
+Description: ignore 0.0.0.0
+Author: KELEMEN Péter <fuji@debian.org>
+
+--- a/db.c
++++ b/db.c
+@@ -97,6 +97,11 @@
+ 	u_char *e2;
+ 	time_t t2;
+ 
++	/* Ignore 0.0.0.0 */
++	if (a == 0) {
++		return(1);
++	}
++
+ 	/* Lookup ip address */
+ 	ap = ainfo_find(a);
+ 

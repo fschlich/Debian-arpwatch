@@ -97,11 +97,6 @@ ent_add(register u_int32_t a, register u_char *e, time_t t, register char *h,
 	u_char *e2;
 	time_t t2;
 
-	/* Ignore 0.0.0.0 */
-	if (a == 0) {
-		return(1);
-	}
-
 	/* Lookup ip address */
 	ap = ainfo_find(a);
 

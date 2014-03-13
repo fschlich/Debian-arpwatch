@@ -184,9 +184,6 @@ main(int argc, char **argv)
 		"a"
 		/**/
 		/**/
-		"m:"
-		/**/
-		/**/
 	;
 
 	if (argv[0] == NULL)
@@ -249,11 +246,6 @@ main(int argc, char **argv)
 		/**/
 		case 'p':
 			++nopromisc;
-			break;
-		/**/
-		/**/
-		case 'm':
-			mailaddress = optarg;
 			break;
 		/**/
 		/**/
@@ -830,9 +822,6 @@ usage(void)
 		/**/
 		/**/
 		"[-a] "
-		/**/
-		/**/
-		"[-m addr] "
 		/**/
 		/**/
 		"\n"

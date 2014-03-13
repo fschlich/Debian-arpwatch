@@ -25,6 +25,3 @@ extern int nopromisc;
 extern int allsubnets;
 /**/
 /**/
-extern char *mailaddress;
-/**/
-/**/

@@ -1,0 +1,181 @@
+Description: optoin -m to specify the e-mail address for reports
+Author: KELEMEN Péter <fuji@debian.org>
+
+--- a/arpsnmp.8
++++ b/arpsnmp.8
+@@ -48,6 +48,14 @@
+ .\" **
+ .br
+ .ti +8
++[
++.B -m
++.I addr
++]
++.\" **
++.\" **
++.br
++.ti +8
+ .I file
+ [
+ .I ...
+@@ -87,6 +95,15 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
++.B -m
++option is used to specify the e-mail address to which reports will be
++sent.  By default, reports are sent to
++.I root
++on the local machine.
++.\" **
++.\" **
++.LP
+ Note that an empty
+ .I arp.dat
+ file must be created before the first time you run
+--- a/arpsnmp.c
++++ b/arpsnmp.c
+@@ -81,6 +81,7 @@
+ 	char errbuf[256];
+ 	char options[] =
+ 		"d"
++		"m:"
+ 		"f:"
+ 		"s:"
+ 	;
+@@ -107,6 +108,10 @@
+ #endif
+ 			break;
+ 
++		case 'm':
++			mailaddress = optarg;
++			break;
++
+ 		case 'f':
+ 			arpfile = optarg;
+ 			break;
+@@ -196,6 +201,7 @@
+ 	extern char version[];
+ 	char usage[] =
+ 		"[-d] "
++		"[-m addr ] "
+ 		"[-f datafile] "
+ 		"[-s sendmail_path] "
+ 		"file [...]\n"
+--- a/arpwatch.8
++++ b/arpwatch.8
+@@ -47,6 +47,8 @@
+ .B -i
+ .I interface
+ ]
++.\" **
++.\" **
+ .br
+ .ti +8
+ [
+@@ -85,6 +87,14 @@
+ ]
+ .\" **
+ .\" **
++.br
++.ti +8
++[
++.B -m
++.I addr
++]
++.\" **
++.\" **
+ .ad
+ .SH DESCRIPTION
+ .B Arpwatch
+@@ -183,6 +193,15 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
++.B -m
++option is used to specify the e-mail address to which reports will be
++sent.  By default, reports are sent to
++.I root
++on the local machine.
++.\" **
++.\" **
++.LP
+ Note that an empty
+ .I arp.dat
+ file must be created before the first time you run
+--- a/arpwatch.c
++++ b/arpwatch.c
+@@ -184,6 +184,9 @@
+ 		"a"
+ 		/**/
+ 		/**/
++		"m:"
++		/**/
++		/**/
+ 	;
+ 
+ 	if (argv[0] == NULL)
+@@ -249,6 +252,11 @@
+ 			break;
+ 		/**/
+ 		/**/
++		case 'm':
++			mailaddress = optarg;
++			break;
++		/**/
++		/**/
+ 		default:
+ 			usage();
+ 		}
+@@ -824,6 +832,9 @@
+ 		"[-a] "
+ 		/**/
+ 		/**/
++		"[-m addr] "
++		/**/
++		/**/
+ 		"\n"
+ 	;
+ 
+--- a/report.c
++++ b/report.c
+@@ -242,7 +242,7 @@
+ 	register FILE *f;
+ 	char tempfile[64], cpu[64], os[64];
+ 	char *fmt = "%20s: %s\n";
+-	char *watcher = WATCHER;
++	char *watcher = mailaddress;
+ 	char *watchee = WATCHEE;
+ 	char *sendmail = path_sendmail;
+ 	char *unknown = "<unknown>";
+--- a/util.c
++++ b/util.c
+@@ -50,6 +50,7 @@
+ #include "ec.h"
+ #include "file.h"
+ #include "util.h"
++#include "addresses.h"
+ 
+ char *arpdir = ARPDIR;
+ char *arpfile = ARPFILE;
+@@ -69,6 +70,9 @@
+ int allsubnets = 0;			/* watch all attached subnets */
+ /**/
+ /**/
++char *mailaddress = WATCHER;
++/**/
++/**/
+ 
+ /* syslog() helper routine */
+ void
+--- a/util.h
++++ b/util.h
+@@ -25,3 +25,6 @@
+ extern int allsubnets;
+ /**/
+ /**/
++extern char *mailaddress;
++/**/
++/**/

@@ -48,14 +48,6 @@ arpsnmp \- keep track of ethernet/ip address pairings
 .\" **
 .br
 .ti +8
-[
-.B -m
-.I addr
-]
-.\" **
-.\" **
-.br
-.ti +8
 .I file
 [
 .I ...
@@ -92,15 +84,6 @@ flag is used to specify the path to the sendmail program.
 Any program that takes the option -odi and then text from stdin
 can be substituted. This is useful for redirecting reports
 to log files instead of mail.
-.\" **
-.\" **
-.LP
-(Debian) The
-.B -m
-option is used to specify the e-mail address to which reports will be
-sent.  By default, reports are sent to
-.I root
-on the local machine.
 .\" **
 .\" **
 .LP

@@ -81,7 +81,6 @@ main(int argc, char **argv)
 	char errbuf[256];
 	char options[] =
 		"d"
-		"m:"
 		"f:"
 		"s:"
 	;
@@ -106,10 +105,6 @@ main(int argc, char **argv)
 			(void)fprintf(stderr,
 			    "%s: Warning: Not compiled with -DDEBUG\n", prog);
 #endif
-			break;
-
-		case 'm':
-			mailaddress = optarg;
 			break;
 
 		case 'f':
@@ -201,7 +196,6 @@ usage(void)
 	extern char version[];
 	char usage[] =
 		"[-d] "
-		"[-m addr ] "
 		"[-f datafile] "
 		"[-s sendmail_path] "
 		"file [...]\n"

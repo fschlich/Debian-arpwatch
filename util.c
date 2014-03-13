@@ -50,7 +50,6 @@ static const char rcsid[] =
 #include "ec.h"
 #include "file.h"
 #include "util.h"
-#include "addresses.h"
 
 char *arpdir = ARPDIR;
 char *arpfile = ARPFILE;
@@ -68,9 +67,6 @@ int nopromisc = 0;			/* don't activate promisc mode */
 /**/
 /**/
 int allsubnets = 0;			/* watch all attached subnets */
-/**/
-/**/
-char *mailaddress = WATCHER;
 /**/
 /**/
 

@@ -242,7 +242,7 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 	register FILE *f;
 	char tempfile[64], cpu[64], os[64];
 	char *fmt = "%20s: %s\n";
-	char *watcher = mailaddress;
+	char *watcher = WATCHER;
 	char *watchee = WATCHEE;
 	char *sendmail = path_sendmail;
 	char *unknown = "<unknown>";

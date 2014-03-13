@@ -345,10 +345,9 @@ main(int argc, char **argv)
 
 		/* Determine network and netmask */
 		if (pcap_lookupnet(interface, &net, &netmask, errbuf) < 0) {
-			syslog(LOG_NOTICE, "bad interface %s: %s - assuming unconfigured interface",
-				interface, errbuf);
-			net = 0;
-			netmask = 0;
+			(void)fprintf(stderr, "%s: bad interface %s: %s\n",
+			    prog, interface, errbuf);
+			exit(1);
 		}
 
 		/* Drop into the background if not debugging */

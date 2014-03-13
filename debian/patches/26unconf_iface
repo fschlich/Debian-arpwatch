@@ -1,0 +1,19 @@
+Description: assume unconfigured interface rather than exit
+Author: KELEMEN Péter <fuji@debian.org>
+
+--- a/arpwatch.c
++++ b/arpwatch.c
+@@ -345,9 +345,10 @@
+ 
+ 		/* Determine network and netmask */
+ 		if (pcap_lookupnet(interface, &net, &netmask, errbuf) < 0) {
+-			(void)fprintf(stderr, "%s: bad interface %s: %s\n",
+-			    prog, interface, errbuf);
+-			exit(1);
++			syslog(LOG_NOTICE, "bad interface %s: %s - assuming unconfigured interface",
++				interface, errbuf);
++			net = 0;
++			netmask = 0;
+ 		}
+ 
+ 		/* Drop into the background if not debugging */

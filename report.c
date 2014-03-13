@@ -67,7 +67,6 @@ struct rtentry;
 #include "report.h"
 #include "setsignal.h"
 #include "util.h"
-#include "localhost.h"
 
 #define PLURAL(n) ((n) == 1 || (n) == -1 ? "" : "s")
 
@@ -307,7 +306,7 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 			syslog(LOG_ERR, "unlink(%s): %m", tempfile);
 	}
 
-	(void)fprintf(f, "From: arpwatch (Arpwatch %s)\n", localhost());
+	(void)fprintf(f, "From: %s\n", watchee);
 	(void)fprintf(f, "To: %s\n", watcher);
 	if (interface == NULL) interface = ""; /* shouldn't happen */
 	hn = gethname(a);

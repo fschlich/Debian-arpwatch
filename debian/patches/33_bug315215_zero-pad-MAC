@@ -1,0 +1,18 @@
+Subject: ethernet address format fix
+ Enclosed is a patch to make the format of the ethernet MAC addresses
+ that arpwatch prints match the format used by other tools (like ifconfig
+ and dhcpd).  This makes it easier to, for example, copy the mac address
+ from the arpwatch email and paste it into a grep.
+From: Mark Ferlatte <ferlatte@cryptio.net>
+
+--- a/ec.c
++++ b/ec.c
+@@ -218,7 +218,7 @@
+ {
+ 	static char str[32];
+ 
+-	(void)sprintf(str, "%x:%x:%x:%x:%x:%x",
++	(void)sprintf(str, "%02x:%02x:%02x:%02x:%02x:%02x",
+ 	    e[0], e[1], e[2], e[3], e[4], e[5]);
+ 	return (str);
+ }

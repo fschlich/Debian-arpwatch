@@ -218,7 +218,7 @@ e2str(register u_char *e)
 {
 	static char str[32];
 
-	(void)sprintf(str, "%02x:%02x:%02x:%02x:%02x:%02x",
+	(void)sprintf(str, "%x:%x:%x:%x:%x:%x",
 	    e[0], e[1], e[2], e[3], e[4], e[5]);
 	return (str);
 }

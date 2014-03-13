@@ -17,5 +17,3 @@ extern u_char allones[6];
 
 extern int debug;
 extern int initializing;
-/**/
-/**/

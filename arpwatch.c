@@ -153,26 +153,6 @@ main(int argc, char **argv)
 	register char *interface, *rfilename;
 	struct bpf_program code;
 	char errbuf[PCAP_ERRBUF_SIZE];
-	char options[] =
-		"d"
-		/**/
-		/**/
-		"f:"
-		/**/
-		/**/
-		"i:"
-		/**/
-		/**/
-		"n:"
-		/**/
-		/**/
-		"N"
-		/**/
-		/**/
-		"r:"
-		/**/
-		/**/
-	;
 
 	if (argv[0] == NULL)
 		prog = "arpwatch";
@@ -190,7 +170,7 @@ main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-	while ((op = getopt(argc, argv, options)) != EOF)
+	while ((op = getopt(argc, argv, "df:i:n:Nr:")) != EOF)
 		switch (op) {
 
 		case 'd':
@@ -221,8 +201,7 @@ main(int argc, char **argv)
 		case 'r':
 			rfilename = optarg;
 			break;
-		/**/
-		/**/
+
 		default:
 			usage();
 		}
@@ -769,26 +748,9 @@ __dead void
 usage(void)
 {
 	extern char version[];
-	char usage[] =
-		"[-dN] "
-		/**/
-		/**/
-		"[-f datafile] "
-		/**/
-		/**/
-		"[-i interface] "
-		/**/
-		/**/
-		"[-n net[/width]] "
-		/**/
-		/**/
-		"[-r file] "
-		/**/
-		/**/
-		"\n"
-	;
 
 	(void)fprintf(stderr, "Version %s\n", version);
-	(void)fprintf(stderr, "usage: %s %s", prog, usage);
+	(void)fprintf(stderr, "usage: %s [-dN] [-f datafile] [-i interface]"
+	    " [-n net[/width]] [-r file]\n", prog);
 	exit(1);
 }

@@ -61,8 +61,6 @@ u_char allones[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
 int debug = 0;
 int initializing = 1;			/* true if initializing */
-/**/
-/**/
 
 /* syslog() helper routine */
 void

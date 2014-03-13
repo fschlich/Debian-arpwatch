@@ -78,10 +78,6 @@ main(int argc, char **argv)
 	register char *cp;
 	register int op, i;
 	char errbuf[256];
-	char options[] =
-		"d"
-		"f:"
-	;
 
 	if ((cp = strrchr(argv[0], '/')) != NULL)
 		prog = cp + 1;
@@ -94,7 +90,7 @@ main(int argc, char **argv)
 	}
 
 	opterr = 0;
-	while ((op = getopt(argc, argv, options)) != EOF)
+	while ((op = getopt(argc, argv, "df:")) != EOF)
 		switch (op) {
 
 		case 'd':
@@ -186,14 +182,9 @@ __dead void
 usage(void)
 {
 	extern char version[];
-	char usage[] =
-		"[-d] "
-		"[-f datafile] "
-		"file [...]\n"
-	;
 
 	(void)fprintf(stderr, "Version %s\n", version);
 	(void)fprintf(stderr,
-	    "usage: %s %s", prog, usage);
+	    "usage: %s [-d] [-f datafile] file [...]\n", prog);
 	exit(1);
 }

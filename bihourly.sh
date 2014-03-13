@@ -6,7 +6,7 @@
 PATH=${PATH}:/usr/local/sbin
 export PATH
 #
-cd /var/lib/arpwatch
+cd /usr/operator/arpwatch
 #
 list="`cat list`"
 cname="`cat cname`"
@@ -26,7 +26,7 @@ touch ${l}
 
 alist=""
 for r in ${list}; do \
-	arpfetch ${r} ${cname} > ${r} 2> ${temp1}
+	./arpfetch ${r} ${cname} > ${r} 2> ${temp1}
 	if [ -s ${temp1} ]; then
 		echo "arpfetch ${r} errors:"
 		xr=${d}/${r}.$$

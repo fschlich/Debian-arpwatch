@@ -33,7 +33,7 @@ If you want to run arpsnmp, there are two scripts in this distribution
 that are of interest. The first is arpfetch and it knows how to
 retrieve the arp tables from a cisco using snmpwalk. This script takes
 two arguments, the hostname and the snmp community name. The other
-script is called bihourly and is suitable as a cron job. To configure
+script is called bihourly.sh and is suitable as a cron job. To configure
 it, you need to create a file called "list" that contains the names of
 the hosts to query and "cname" which contains the read/only snmp
 community name.
@@ -63,7 +63,7 @@ arpwatch.8	- man page
 arpwatch.c	- main program
 arpwatch.h	- config info
 bcopy.c		- missing routine
-bihourly	- arpsnmp wrapper script
+bihourly.sh	- arpsnmp wrapper script
 config.guess	- autoconf support
 config.sub	- autoconf support
 configure	- configure script (run this first)

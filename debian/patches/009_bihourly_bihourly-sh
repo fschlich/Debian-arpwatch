@@ -1,0 +1,95 @@
+Description: made bihourly.sh an example, and copied bihourly cron script from arpwatch-2.1a13
+Author: Craig Sanders <cas@taz.net.au>
+
+diff --git a/FILES b/FILES
+index e183aa1..012bdb6 100644
+--- a/FILES
++++ b/FILES
+@@ -14,7 +14,7 @@ arpwatch.8
+ arpwatch.c
+ arpwatch.h
+ bcopy.c
+-bihourly.sh
++bihourly
+ config.guess
+ config.sub
+ configure
+diff --git a/INSTALL b/INSTALL
+index 8eee373..9f53732 100644
+--- a/INSTALL
++++ b/INSTALL
+@@ -33,7 +33,7 @@ If you want to run arpsnmp, there are two scripts in this distribution
+ that are of interest. The first is arpfetch and it knows how to
+ retrieve the arp tables from a cisco using snmpwalk. This script takes
+ two arguments, the hostname and the snmp community name. The other
+-script is called bihourly.sh and is suitable as a cron job. To configure
++script is called bihourly and is suitable as a cron job. To configure
+ it, you need to create a file called "list" that contains the names of
+ the hosts to query and "cname" which contains the read/only snmp
+ community name.
+@@ -63,7 +63,7 @@ arpwatch.8	- man page
+ arpwatch.c	- main program
+ arpwatch.h	- config info
+ bcopy.c		- missing routine
+-bihourly.sh	- arpsnmp wrapper script
++bihourly	- arpsnmp wrapper script
+ config.guess	- autoconf support
+ config.sub	- autoconf support
+ configure	- configure script (run this first)
+diff --git a/bihourly b/bihourly
+new file mode 100644
+index 0000000..3d85952
+--- /dev/null
++++ b/bihourly
+@@ -0,0 +1,29 @@
++#!/bin/sh
++# @(#) $Header: bihourly,v 1.1 96/11/07 17:39:23 leres Exp $ (LBL)
++#
++#  bihourly arpwatch job
++#
++PATH=$PATH:/usr/local/sbin
++export PATH
++#
++cd /usr/operator/arpwatch
++#
++list=`cat list`
++cname=`cat cname`
++errs=/tmp/bihourly.$$
++#
++alist=""
++for r in $list; do \
++	./arpfetch $r $cname > $r 2> $errs
++	if test -s $errs; then
++		echo "arpfetch $r failed:"
++		sed -e 's/^/    /' $errs
++		continue
++	fi
++	alist="$alist $r"
++done
++#
++rm -f $errs
++arpsnmp $alist
++#
++exit 0
+diff --git a/bihourly.sh b/bihourly.sh
+index fd273a4..8cb0aa9 100755
+--- a/bihourly.sh
++++ b/bihourly.sh
+@@ -6,7 +6,7 @@
+ PATH=${PATH}:/usr/local/sbin
+ export PATH
+ #
+-cd /usr/operator/arpwatch
++cd /var/lib/arpwatch
+ #
+ list="`cat list`"
+ cname="`cat cname`"
+@@ -26,7 +26,7 @@ touch ${l}
+ 
+ alist=""
+ for r in ${list}; do \
+-	./arpfetch ${r} ${cname} > ${r} 2> ${temp1}
++	arpfetch ${r} ${cname} > ${r} 2> ${temp1}
+ 	if [ -s ${temp1} ]; then
+ 		echo "arpfetch ${r} errors:"
+ 		xr=${d}/${r}.$$

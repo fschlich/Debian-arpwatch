@@ -9,7 +9,6 @@
 #
 # - Deal with duplicates in oui.txt (concatenate company names)
 #
-export AWKPATH="$AWKPATH:/usr/lib/arpwatch"
 (sed -n \
     -e 's/^\([0-9A-F][0-9A-F]\)-\([0-9A-F][0-9A-F]\)-\([0-9A-F][0-9A-F]\)  *(hex)[ 	]*\(..*\)/\1\2\3	\4/p' \
     $* | \

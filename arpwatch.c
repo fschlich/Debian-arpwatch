@@ -142,8 +142,6 @@ int	sanity_ether(struct ether_header *, struct ether_arp *, int);
 int	sanity_fddi(struct fddi_header *, struct ether_arp *, int);
 __dead	void usage(void) __attribute__((volatile));
 
-static char *interface;
-
 int
 main(int argc, char **argv)
 {
@@ -153,7 +151,7 @@ main(int argc, char **argv)
 	register int fd;
 #endif
 	register pcap_t *pd;
-	register char *rfilename;
+	register char *interface, *rfilename;
 	struct bpf_program code;
 	char errbuf[PCAP_ERRBUF_SIZE];
 	char options[] =
@@ -181,9 +179,6 @@ main(int argc, char **argv)
 		"p"
 		/**/
 		/**/
-		"a"
-		/**/
-		/**/
 	;
 
 	if (argv[0] == NULL)
@@ -204,10 +199,6 @@ main(int argc, char **argv)
 	pd = NULL;
 	while ((op = getopt(argc, argv, options)) != EOF)
 		switch (op) {
-
-		case 'a':
-			++allsubnets;
-			break;
 
 		case 'd':
 			++debug;
@@ -427,31 +418,29 @@ process_ether(register u_char *u, register const struct pcap_pkthdr *h,
 
 	/* Watch for bogons */
 	if (isbogon(sia)) {
-		dosyslog(LOG_INFO, "bogon", sia, sea, sha, interface);
-		if (!allsubnets) return;
+		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
+		return;
 	}
 
 	/* Watch for ethernet broadcast */
 	if (MEMCMP(sea, zero, 6) == 0 || MEMCMP(sea, allones, 6) == 0 ||
 	    MEMCMP(sha, zero, 6) == 0 || MEMCMP(sha, allones, 6) == 0) {
-		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha,
-			 interface);
+		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha);
 		return;
 	}
 
 	/* Double check ethernet addresses */
 	if (MEMCMP(sea, sha, 6) != 0) {
-		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha,
-			 interface);
+		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha);
 		return;
 	}
 
 	/* Got a live one */
 	t = h->ts.tv_sec;
 	can_checkpoint = 0;
-	if (!ent_add(sia, sea, t, NULL, interface))
-		syslog(LOG_ERR, "ent_add(%s, %s, %ld, %s) failed",
-		    intoa(sia), e2str(sea), t, interface);
+	if (!ent_add(sia, sea, t, NULL))
+		syslog(LOG_ERR, "ent_add(%s, %s, %ld) failed",
+		    intoa(sia), e2str(sea), t);
 	can_checkpoint = 1;
 }
 
@@ -578,31 +567,29 @@ process_fddi(register u_char *u, register const struct pcap_pkthdr *h,
 
 	/* Watch for bogons */
 	if (isbogon(sia)) {
-		dosyslog(LOG_INFO, "bogon", sia, sea, sha, interface);
-		if (!allsubnets) return;
+		dosyslog(LOG_INFO, "bogon", sia, sea, sha);
+		return;
 	}
 
 	/* Watch for ethernet broadcast */
 	if (MEMCMP(sea, zero, 6) == 0 || MEMCMP(sea, allones, 6) == 0 ||
 	    MEMCMP(sha, zero, 6) == 0 || MEMCMP(sha, allones, 6) == 0) {
-		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha,
-			 interface);
+		dosyslog(LOG_INFO, "ethernet broadcast", sia, sea, sha);
 		return;
 	}
 
 	/* Double check ethernet addresses */
 	if (MEMCMP(sea, sha, 6) != 0) {
-		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha,
-			 interface);
+		dosyslog(LOG_INFO, "ethernet mismatch", sia, sea, sha);
 		return;
 	}
 
 	/* Got a live one */
 	t = h->ts.tv_sec;
 	can_checkpoint = 0;
-	if (!ent_add(sia, sea, t, NULL, interface))
-		syslog(LOG_ERR, "ent_add(%s, %s, %ld, %s) failed",
-		    intoa(sia), e2str(sea), t, interface);
+	if (!ent_add(sia, sea, t, NULL))
+		syslog(LOG_ERR, "ent_add(%s, %s, %ld) failed",
+		    intoa(sia), e2str(sea), t);
 	can_checkpoint = 1;
 }
 
@@ -819,9 +806,6 @@ usage(void)
 		/**/
 		/**/
 		"[-p] "
-		/**/
-		/**/
-		"[-a] "
 		/**/
 		/**/
 		"\n"

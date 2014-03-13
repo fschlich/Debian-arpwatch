@@ -63,7 +63,7 @@ static const char rcsid[] =
 /* Forwards */
 int	main(int, char **);
 int	readsnmp(char *);
-int	snmp_add(u_int32_t, u_char *, time_t, char *, char *);
+int	snmp_add(u_int32_t, u_char *, time_t, char *);
 __dead	void usage(void) __attribute__((volatile));
 
 char *prog;
@@ -149,24 +149,22 @@ main(int argc, char **argv)
 static time_t now;
 
 int
-snmp_add(register u_int32_t a, register u_char *e, time_t t, register char *h,
-    char *interface)
+snmp_add(register u_int32_t a, register u_char *e, time_t t, register char *h)
 {
 	/* Watch for ethernet broadcast */
 	if (MEMCMP(e, zero, 6) == 0 || MEMCMP(e, allones, 6) == 0) {
-		dosyslog(LOG_INFO, "ethernet broadcast", a, e, NULL,
-			 interface);
+		dosyslog(LOG_INFO, "ethernet broadcast", a, e, NULL);
 		return (1);
 	}
 
 	/* Watch for some ip broadcast addresses */
 	if (a == 0 || a == 1) {
-		dosyslog(LOG_INFO, "ip broadcast", a, e, NULL, interface);
+		dosyslog(LOG_INFO, "ip broadcast", a, e, NULL);
 		return (1);
 	}
 
 	/* Use current time (although it would be nice to subtract idle time) */
-	return (ent_add(a, e, now, h, interface));
+	return (ent_add(a, e, now, h));
 }
 
 /* Process an snmp file */

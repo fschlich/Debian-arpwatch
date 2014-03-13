@@ -1,8 +1,8 @@
 /* @(#) $Header: util.h,v 1.2 96/10/06 03:22:13 leres Exp $ (LBL) */
 
-void	dosyslog(int, char *, u_int32_t, u_char *, u_char *, char *);
+void	dosyslog(int, char *, u_int32_t, u_char *, u_char *);
 int	dump(void);
-void	dumpone(u_int32_t, u_char *, time_t, char *, char *);
+void	dumpone(u_int32_t, u_char *, time_t, char *);
 int	readdata(void);
 char	*savestr(const char *);
 
@@ -20,8 +20,5 @@ extern int initializing;
 /**/
 /**/
 extern int nopromisc;
-/**/
-/**/
-extern int allsubnets;
 /**/
 /**/

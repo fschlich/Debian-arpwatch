@@ -78,13 +78,6 @@ arpwatch \- keep track of ethernet/ip address pairings
 ]
 .\" **
 .\" **
-.br
-.ti +8
-[
-.B -a
-]
-.\" **
-.\" **
 .ad
 .SH DESCRIPTION
 .B Arpwatch
@@ -166,20 +159,6 @@ that would be wasted on processing gigabytes of non-broadcast traffic.  OTOH,
 setting promiscuous mode does not mean getting 100% traffic that would concern
 .B arpwatch .
 YMMV.
-.\" **
-.\" **
-.LP
-(Debian) 
-.B -a
-By default,
-.B arpwatch
-reports bogons (unless
-.B -N
-is given) for IP addresses that are in the same subnet than the
-first IP address of the default interface.  If this option is
-specified,
-.B arpwatch
-will report bogons about every IP addresses.
 .\" **
 .\" **
 .LP

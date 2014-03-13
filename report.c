@@ -233,8 +233,7 @@ reaper(int signo)
 
 void
 report(register char *title, register u_int32_t a, register u_char *e1,
-    register u_char *e2, register time_t *t1p, register time_t *t2p,
-    char *interface)
+    register u_char *e2, register time_t *t1p, register time_t *t2p)
 {
         extern char *path_sendmail;
 	register char *cp, *hn;
@@ -255,7 +254,7 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 
 	if (debug) {
 		if (debug > 1) {
-			dosyslog(LOG_NOTICE, title, a, e1, e2, interface);
+			dosyslog(LOG_NOTICE, title, a, e1, e2);
 			return;
 		}
 		f = stdout;
@@ -272,7 +271,7 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 		}
 
 		/* Syslog this event too */
-		dosyslog(LOG_NOTICE, title, a, e1, e2, interface);
+		dosyslog(LOG_NOTICE, title, a, e1, e2);
 
 		/* Update child depth */
 		++cdepth;
@@ -304,19 +303,16 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 
 	(void)fprintf(f, "From: %s\n", watchee);
 	(void)fprintf(f, "To: %s\n", watcher);
-	if (interface == NULL) interface = ""; /* shouldn't happen */
 	hn = gethname(a);
 	if (!isdigit(*hn))
-		(void)fprintf(f, "Subject: %s (%s) %s\n", title, hn,
-			      interface);
+		(void)fprintf(f, "Subject: %s (%s)\n", title, hn);
 	else {
-		(void)fprintf(f, "Subject: %s %s\n", title, interface);
+		(void)fprintf(f, "Subject: %s\n", title);
 		hn = unknown;
 	}
 	(void)putc('\n', f);
 	(void)fprintf(f, fmt, "hostname", hn);
 	(void)fprintf(f, fmt, "ip address", intoa(a));
-	(void)fprintf(f, fmt, "interface", interface);
 	(void)fprintf(f, fmt, "ethernet address", e2str(e1));
 	if ((cp = ec_find(e1)) == NULL)
 		cp = unknown;

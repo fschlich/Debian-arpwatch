@@ -1,0 +1,201 @@
+Description: options -u and -R
+ -u to drop root privileges and change the UID to username
+ -R to restart in s seconds after the interface went down
+Author: KELEMEN Péter <fuji@debian.org>
+
+--- a/arpwatch.8
++++ b/arpwatch.8
+@@ -95,6 +95,20 @@
+ ]
+ .\" **
+ .\" **
++.br
++.ti +8
++[
++.B -u
++.I username
++]
++.br
++.ti +8
++[
++.B -R
++.I seconds
++]
++.\" **
++.\" **
+ .ad
+ .SH DESCRIPTION
+ .B Arpwatch
+@@ -202,6 +216,34 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
++.B -u
++flag instructs
++.B arpwatch
++to drop root privileges and change the UID to
++.I username
++and GID to the primary group of
++.I username .
++This is recommended for security reasons, but
++.I username
++has to have write access to the default directory.
++.LP
++(Debian) The
++.B -R
++flag instructs
++.B arpwatch
++to restart in
++.I seconds
++seconds after the interface went down.  By default, in such cases
++arpwatch would print an error message and exit.  This option is
++ignored if either the
++.B -r
++or
++.B -u
++flags are used.
++.\" **
++.\" **
++.LP
+ Note that an empty
+ .I arp.dat
+ file must be created before the first time you run
+--- a/arpwatch.c
++++ b/arpwatch.c
+@@ -62,7 +62,8 @@
+ #include <string.h>
+ #include <syslog.h>
+ #include <unistd.h>
+-
++#include <pwd.h>
++#include <grp.h>
+ #include <pcap.h>
+ 
+ #include "gnuc.h"
+@@ -144,6 +145,24 @@
+ 
+ static char *interface;
+ 
++void dropprivileges(const char* user)
++{
++       struct passwd* pw;
++       pw = getpwnam( user );
++       if ( pw ) {
++               if ( initgroups(pw->pw_name, 0) != 0 || setgid(pw->pw_gid) != 0 ||
++                       setuid(pw->pw_uid) != 0 ) {
++                       syslog(LOG_ERR, "Couldn't change to '%.32s' uid=%d gid=%d", user,pw->pw_uid, pw->pw_gid);
++                       exit(1);
++              }
++      }
++      else {
++            syslog(LOG_ERR, "Couldn't find user '%.32s' in /etc/passwd", user);
++            exit(1);
++      }
++      syslog(LOG_INFO, "Running as uid=%d gid=%d", getuid(), getgid());
++}
++
+ int
+ main(int argc, char **argv)
+ {
+@@ -156,6 +175,8 @@
+ 	register char *rfilename;
+ 	struct bpf_program code;
+ 	char errbuf[PCAP_ERRBUF_SIZE];
++	char* username = NULL;
++	int restart = 0;
+ 	char options[] =
+ 		"d"
+ 		/**/
+@@ -187,6 +208,10 @@
+ 		"m:"
+ 		/**/
+ 		/**/
++		"u:"
++		"R:"
++		/**/
++		/**/
+ 	;
+ 
+ 	if (argv[0] == NULL)
+@@ -257,6 +282,19 @@
+ 			break;
+ 		/**/
+ 		/**/
++		case 'u':
++			if ( optarg ) {
++				username = strdup(optarg);
++			} else {
++				fprintf(stderr, "%s: Need username after -u\n", prog);
++				usage();
++			}
++			break;
++		case 'R':
++			restart = atoi(optarg);
++			break;
++		/**/
++		/**/
+ 		default:
+ 			usage();
+ 		}
+@@ -267,6 +305,8 @@
+ 	if (rfilename != NULL) {
+ 		net = 0;
+ 		netmask = 0;
++		interface = "(from file)";
++		restart = 0;
+ 	} else {
+ 		/* Determine interface if not specified */
+ 		if (interface == NULL &&
+@@ -313,6 +353,7 @@
+ 		syslog(LOG_ERR, "(using current working directory)");
+ 	}
+ 
++label_restart:
+ 	if (rfilename != NULL) {
+ 		pd = pcap_open_offline(rfilename, errbuf);
+ 		if (pd == NULL) {
+@@ -327,19 +368,29 @@
+ 		pd = pcap_open_live(interface, snaplen, !nopromisc, timeout, errbuf);
+ 		if (pd == NULL) {
+ 			syslog(LOG_ERR, "pcap open %s: %s", interface, errbuf);
+-			exit(1);
++			if (restart) {
++				syslog(LOG_ERR, "restart in %d secs", restart);
++			} else {
++				exit(1);
++			}
++			sleep(restart);
++			goto label_restart;
+ 		}
+ #ifdef WORDS_BIGENDIAN
+ 		swapped = 1;
+ #endif
+ 	}
+ 
++        if ( username && !restart ) {
++               dropprivileges( username );
++        } else {
+ 	/*
+ 	 * Revert to non-privileged user after opening sockets
+ 	 * (not needed on most systems).
+ 	 */
+-	setgid(getgid());
+-	setuid(getuid());
++		setgid(getgid());
++		setuid(getuid());
++	}
+ 
+ 	/* Must be ethernet or fddi */
+ 	linktype = pcap_datalink(pd);
+@@ -835,6 +886,10 @@
+ 		"[-m addr] "
+ 		/**/
+ 		/**/
++		"[-u username] "
++		"[-R seconds ] "
++		/**/
++		/**/
+ 		"\n"
+ 	;
+ 

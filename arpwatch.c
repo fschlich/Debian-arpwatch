@@ -62,8 +62,7 @@ struct rtentry;
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
-#include <pwd.h>
-#include <grp.h>
+
 #include <pcap.h>
 
 #include "gnuc.h"
@@ -145,24 +144,6 @@ __dead	void usage(void) __attribute__((volatile));
 
 static char *interface;
 
-void dropprivileges(const char* user)
-{
-       struct passwd* pw;
-       pw = getpwnam( user );
-       if ( pw ) {
-               if ( initgroups(pw->pw_name, 0) != 0 || setgid(pw->pw_gid) != 0 ||
-                       setuid(pw->pw_uid) != 0 ) {
-                       syslog(LOG_ERR, "Couldn't change to '%.32s' uid=%d gid=%d", user,pw->pw_uid, pw->pw_gid);
-                       exit(1);
-              }
-      }
-      else {
-            syslog(LOG_ERR, "Couldn't find user '%.32s' in /etc/passwd", user);
-            exit(1);
-      }
-      syslog(LOG_INFO, "Running as uid=%d gid=%d", getuid(), getgid());
-}
-
 int
 main(int argc, char **argv)
 {
@@ -175,8 +156,6 @@ main(int argc, char **argv)
 	register char *rfilename;
 	struct bpf_program code;
 	char errbuf[PCAP_ERRBUF_SIZE];
-	char* username = NULL;
-	int restart = 0;
 	char options[] =
 		"d"
 		/**/
@@ -206,10 +185,6 @@ main(int argc, char **argv)
 		/**/
 		/**/
 		"m:"
-		/**/
-		/**/
-		"u:"
-		"R:"
 		/**/
 		/**/
 	;
@@ -282,19 +257,6 @@ main(int argc, char **argv)
 			break;
 		/**/
 		/**/
-		case 'u':
-			if ( optarg ) {
-				username = strdup(optarg);
-			} else {
-				fprintf(stderr, "%s: Need username after -u\n", prog);
-				usage();
-			}
-			break;
-		case 'R':
-			restart = atoi(optarg);
-			break;
-		/**/
-		/**/
 		default:
 			usage();
 		}
@@ -305,8 +267,6 @@ main(int argc, char **argv)
 	if (rfilename != NULL) {
 		net = 0;
 		netmask = 0;
-		interface = "(from file)";
-		restart = 0;
 	} else {
 		/* Determine interface if not specified */
 		if (interface == NULL &&
@@ -353,7 +313,6 @@ main(int argc, char **argv)
 		syslog(LOG_ERR, "(using current working directory)");
 	}
 
-label_restart:
 	if (rfilename != NULL) {
 		pd = pcap_open_offline(rfilename, errbuf);
 		if (pd == NULL) {
@@ -368,29 +327,19 @@ label_restart:
 		pd = pcap_open_live(interface, snaplen, !nopromisc, timeout, errbuf);
 		if (pd == NULL) {
 			syslog(LOG_ERR, "pcap open %s: %s", interface, errbuf);
-			if (restart) {
-				syslog(LOG_ERR, "restart in %d secs", restart);
-			} else {
-				exit(1);
-			}
-			sleep(restart);
-			goto label_restart;
+			exit(1);
 		}
 #ifdef WORDS_BIGENDIAN
 		swapped = 1;
 #endif
 	}
 
-        if ( username && !restart ) {
-               dropprivileges( username );
-        } else {
 	/*
 	 * Revert to non-privileged user after opening sockets
 	 * (not needed on most systems).
 	 */
-		setgid(getgid());
-		setuid(getuid());
-	}
+	setgid(getgid());
+	setuid(getuid());
 
 	/* Must be ethernet or fddi */
 	linktype = pcap_datalink(pd);
@@ -884,10 +833,6 @@ usage(void)
 		/**/
 		/**/
 		"[-m addr] "
-		/**/
-		/**/
-		"[-u username] "
-		"[-R seconds ] "
 		/**/
 		/**/
 		"\n"

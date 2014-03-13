@@ -95,20 +95,6 @@ arpwatch \- keep track of ethernet/ip address pairings
 ]
 .\" **
 .\" **
-.br
-.ti +8
-[
-.B -u
-.I username
-]
-.br
-.ti +8
-[
-.B -R
-.I seconds
-]
-.\" **
-.\" **
 .ad
 .SH DESCRIPTION
 .B Arpwatch
@@ -213,34 +199,6 @@ option is used to specify the e-mail address to which reports will be
 sent.  By default, reports are sent to
 .I root
 on the local machine.
-.\" **
-.\" **
-.LP
-(Debian) The
-.B -u
-flag instructs 
-.B arpwatch
-to drop root privileges and change the UID to
-.I username
-and GID to the primary group of
-.I username .
-This is recommended for security reasons, but
-.I username
-has to have write access to the default directory.
-.LP
-(Debian) The
-.B -R
-flag instructs
-.B arpwatch
-to restart in
-.I seconds
-seconds after the interface went down.  By default, in such cases
-arpwatch would print an error message and exit.  This option is
-ignored if either the
-.B -r
-or
-.B -u
-flags are used.
 .\" **
 .\" **
 .LP

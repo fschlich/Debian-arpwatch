@@ -1,0 +1,38 @@
+Description: two files that likely shouldn't be here
+
+diff --git a/addresses.h b/addresses.h
+new file mode 100644
+index 0000000..3071abf
+--- /dev/null
++++ b/addresses.h
+@@ -0,0 +1,2 @@
++#define WATCHER "root"
++#define WATCHEE "arpwatch (Arpwatch)"
+diff --git a/arpwatch.conf b/arpwatch.conf
+new file mode 100644
+index 0000000..07bdbcf
+--- /dev/null
++++ b/arpwatch.conf
+@@ -0,0 +1,22 @@
++# /etc/arpwatch.conf: Debian-specific way to watch multiple interfaces.
++# Format of this configuration file is:
++#
++#<dev1>	<arpwatch options for dev1>
++#<dev2>	<arpwatch options for dev2>
++#...
++#<devN>	<arpwatch options for devN>
++#
++# You can set global options for all interfaces by editing
++# /etc/default/arpwatch
++
++# For example:
++
++#eth0	-m root
++#eth1	-m root
++#eth2	-m root
++
++# or, if you have an MTA configured for plussed addressing:
++#
++#eth0	-m root+eth0
++#eth1	-m root+eth1
++#eth2	-m root+eth2

@@ -1,0 +1,18 @@
+Subject: arpwatch: Bad patch 22secure_tempfile
+ The 22secure_tempfile patch used in arpwatch has a minor bug in
+ the changes to the bihourly script.
+ The /tmp/biourly.$$ line is not remove so 'errs' is actually defined
+ twice in the script.
+From: Javier Fernández-Sanguino Peña <jfs@computer.org>
+NOTE: merge with 22secure_tempfile
+
+--- a/bihourly	2014-03-13 20:45:41.177706262 +0100
++++ b/bihourly	2014-03-13 20:46:03.105533924 +0100
+@@ -10,7 +10,6 @@
+ #
+ list=`cat list`
+ cname=`cat cname`
+-errs=/tmp/bihourly.$$
+ errs=`tempfile -p arpbh -s .tmp`
+ #
+ alist=""

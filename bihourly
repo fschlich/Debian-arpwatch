@@ -10,6 +10,7 @@ cd /var/lib/arpwatch
 #
 list=`cat list`
 cname=`cat cname`
+errs=/tmp/bihourly.$$
 errs=`tempfile -p arpbh -s .tmp`
 #
 alist=""

@@ -1,0 +1,30 @@
+Description: use secure tempfiles
+ two cases of insecure tempfile usage no longer apply, as arpfetch
+ was changed between 2.1a13 and 2.1a15
+Author: KELEMEN Péter <fuji@debian.org>
+
+Index: arpwatch/bihourly
+diff -u arpwatch/bihourly:1.1.1.1 arpwatch/bihourly:1.1.1.1.18.1
+--- arpwatch/bihourly:1.1.1.1	Tue Apr 17 13:31:36 2001
++++ arpwatch/bihourly	Wed Aug 11 21:54:18 2004
+@@ -11,6 +11,7 @@
+ list=`cat list`
+ cname=`cat cname`
+ errs=/tmp/bihourly.$$
++errs=`tempfile -p arpbh -s .tmp`
+ #
+ alist=""
+ for r in $list; do \
+Index: arpwatch/mkdep
+diff -u arpwatch/mkdep:1.1.1.1 arpwatch/mkdep:1.1.1.1.18.1
+--- arpwatch/mkdep:1.1.1.1	Tue Apr 17 13:31:37 2001
++++ arpwatch/mkdep	Wed Aug 11 21:54:18 2004
+@@ -51,7 +51,7 @@
+ 	exit 1
+ fi
+ 
+-TMP=/tmp/mkdep$$
++TMP=`tempfile -p mkdep -s .tmp`
+ 
+ trap 'rm -f $TMP ; exit 1' 1 2 3 13 15
+ 

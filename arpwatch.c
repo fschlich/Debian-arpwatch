@@ -176,9 +176,6 @@ main(int argc, char **argv)
 		"s:"
 		/**/
 		/**/
-		"p"
-		/**/
-		/**/
 	;
 
 	if (argv[0] == NULL)
@@ -232,11 +229,6 @@ main(int argc, char **argv)
 		/**/
 		case 's':
 			path_sendmail = optarg;
-			break;
-		/**/
-		/**/
-		case 'p':
-			++nopromisc;
 			break;
 		/**/
 		/**/
@@ -307,7 +299,7 @@ main(int argc, char **argv)
 		snaplen = max(sizeof(struct ether_header),
 		    sizeof(struct fddi_header)) + sizeof(struct ether_arp);
 		timeout = 1000;
-		pd = pcap_open_live(interface, snaplen, !nopromisc, timeout, errbuf);
+		pd = pcap_open_live(interface, snaplen, 1, timeout, errbuf);
 		if (pd == NULL) {
 			syslog(LOG_ERR, "pcap open %s: %s", interface, errbuf);
 			exit(1);
@@ -803,9 +795,6 @@ usage(void)
 		/**/
 		/**/
 		"[-s sendmail_path] "
-		/**/
-		/**/
-		"[-p] "
 		/**/
 		/**/
 		"\n"

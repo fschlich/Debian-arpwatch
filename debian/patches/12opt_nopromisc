@@ -1,0 +1,101 @@
+Description: option -p to disable promiscuous operation
+Author: KELEMEN Péter <fuji@debian.org>
+
+--- a/arpwatch.8
++++ b/arpwatch.8
+@@ -71,6 +71,13 @@
+ ]
+ .\" **
+ .\" **
++.br
++.ti +8
++[
++.B -p
++]
++.\" **
++.\" **
+ .ad
+ .SH DESCRIPTION
+ .B Arpwatch
+@@ -144,6 +151,17 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
++.B -p
++flag disables promiscuous operation.  ARP broadcasts get through hubs without
++having the interface in promiscuous mode, while saving considerable resources
++that would be wasted on processing gigabytes of non-broadcast traffic.  OTOH,
++setting promiscuous mode does not mean getting 100% traffic that would concern
++.B arpwatch .
++YMMV.
++.\" **
++.\" **
++.LP
+ Note that an empty
+ .I arp.dat
+ file must be created before the first time you run
+--- a/arpwatch.c
++++ b/arpwatch.c
+@@ -176,6 +176,9 @@
+ 		"s:"
+ 		/**/
+ 		/**/
++		"p"
++		/**/
++		/**/
+ 	;
+ 
+ 	if (argv[0] == NULL)
+@@ -232,6 +235,11 @@
+ 			break;
+ 		/**/
+ 		/**/
++		case 'p':
++			++nopromisc;
++			break;
++		/**/
++		/**/
+ 		default:
+ 			usage();
+ 		}
+@@ -299,7 +307,7 @@
+ 		snaplen = max(sizeof(struct ether_header),
+ 		    sizeof(struct fddi_header)) + sizeof(struct ether_arp);
+ 		timeout = 1000;
+-		pd = pcap_open_live(interface, snaplen, 1, timeout, errbuf);
++		pd = pcap_open_live(interface, snaplen, !nopromisc, timeout, errbuf);
+ 		if (pd == NULL) {
+ 			syslog(LOG_ERR, "pcap open %s: %s", interface, errbuf);
+ 			exit(1);
+@@ -797,6 +805,9 @@
+ 		"[-s sendmail_path] "
+ 		/**/
+ 		/**/
++		"[-p] "
++		/**/
++		/**/
+ 		"\n"
+ 	;
+ 
+--- a/util.c
++++ b/util.c
+@@ -63,6 +63,9 @@
+ int initializing = 1;			/* true if initializing */
+ /**/
+ /**/
++int nopromisc = 0;			/* don't activate promisc mode */
++/**/
++/**/
+ 
+ /* syslog() helper routine */
+ void
+--- a/util.h
++++ b/util.h
+@@ -19,3 +19,6 @@
+ extern int initializing;
+ /**/
+ /**/
++extern int nopromisc;
++/**/
++/**/

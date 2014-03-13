@@ -63,9 +63,6 @@ int debug = 0;
 int initializing = 1;			/* true if initializing */
 /**/
 /**/
-int nopromisc = 0;			/* don't activate promisc mode */
-/**/
-/**/
 
 /* syslog() helper routine */
 void

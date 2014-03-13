@@ -71,13 +71,6 @@ arpwatch \- keep track of ethernet/ip address pairings
 ]
 .\" **
 .\" **
-.br
-.ti +8
-[
-.B -p
-]
-.\" **
-.\" **
 .ad
 .SH DESCRIPTION
 .B Arpwatch
@@ -148,17 +141,6 @@ flag is used to specify the path to the sendmail program.
 Any program that takes the option -odi and then text from stdin
 can be substituted. This is useful for redirecting reports
 to log files instead of mail.
-.\" **
-.\" **
-.LP
-(Debian) The
-.B -p
-flag disables promiscuous operation.  ARP broadcasts get through hubs without
-having the interface in promiscuous mode, while saving considerable resources
-that would be wasted on processing gigabytes of non-broadcast traffic.  OTOH,
-setting promiscuous mode does not mean getting 100% traffic that would concern
-.B arpwatch .
-YMMV.
 .\" **
 .\" **
 .LP

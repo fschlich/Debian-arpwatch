@@ -19,6 +19,3 @@ extern int debug;
 extern int initializing;
 /**/
 /**/
-extern int nopromisc;
-/**/
-/**/

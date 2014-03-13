@@ -28,6 +28,3 @@ extern int allsubnets;
 extern char *mailaddress;
 /**/
 /**/
-extern int quiet;
-/**/
-/**/

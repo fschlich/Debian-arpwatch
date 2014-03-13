@@ -212,9 +212,6 @@ main(int argc, char **argv)
 		"R:"
 		/**/
 		/**/
-		"Q"
-		/**/
-		/**/
 	;
 
 	if (argv[0] == NULL)
@@ -296,12 +293,6 @@ main(int argc, char **argv)
 		case 'R':
 			restart = atoi(optarg);
 			break;
-		/**/
-		/**/
-		case 'Q':
-		        ++quiet;
-			break;
-
 		/**/
 		/**/
 		default:
@@ -897,9 +888,6 @@ usage(void)
 		/**/
 		"[-u username] "
 		"[-R seconds ] "
-		/**/
-		/**/
-		"[-Q] "
 		/**/
 		/**/
 		"\n"

@@ -73,9 +73,6 @@ int allsubnets = 0;			/* watch all attached subnets */
 char *mailaddress = WATCHER;
 /**/
 /**/
-int quiet = 0;				/* send mail by default */
-/**/
-/**/
 
 /* syslog() helper routine */
 void

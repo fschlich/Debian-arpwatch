@@ -274,10 +274,6 @@ report(register char *title, register u_int32_t a, register u_char *e1,
 		/* Syslog this event too */
 		dosyslog(LOG_NOTICE, title, a, e1, e2, interface);
 
-		/* return if watcher is an empty string */
-		if ( quiet ) 
-		  return;
-
 		/* Update child depth */
 		++cdepth;
 

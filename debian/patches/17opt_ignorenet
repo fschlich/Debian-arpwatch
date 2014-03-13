@@ -1,0 +1,111 @@
+Description: add option -z ignorenet/ignoremask
+ Used to set a range of ip addresses to ignore (such as a DHCP range).
+ Netmask is specified as 255.255.128.0.
+Author: KELEMEN Péter <fuji@debian.org>
+
+--- a/arpwatch.8
++++ b/arpwatch.8
+@@ -116,6 +116,14 @@
+ ]
+ .\" **
+ .\" **
++.br
++.ti +8
++[
++.B -z
++.I ignorenet/ignoremask
++]
++.\" **
++.\" **
+ .ad
+ .SH DESCRIPTION
+ .B Arpwatch
+@@ -257,6 +265,13 @@
+ .\" **
+ .\" **
+ .LP
++(Debian) The
++.B -z
++flag is used to set a range of ip addresses to ignore (such as a DHCP
++range). Netmask is specified as 255.255.128.0.
++.\" **
++.\" **
++.LP
+ Note that an empty
+ .I arp.dat
+ file must be created before the first time you run
+--- a/arpwatch.c
++++ b/arpwatch.c
+@@ -125,6 +125,9 @@
+ static int nets_ind;
+ static int nets_size;
+ 
++static struct in_addr ignore_net;
++static struct in_addr ignore_netmask;
++
+ extern int optind;
+ extern int opterr;
+ extern char *optarg;
+@@ -215,7 +218,11 @@
+ 		"Q"
+ 		/**/
+ 		/**/
++		"z:"
++		/**/
++		/**/
+ 	;
++	char *tmpptr;
+ 
+ 	if (argv[0] == NULL)
+ 		prog = "arpwatch";
+@@ -233,6 +240,9 @@
+ 	interface = NULL;
+ 	rfilename = NULL;
+ 	pd = NULL;
++
++	inet_aton("0.0.0.0", &ignore_netmask);
++	inet_aton("255.255.255.255", &ignore_netmask);
+ 	while ((op = getopt(argc, argv, options)) != EOF)
+ 		switch (op) {
+ 
+@@ -304,6 +314,14 @@
+ 
+ 		/**/
+ 		/**/
++		case 'z':
++			tmpptr = strtok(optarg, "/");
++			inet_aton(tmpptr, &ignore_net);
++			tmpptr = strtok(NULL, "/");
++			inet_aton(tmpptr, &ignore_netmask);
++			break;
++		/**/
++		/**/
+ 		default:
+ 			usage();
+ 		}
+@@ -514,7 +532,15 @@
+ 		return;
+ 	}
+ 
++	/* Ignores the specified netmask/metwork */
++	if ((sia & ignore_netmask.s_addr) == ignore_net.s_addr) {
++		if (debug) {
++			dosyslog(LOG_INFO, "ignored", sia, sea, sha, interface);
++		}
++		return;
++	}
+ 	/* Got a live one */
++
+ 	t = h->ts.tv_sec;
+ 	can_checkpoint = 0;
+ 	if (!ent_add(sia, sea, t, NULL, interface))
+@@ -902,6 +928,9 @@
+ 		"[-Q] "
+ 		/**/
+ 		/**/
++		"[-z ignorenet/ignoremask] "
++		/**/
++		/**/
+ 		"\n"
+ 	;
+ 

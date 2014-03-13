@@ -125,9 +125,6 @@ static struct nets *nets;
 static int nets_ind;
 static int nets_size;
 
-static struct in_addr ignore_net;
-static struct in_addr ignore_netmask;
-
 extern int optind;
 extern int opterr;
 extern char *optarg;
@@ -218,11 +215,7 @@ main(int argc, char **argv)
 		"Q"
 		/**/
 		/**/
-		"z:"
-		/**/
-		/**/
 	;
-	char *tmpptr;
 
 	if (argv[0] == NULL)
 		prog = "arpwatch";
@@ -240,9 +233,6 @@ main(int argc, char **argv)
 	interface = NULL;
 	rfilename = NULL;
 	pd = NULL;
-
-	inet_aton("0.0.0.0", &ignore_netmask);
-	inet_aton("255.255.255.255", &ignore_netmask);
 	while ((op = getopt(argc, argv, options)) != EOF)
 		switch (op) {
 
@@ -312,14 +302,6 @@ main(int argc, char **argv)
 		        ++quiet;
 			break;
 
-		/**/
-		/**/
-		case 'z':
-			tmpptr = strtok(optarg, "/");
-			inet_aton(tmpptr, &ignore_net);
-			tmpptr = strtok(NULL, "/");
-			inet_aton(tmpptr, &ignore_netmask);
-			break;
 		/**/
 		/**/
 		default:
@@ -532,15 +514,7 @@ process_ether(register u_char *u, register const struct pcap_pkthdr *h,
 		return;
 	}
 
-	/* Ignores the specified netmask/metwork */
-	if ((sia & ignore_netmask.s_addr) == ignore_net.s_addr) {
-		if (debug) {
-			dosyslog(LOG_INFO, "ignored", sia, sea, sha, interface);
-		}
-		return;
-	}
 	/* Got a live one */
-
 	t = h->ts.tv_sec;
 	can_checkpoint = 0;
 	if (!ent_add(sia, sea, t, NULL, interface))
@@ -926,9 +900,6 @@ usage(void)
 		/**/
 		/**/
 		"[-Q] "
-		/**/
-		/**/
-		"[-z ignorenet/ignoremask] "
 		/**/
 		/**/
 		"\n"

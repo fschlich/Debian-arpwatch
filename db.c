@@ -293,11 +293,15 @@ elist_alloc(register u_int32_t a, register u_char *e, register time_t t,
 	BCOPY(e, ep->e, 6);
 	if (h == NULL && !initializing)
 		h = getsname(a);
-	if (h != NULL && !isdigit((int)*h))
-		strcpy(ep->h, h);
+	if (h != NULL && !isdigit((int)*h)) {
+		strncpy(ep->h, h, 34);
+                ep->h[33] = '\0';
+        }
 	ep->t = t;
-	if (interface != NULL)
+	if (interface != NULL) {
 		strncpy(ep->i, interface, 16);
+                ep->i[15] = '\0';
+        }
 	return (ep);
 }
 
@@ -316,7 +320,8 @@ check_hname(register struct ainfo *ap)
 	if (!isdigit((int)*h) && strcmp(h, ep->h) != 0) {
 		syslog(LOG_INFO, "hostname changed %s %s %s -> %s",
 		    intoa(ap->a), e2str(ep->e), ep->h, h);
-		strcpy(ep->h, h);
+		strncpy(ep->h, h, 34);
+                ep->h[33] = '\0';
 	}
 }
 

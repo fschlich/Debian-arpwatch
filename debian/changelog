@@ -1,3 +1,11 @@
+arpwatch (2.1a15-1.3) unstable; urgency=medium
+
+  * Non-maintainer upload
+  * Fix buffer overflow with hostnames longer than 33 characters (patch from
+    Christoph Biedl). Closes: #705894, LP: #1097289
+
+ -- Florian Schlichting <fsfs@debian.org>  Sat, 25 Oct 2014 23:12:41 +0200
+
 arpwatch (2.1a15-1.2) unstable; urgency=high
 
   * Non-maintainer upload by the Security Team.

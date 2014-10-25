@@ -1,0 +1,29 @@
+Description: fix buffer overflow with long hostnames (#705894, LP: #1097289)
+    (the rest of the patch is in debian/patches/13opt_allsubnets)
+Author: Christoph Biedl <debian.axhn@manchmal.in-ulm.de>
+
+--- a/db.c
++++ b/db.c
+@@ -293,8 +293,10 @@
+ 	BCOPY(e, ep->e, 6);
+ 	if (h == NULL && !initializing)
+ 		h = getsname(a);
+-	if (h != NULL && !isdigit((int)*h))
+-		strcpy(ep->h, h);
++	if (h != NULL && !isdigit((int)*h)) {
++		strncpy(ep->h, h, 34);
++                ep->h[33] = '\0';
++        }
+ 	ep->t = t;
+ 	if (interface != NULL) {
+ 		strncpy(ep->i, interface, 16);
+@@ -318,7 +320,8 @@
+ 	if (!isdigit((int)*h) && strcmp(h, ep->h) != 0) {
+ 		syslog(LOG_INFO, "hostname changed %s %s %s -> %s",
+ 		    intoa(ap->a), e2str(ep->e), ep->h, h);
+-		strcpy(ep->h, h);
++		strncpy(ep->h, h, 34);
++                ep->h[33] = '\0';
+ 	}
+ }
+ 

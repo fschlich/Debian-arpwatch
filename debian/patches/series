@@ -24,3 +24,4 @@
 35_bug289426_arpwatch-interface
 37_bug288994_arpwatch-subject
 39_bug674715-initgroups-ldflags
+41_bug705894-long-hostnames

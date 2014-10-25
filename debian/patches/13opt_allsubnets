@@ -311,12 +311,14 @@ Author: KELEMEN Péter <fuji@debian.org>
  {
  	register struct einfo *ep;
  	register u_int size;
-@@ -286,6 +291,8 @@
+@@ -286,6 +291,10 @@
  	if (h != NULL && !isdigit((int)*h))
  		strcpy(ep->h, h);
  	ep->t = t;
-+	if (interface != NULL)
++	if (interface != NULL) {
 +		strncpy(ep->i, interface, 16);
++                ep->i[15] = '\0';
++        }
  	return (ep);
  }
  
